@@ -51,19 +51,21 @@
   <xsl:import href="../../org.dita-community.common.xslt/xsl/dita-support-lib.xsl"/>
   <xsl:import href="../../org.dita-community.common.xslt/xsl/relpath_util.xsl"/>
   -->
-  <xsl:import href="../../org.dita4publishers.common.html/xsl/html-generation-utils.xsl"/>
-  
+  <xsl:import href="plugin:org.dita4publishers.common.xslt:xsl/reportParametersBase.xsl"/>
+  <xsl:import href="plugin:org.dita4publishers.common.html:xsl/html-generation-utils.xsl"/>
+  <xsl:import href="plugin:org.dita4publishers.common.mapdriven:xsl/dataCollection.xsl"/>
   <!-- Import the base HTML output generation transform. -->
   <xsl:import href="plugin:org.dita.xhtml:xsl/dita2xhtml.xsl"/>
   
-  <xsl:import href="../../org.dita4publishers.common.html/xsl/html-generation-utils.xsl"/>
-  <xsl:import href="../../org.dita4publishers.common.xslt/xsl/map2graphicMapImpl.xsl"/>
-  <xsl:import href="../../org.dita4publishers.common.xslt/xsl/topicHrefFixup.xsl"/>
-  <xsl:import href="../../org.dita4publishers.common.mapdriven/xsl/dataCollection.xsl"/>  
   
-  <xsl:include href="../../org.dita4publishers.common.html/xsl/commonHtmlOverrides.xsl"/>
-  <xsl:include href="../../org.dita4publishers.common.html/xsl/commonHtmlEnumeration.xsl"/>
-  <xsl:include href="../../org.dita4publishers.common.html/xsl/commonHtmlBookmapEnumeration.xsl"/>
+  <xsl:import href="plugin:org.dita4publishers.common.xslt:xsl/map2graphicMap.xsl"/>
+  <xsl:import href="plugin:org.dita4publishers.common.xslt:xsl/graphicMap2AntCopyScript.xsl"/>
+  <xsl:import href="plugin:org.dita4publishers.common.xslt:xsl/topicHrefFixup.xsl"/>
+  
+  <xsl:include href="plugin:org.dita4publishers.common.html:xsl/commonHtmlOverrides.xsl"/>
+  <xsl:include href="plugin:org.dita4publishers.common.html:xsl/commonHtmlEnumeration.xsl"/>
+  <xsl:include href="plugin:org.dita4publishers.common.html:xsl/commonHtmlBookmapEnumeration.xsl"/>
+
   <xsl:include href="map2epubCommon.xsl"/>
   <xsl:include href="map2epubOpfImpl.xsl"/>
   <xsl:include href="map2epubBookLists.xsl"/>
@@ -381,10 +383,10 @@
       <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>        
     </xsl:apply-templates>
     <xsl:message> + [DEBUG] after generate-opf</xsl:message>
-    <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
+<!--    <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
     </xsl:apply-templates>
-    <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
+-->    <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
   </xsl:template>
   
   <xsl:template name="make-meta-inf">
