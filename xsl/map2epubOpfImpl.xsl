@@ -58,7 +58,7 @@
         <xsl:if test="@lang">
           <xsl:attribute name="xml:lang" select="string(@lang)"/>
         </xsl:if>
-        <metadata xmlns:opf="http://www.idpf.org/2007/opf">
+        <metadata>
           
           <!-- NOTE: For EPUB3, the <meta> element has different attributes from
                EPUB2. Instead of @name and @value, it uses @property to specify
@@ -113,7 +113,7 @@
           
         </metadata>
         
-        <manifest xmlns:opf="http://www.idpf.org/2007/opf">
+        <manifest>
           <opf:item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
           <!-- List the XHTML files -->
           <xsl:apply-templates mode="manifest" select="$uniqueTopicRefs"/>
@@ -181,7 +181,7 @@
   </xsl:template>
   
   <xsl:template mode="epub:collections" match="*[df:class(., 'map/map')]">
-    <collection>
+    <collection xmlns="http://www.idpf.org/2007/opf">
       <xsl:apply-templates mode="#current"/>
     </collection>
   </xsl:template>
@@ -225,7 +225,7 @@
     <xsl:variable name="role" as="xs:string"
       select="if (@type) then string(@type) else 'aut'"
     />
-    <dc:creator opf:role="{$role}"
+    <dc:creator
       ><xsl:apply-templates select=".//*[df:class(., 'topic/data')]" mode="data-to-atts"
       /><xsl:apply-templates
     /></dc:creator>
@@ -262,11 +262,16 @@
 
   <xsl:template match="*[df:class(., 'pubmeta-d/pubrights')]" 
     mode="generate-opf"> 
-    <dc:rights>
+    <xsl:variable name="content" as="node()*">
       <xsl:apply-templates mode="#current" select="*[df:class(., 'pubmeta-d/copyrfirst')]"/>
       <xsl:text> </xsl:text>
       <xsl:apply-templates mode="generate-opf" select="* except *[df:class(., 'pubmeta-d/copyrfirst')]"/>
-    </dc:rights>
+    </xsl:variable>
+    <xsl:if test="normalize-space($content) != ''">
+      <dc:rights>
+        <xsl:sequence select="$content"/>
+      </dc:rights>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template mode="generate-opf" match="*[df:class(., 'pubmeta-d/copyrfirst')]">
@@ -420,7 +425,7 @@
     <xsl:variable name="scheme" as="xs:string"
       select="if (starts-with(lower-case($schemeBase), 'isbn')) then 'isbn' else $schemeBase"
     />
-    <dc:identifier opf:scheme="{$scheme}">
+    <dc:identifier>
       <xsl:if test="$id">
         <xsl:attribute name="id" select="$id"/>
       </xsl:if>
