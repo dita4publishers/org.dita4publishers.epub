@@ -9,7 +9,8 @@
   xmlns:glossdata="http://dita4publishers.org/glossdata"
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:mapdriven="http://dita4publishers.org/mapdriven"
-  exclude-result-prefixes="xs xd df relpath"
+  xmlns:epub="urn:d4p:epubtranstype"
+  exclude-result-prefixes="xs xd df relpath epub"
   version="2.0">
   
   <!-- =============================================================
@@ -196,7 +197,19 @@
   <xsl:param name="mathJaxLocalJavascriptUri" select="'js/mathjax/MathJax.js'"/>
   
   <xsl:variable name="coverImageId" select="'coverimage'" as="xs:string"/>
-  
+
+  <!-- Generate the OPF package bindings section. -->
+  <xsl:param name="generateBindings" as="xs:string" select="'no'"/>
+  <xsl:variable name="epub:doGenerateBindings" as="xs:boolean"
+    select="matches($generateBindings, 'yes|true|on|1', 'i')"
+  />
+
+  <!-- Generate the OPF package collections section. -->
+  <xsl:param name="generateCollections" as="xs:string" select="'no'"/>
+  <xsl:variable name="epub:doGenerateCollections" as="xs:boolean"
+    select="matches($generateCollections, 'yes|true|on|1', 'i')"
+  />
+
   <!-- Used by some HTML output stuff. For EPUB, don't want links to
        go to a new window.
     -->
@@ -215,6 +228,8 @@
       
       + coverGraphicUri = "<xsl:sequence select="$coverGraphicUri"/>"
       + cssOutputDir    = "<xsl:sequence select="$cssOutputDir"/>"
+      + generateBindings= "<xsl:sequence select="$epub:doGenerateBindings"/>"
+      + generateCollections= "<xsl:sequence select="$epub:doGenerateCollections"/>"
       + generateGlossary= "<xsl:sequence select="$generateGlossary"/>"
       + generateHtmlToc = "<xsl:sequence select="$generateHtmlToc"/>"
       + maxTocDepth     = "<xsl:sequence select="$maxTocDepth"/>"

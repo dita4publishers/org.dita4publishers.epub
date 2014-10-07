@@ -15,9 +15,14 @@ they will be added to the epub file as Dublin Core metadata.
 <xsl:stylesheet version="2.0"
                 xmlns:opf="http://www.idpf.org/2007/opf"
                 xmlns:dc="http://purl.org/dc/elements/1.1/"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:epub="urn:d4p:epubtranstype"
+                exclude-result-prefixes="xs epub"
+  >
 
   <xsl:import href="map2epubImpl.xsl"/>
+  
 
   <dita:extension id="xsl.transtype-epub" 
     behavior="org.dita.dost.platform.ImportXSLAction" 

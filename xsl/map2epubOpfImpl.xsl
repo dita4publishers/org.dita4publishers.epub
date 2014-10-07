@@ -9,7 +9,8 @@
   xmlns:gmap="http://dita4publishers/namespaces/graphic-input-to-output-map"  
   xmlns="http://www.idpf.org/2007/opf"
   xmlns:local="urn:functions:local"
-  exclude-result-prefixes="df xs relpath htmlutil gmap local"
+  xmlns:epub="urn:d4p:epubtranstype"
+  exclude-result-prefixes="df xs relpath htmlutil gmap local epub"
   >
 
   <!-- Convert a DITA map to an EPUB content.opf file. 
@@ -51,9 +52,18 @@
       <package xmlns="http://www.idpf.org/2007/opf"
         xmlns:dc="http://purl.org/dc/elements/1.1/"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        version="2.0"
+        version="3.0"
         unique-identifier="bookid">
+        <xsl:apply-templates select="." mode="epub:set-prefix-attribute"/>
+        <xsl:if test="@lang">
+          <xsl:attribute name="xml:lang" select="string(@lang)"/>
+        </xsl:if>
         <metadata xmlns:opf="http://www.idpf.org/2007/opf">
+          
+          <!-- NOTE: For EPUB3, the <meta> element has different attributes from
+               EPUB2. Instead of @name and @value, it uses @property to specify
+               the property name and the element content to specify the value.
+            -->
           
           <!-- dc:title, dc:language, and dc:identifier are required, so
             if the ditamap doesn't have values, they go in as empty
@@ -95,6 +105,7 @@
           />
           
           <xsl:if test="$effectiveCoverGraphicUri != ''">
+            <!-- EPUB2 cover meta element -->
             <meta name="cover" content="{$coverImageId}"/>
           </xsl:if>
           <xsl:apply-templates mode="generate-opf"
@@ -135,16 +146,54 @@
           
         </spine>
         
-          <guide>
+        <!-- NOTE: guide is deprecated for EPUB3. Allowed for EPUB2 
+                   compatiblity.
+          -->
+        <guide>
             <xsl:apply-templates mode="guide"  select=".">
               <xsl:with-param name="uniqueTopicRefs" as="element()*" 
                 select="$uniqueTopicRefs" tunnel="yes"/>
             </xsl:apply-templates>            
           </guide>
-        
+
+        <xsl:if test="$epub:doGenerateBindings">          
+          <bindings>
+            <xsl:apply-templates mode="epub:bindings" select=".">
+              <xsl:with-param name="uniqueTopicRefs" as="element()*" 
+                select="$uniqueTopicRefs" tunnel="yes"/>
+            </xsl:apply-templates>
+          </bindings>
+        </xsl:if>
+        <xsl:if test="$epub:doGenerateCollections">          
+            <xsl:apply-templates mode="epub:collections" select=".">
+              <xsl:with-param name="uniqueTopicRefs" as="element()*" 
+                select="$uniqueTopicRefs" tunnel="yes"/>
+            </xsl:apply-templates>
+        </xsl:if>
       </package>
     </xsl:result-document>  
     <xsl:message> + [INFO] OPF file generation done.</xsl:message>
+  </xsl:template>
+  
+  <xsl:template mode="epub:bindings" match="*" priority="-1">
+    <!-- Do nothing. There are no default bindings.
+      -->
+  </xsl:template>
+  
+  <xsl:template mode="epub:collections" match="*[df:class(., 'map/map')]">
+    <collection>
+      <xsl:apply-templates mode="#current"/>
+    </collection>
+  </xsl:template>
+  
+  <xsl:template mode="epub:collections" match="*" priority="-1">
+    <!-- Nothing to do. No default collections. -->
+  </xsl:template>
+  
+  <xsl:template mode="epub:set-prefix-attribute" match="*" priority="-1">
+    <!-- Do nothing. Override this mode if you need to set the 
+         @prefix attribute on the <package> element.
+      -->
   </xsl:template>
   
   <xsl:template mode="guide" match="*[df:class(., 'map/map')]">
@@ -444,6 +493,10 @@
         then string(@value)
         else string(.)"
     />
+    <!-- NOTE: This is the EPUB2 syntax for <meta> elements. Not sure how 
+         to produce EPUB3 meta elements, where the @name attribute is replaced
+         by a prefix-qualified property name.
+      -->
     <meta name="{@name}" content="{$value}"/>
   </xsl:template>
 
