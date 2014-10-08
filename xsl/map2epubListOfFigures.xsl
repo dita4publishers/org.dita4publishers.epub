@@ -77,9 +77,7 @@
     <xsl:message> + [INFO] Generating list of figures as "<xsl:sequence select="$targetUri"/>"</xsl:message>
     
     <xsl:result-document href="{$targetUri}"
-      format="html"
-      doctype-public="-//W3C//DTD XHTML 1.1//EN"
-      doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+      format="html5">
       <html>
         <head>                   
           <title><xsl:sequence select="$lof-title"/></title>

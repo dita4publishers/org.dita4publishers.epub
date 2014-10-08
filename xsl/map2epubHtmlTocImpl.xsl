@@ -48,7 +48,7 @@
           <xsl:message> + [DEBUG] found index terms, adding navpoint to generated
             index...</xsl:message>
           <li class="html-toc-entry html-toc-entry_1">
-            <span class="html-toc-entry-text html-toc-entry-text_1"><a href="generated-index.html">Index</a></span>
+            <a class="html-toc-entry-text html-toc-entry-text_1" href="generated-index.html">Index</a>
           </li>
         </xsl:if>
       </ol>  
@@ -57,7 +57,7 @@
     <xsl:message> + [INFO] Generating HTML ToC file "<xsl:sequence select="$resultUri"
     />"...</xsl:message>
     
-    <xsl:result-document href="{$resultUri}" format="html">
+    <xsl:result-document href="{$resultUri}" format="html5">
       <html>
         <head>
           <title>Table of Contents</title>
@@ -140,7 +140,8 @@
             <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
               as="xs:string"/>
           <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-            <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"><a href="{$relativeUri}">
+            <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"
+               href="{$relativeUri}">
                 <xsl:value-of
                   select="
                   if ($enumeration = '')
@@ -148,7 +149,7 @@
                   else concat($enumeration, ' ', $navPointTitle)
                   "
                 />
-              </a></span>
+              </a>
               <xsl:variable name="subentries" as="node()*">
                 <xsl:apply-templates mode="#current"
                   select="$topic/*[df:class(., 'topic/topic')]">
@@ -194,10 +195,10 @@
       </xsl:variable>
       
       <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-        <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"
-          ><a href="{$relativeUri}">
+        <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"
+            href="{$relativeUri}">
             <xsl:sequence select="$lof-title"/>
-        </a></span>
+        </a>
       </li>
     </xsl:if>
   </xsl:template>
@@ -215,10 +216,9 @@
         <xsl:text>List of Tables</xsl:text><!-- FIXME: Get this string from string config -->
       </xsl:variable>
       <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-        <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"
-          ><a href="{$relativeUri}">
+        <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}" href="{$relativeUri}">
             <xsl:sequence select="$lot-title"/>
-          </a></span>
+        </a>
       </li>
     </xsl:if>
   </xsl:template>
@@ -239,9 +239,9 @@
         <!-- FIXME: Likely need to map input IDs to output IDs. -->
         <xsl:variable name="fragId" as="xs:string" select="string(@id)"/>
       <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-        <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"><a href="{concat($relativeUri, '#', $fragId)}">
+        <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}" href="{concat($relativeUri, '#', $fragId)}">
           <xsl:sequence select="$navPointTitle"/>
-          </a></span>
+        </a>
         <xsl:variable name="subentries" as="node()*">
           <xsl:apply-templates select="*[df:class(.,'topic/topic')]" mode="#current">
             <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="$tocDepth + 1"/>
@@ -276,7 +276,8 @@
           then concat($topicsOutputDir, '/', $titleOnlyTopicFilename) 
           else $titleOnlyTopicFilename"/>
       <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-        <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"><a href="{$contentUri}">
+        <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}" 
+           href="{$contentUri}">
             <xsl:value-of
               select="
               if ($enumeration = '')
@@ -284,7 +285,7 @@
               else concat($enumeration, ' ', $rawNavPointTitle)
               "
             />
-          </a></span>
+          </a>
         <xsl:variable name="subentries" as="node()*">
           <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="#current">
             <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="$tocDepth + 1"/>

@@ -129,8 +129,10 @@
   </xsl:template>
   
   <xsl:template match="*" mode="generate-content" priority="-1">
-    <xsl:message> + [DEBUG] In catchall for generate-content, got 
-      <xsl:sequence select="."/></xsl:message>
+    <xsl:if test="$debugBoolean">
+      <xsl:message> + [DEBUG] In catchall for generate-content, got 
+        <xsl:sequence select="."/></xsl:message>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/topic')]" mode="generate-content">
@@ -154,7 +156,9 @@
         <xsl:with-param name="topicref" select="$topicref" as="element()?" tunnel="yes"/>        
       </xsl:apply-templates>
     </xsl:variable>
-    <xsl:message> + [DEBUG] generate-content: xhtml header=<xsl:sequence select="$xhtml/*:head"/></xsl:message>
+    <xsl:if test="$debugBoolean">
+      <xsl:message> + [DEBUG] generate-content: xhtml header=<xsl:sequence select="$xhtml/*:head"/></xsl:message>
+    </xsl:if>
     <xsl:result-document format="html5" 
       href="{$resultUri}" 
       exclude-result-prefixes="opf">

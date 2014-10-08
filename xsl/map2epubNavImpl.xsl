@@ -38,7 +38,7 @@
     
     <xsl:message> + [INFO] Generating EPUB3 Nav document "<xsl:sequence select="$resultUri"/>"...</xsl:message>
     
-    <xsl:result-document href="{$resultUri}" format="topic-html">
+    <xsl:result-document href="{$resultUri}" format="html5">
       <html 
         xmlns="http://www.w3.org/1999/xhtml" 
         xmlns:epub="http://www.idpf.org/2007/ops" 

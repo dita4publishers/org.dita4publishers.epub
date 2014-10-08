@@ -44,6 +44,13 @@
     </xsl:element>
   </xsl:template>
   
+  <xsl:template match="m:*" mode="html2xhtml" priority="-0.5" >
+    <xsl:message> + [DEBUG] *** html2xhtml: <xsl:value-of select="concat(name(..), '/', name(.))"/></xsl:message>
+     <xsl:element name="{name(.)}" namespace="http://www.w3.org/1998/Math/MathML">
+        <xsl:apply-templates select="@*,node()" mode="#current"/>
+     </xsl:element>    
+  </xsl:template>
+  
   <!-- <a> elements used for IDs are not used in XHTML -->
   <xsl:template match="a[@name and not(@href)]" priority="10" mode="html2xhtml"/>
   
@@ -103,6 +110,15 @@
       /></span>
   </xsl:template>
   
+  <xsl:template match="tt" mode="html2xhtml">
+    <code><xsl:apply-templates mode="#current"/></code>
+  </xsl:template>
+  
+  <xsl:template mode="html2xhtml" match="@headers">
+    <!-- Ensure no leading or trailing whitespace, which throws off epubcheck. -->
+    <xsl:attribute name="{name(.)}" select="normalize-space(.)"/>
+  </xsl:template>
+  
   <xsl:template  mode="html2xhtml" match="img/@width | img/@height" priority="100">
     <!--  Suppress for now because of issue with ImgUtils not working and generating
           bad values for height and width. -->
@@ -142,6 +158,13 @@
     @compact |
     @width |
     @type |
+    @align |
+    @valign |
+    @rules |
+    @frame |
+    @summary |
+    @cellspacing |
+    @cellpadding |
     @xxx
     " priority="10"/>
   

@@ -255,10 +255,28 @@
     <xsl:variable name="role" as="xs:string"
       select="if (@type) then string(@type) else 'aut'"
     />
-    <dc:creator id="{$role}"
-      ><xsl:apply-templates select=".//*[df:class(., 'topic/data')]" mode="data-to-atts"
-      /><xsl:apply-templates
-    /></dc:creator>
+    <xsl:choose>
+      <xsl:when test="$epub:isEpub2">
+        <dc:creator id="{$role}"
+          ><xsl:apply-templates select=".//*[df:class(., 'topic/data')]" mode="data-to-atts"
+          /><xsl:apply-templates
+        /></dc:creator>
+      </xsl:when>
+      <xsl:otherwise>
+        <dc:creator id="{$role}"><xsl:apply-templates/></dc:creator>
+        <xsl:apply-templates select=".//*[df:class(., 'topic/data')]" mode="data-to-refines"
+          >
+          <xsl:with-param name="refinesId" as="xs:string" select="$role"/>
+        </xsl:apply-templates>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="*[df:class(., 'topic/data')]" mode="data-to-refines">
+    <xsl:param name="refinesId" as="xs:string"/>
+    <meta refines="#{$refinesId}" property="{@name}">
+      <xsl:value-of select="if (@value != '') then @value else ."/>
+    </meta>
   </xsl:template>
   
   <xsl:template mode="data-to-atts" match="text()"/><!-- Suppress all text by default -->

@@ -29,7 +29,7 @@
 
       <xsl:message> + [INFO] Generating index file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
 
-      <xsl:result-document href="{$resultUri}" format="topic-html"
+      <xsl:result-document href="{$resultUri}" format="html5"
         exclude-result-prefixes="index-terms"
         >
         <html xmlns="http://www.w3.org/1999/xhtml">
