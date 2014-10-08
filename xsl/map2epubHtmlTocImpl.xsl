@@ -185,7 +185,7 @@
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <xsl:variable name="targetUri"
-        select="relpath:newFile($outdir, concat('list-of-figures_', generate-id(.), '.html'))" 
+        select="relpath:newFile($outdir, concat('list-of-figures_', generate-id(.), $outext))" 
         as="xs:string"
       />
       <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
@@ -207,7 +207,7 @@
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <xsl:variable name="targetUri"
-        select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), '.html'))" 
+        select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), $outext))" 
         as="xs:string"
       />
       <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"

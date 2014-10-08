@@ -150,7 +150,7 @@
             <item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
           </xsl:if>
           <xsl:if test="$generateIndexBoolean">
-            <item id="generated-index" href="generated-index.html" media-type="application/xhtml+xml"/>
+            <item id="generated-index" href="{concat('generated-index', $outext)}" media-type="application/xhtml+xml"/>
           </xsl:if>
 
         </manifest>

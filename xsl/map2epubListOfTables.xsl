@@ -24,7 +24,7 @@
     <xsl:param name="collected-data" as="element()*"/>
 
     <xsl:variable name="targetUri"
-      select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), '.html'))" 
+      select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), $outext))" 
       as="xs:string"
     />
     <xsl:variable name="lot-title" as="node()*">

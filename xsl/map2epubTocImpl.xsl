@@ -73,7 +73,7 @@
             <navLabel>
               <text>Index</text>
             </navLabel>
-            <content src="generated-index.html"/>
+            <content src="{concat('generated-index', $outext)}"/>
           </navPoint>          
         </xsl:if>
       </ncx:navMap>
@@ -389,7 +389,7 @@
     >
     <xsl:call-template name="construct_navpoint">
       <xsl:with-param name="targetUri" as="xs:string"
-        select="concat('list-of-figures_', generate-id(.), '.html')"
+        select="concat('list-of-figures_', generate-id(.), $outext)"
       />
     </xsl:call-template>    
   </xsl:template>
@@ -401,7 +401,7 @@
     >
     <xsl:call-template name="construct_navpoint">
       <xsl:with-param name="targetUri" as="xs:string"
-        select="concat('list-of-tables_', generate-id(.), '.html')"
+        select="concat('list-of-tables_', generate-id(.), $outext)"
       />
     </xsl:call-template>    
   </xsl:template>

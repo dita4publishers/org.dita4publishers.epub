@@ -67,7 +67,7 @@
   <xsl:template name="generate-figure-list-html-doc">
     <xsl:param name="collected-data" as="element()*"/>
     <xsl:variable name="targetUri"
-      select="relpath:newFile($outdir, concat('list-of-figures_', generate-id(.), '.html'))" 
+      select="relpath:newFile($outdir, concat('list-of-figures_', generate-id(.), $outext))" 
       as="xs:string"
     />
     <xsl:variable name="lof-title" as="node()*">

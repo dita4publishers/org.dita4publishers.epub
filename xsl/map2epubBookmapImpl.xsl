@@ -62,7 +62,7 @@
   
   <xsl:template mode="manifest" match="*[df:class(., 'bookmap/tablelist')]">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('list-of-tables_', generate-id(.), '.html')"
+      select="concat('list-of-tables_', generate-id(.), $outext)"
     />
     <opf:item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
