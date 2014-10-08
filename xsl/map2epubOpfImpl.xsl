@@ -59,7 +59,15 @@
           <xsl:attribute name="xml:lang" select="string(@lang)"/>
         </xsl:if>
         <metadata>
-          
+          <!-- NOTE: the spec seems to require the "Z" (indicating a UTC time) but I don't
+                     know of format-dateTime() is actually timezone aware, so this
+                     construction may not be 100% correct.
+            -->
+          <xsl:variable name="formatted-time" as="xs:string"
+            select="format-dateTime(current-dateTime(), '[Y]-[M,2]-[D,2]T[h,2]:[m,2]:[s,2]Z')"
+          />
+          <meta property="dcterms:modified"><xsl:value-of 
+            select="$formatted-time"/></meta>
           <!-- NOTE: For EPUB3, the <meta> element has different attributes from
                EPUB2. Instead of @name and @value, it uses @property to specify
                the property name and the element content to specify the value.
