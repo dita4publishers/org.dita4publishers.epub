@@ -51,14 +51,18 @@
           <nav epub:type="toc" id="toc">
             <!-- FIXME: get from variable: -->
             <h1 class="title">Table of Contents</h1>
-            
-            <xsl:apply-templates mode="epub:generate-nav"/>
-        
-            <xsl:if test="$generateIndexBoolean">
-              <xsl:apply-templates mode="epub:generate-nav" select="$collected-data">
-                <xsl:with-param name="parentId" select="'root'" as="xs:string" tunnel="yes"/>
+            <!-- NOTE: We're using the EPUB2 HTML ToC generation code here.
+              
+                 In EPUB3, the nav document can also serve as the content ToC,
+                 whereas for EPUB2 there is always a toc.ncx in addition to any
+                 HTML ToC.
+                        
+            -->
+            <ol>
+              <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="generate-html-toc">
+                <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="1"/>
               </xsl:apply-templates>
-            </xsl:if>
+            </ol>
           </nav>
       	</body>
       </html>

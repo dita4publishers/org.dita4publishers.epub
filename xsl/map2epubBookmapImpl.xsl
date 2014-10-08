@@ -28,7 +28,7 @@
     >
     <xsl:call-template name="construct_navpoint">
       <xsl:with-param name="targetUri" as="xs:string"
-        select="concat('toc_', generate-id(.), '.html')"
+        select="concat('toc_', generate-id(.), $outext)"
       />
     </xsl:call-template>    
   </xsl:template>
@@ -46,7 +46,7 @@
   
   <xsl:template mode="manifest" match="*[df:class(., 'bookmap/toc')]">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('toc_', generate-id(.), '.html')"
+      select="concat('toc_', generate-id(.), $outext)"
     />
     <opf:item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
@@ -54,7 +54,7 @@
   
   <xsl:template mode="manifest" match="*[df:class(., 'bookmap/figurelist')]">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('list-of-figures_', generate-id(.), '.html')"
+      select="concat('list-of-figures_', generate-id(.), $outext)"
     />
     <opf:item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
@@ -92,7 +92,7 @@
   
   <xsl:template mode="guide" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('toc_', generate-id(.), '.html')"
+      select="concat('toc_', generate-id(.), $outext)"
     />
     <opf:reference type="toc"  href="{$targetUri}"/>    
   </xsl:template>
@@ -100,7 +100,7 @@
   <xsl:template mode="generate-book-lists" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
     <xsl:message> + [DEBUG] generate-book-lists: bookmap/toc</xsl:message>
     <xsl:variable name="htmlFilename" as="xs:string"
-      select="concat('toc_', generate-id(.), '.html')"
+      select="concat('toc_', generate-id(.), $outext)"
     />
     <xsl:variable name="resultUri" as="xs:string"
       select="relpath:newFile($outdir, $htmlFilename)"

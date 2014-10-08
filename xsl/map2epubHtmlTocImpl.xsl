@@ -23,8 +23,9 @@
     
     <!-- Build the ToC tree so we can then calculate the playorder of the navitems. -->
     
-    <xsl:variable name="navmap" as="element()">      
-      <ul class="html-toc-root html-toc html-toc_0">        
+    <xsl:variable name="navmap" as="element()">
+      <!-- NOTE: EPUB3 mandates use of <ol> for nav structures, not <ul> -->      
+      <ol class="html-toc-root html-toc html-toc_0">        
         <xsl:choose>
           <xsl:when test="$pubTitle != ''">
             <!-- FIXME: If there is a pubtitle, generate a root navPoint for the title.
@@ -50,7 +51,7 @@
             <span class="html-toc-entry-text html-toc-entry-text_1"><a href="generated-index.html">Index</a></span>
           </li>
         </xsl:if>
-      </ul>  
+      </ol>  
     </xsl:variable>
         
     <xsl:message> + [INFO] Generating HTML ToC file "<xsl:sequence select="$resultUri"
@@ -163,9 +164,10 @@
                 </xsl:if>
               </xsl:variable>
               <xsl:if test="count($subentries) > 0">
-                <ul class="html-toc html-toc_{$tocDepth + 1}">
+                <!-- NOTE: EPUB3 mandates use of <ol> for nav structures, not <ul> -->
+                <ol class="html-toc html-toc_{$tocDepth + 1}">
                   <xsl:sequence select="$subentries"/>
-                </ul>
+                </ol>
               </xsl:if>
             </li>
         </xsl:otherwise>
@@ -246,9 +248,10 @@
           </xsl:apply-templates>
         </xsl:variable>
         <xsl:if test="count($subentries) > 0">
-          <ul class="html-toc html-toc_{$tocDepth + 1}">
+          <!-- NOTE: EPUB3 mandates use of <ol> for nav structures, not <ul> -->
+          <ol class="html-toc html-toc_{$tocDepth + 1}">
             <xsl:sequence select="$subentries"/>
-          </ul>
+          </ol>
         </xsl:if>
       </li>
     </xsl:if>
@@ -288,9 +291,10 @@
           </xsl:apply-templates>
         </xsl:variable>
         <xsl:if test="count($subentries) > 0">
-          <ul class="html-toc html-toc__{$tocDepth}">
+          <!-- NOTE: EPUB3 mandates use of <ol> for nav structures, not <ul> -->
+          <ol class="html-toc html-toc__{$tocDepth}">
             <xsl:sequence select="$subentries"/>
-          </ul>
+          </ol>
         </xsl:if>
       </li>
     </xsl:if>
