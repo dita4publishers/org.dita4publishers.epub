@@ -131,6 +131,11 @@
           <xsl:if test="$generateIndexBoolean">
             <opf:item id="generated-index" href="generated-index.html" media-type="application/xhtml+xml"/>
           </xsl:if>
+          <xsl:if test="$epub:isDualEpub">
+            <!-- Add the NCX file to the manifest: -->
+            <opf:item id="toc.ncx"/>
+          </xsl:if>
+
         </manifest>
         
         <spine toc="ncx">
@@ -142,6 +147,10 @@
           />
           <xsl:if test="$generateIndexBoolean">
             <opf:itemref idref="generated-index"/>
+          </xsl:if>
+          <xsl:if test="$epub:isDualEpub">
+            <!-- Generate spine reference to the NCX file: -->
+            <opf:item idref="toc.ncx"/>
           </xsl:if>
           
         </spine>
@@ -225,7 +234,7 @@
     <xsl:variable name="role" as="xs:string"
       select="if (@type) then string(@type) else 'aut'"
     />
-    <dc:creator
+    <dc:creator id="{$role}"
       ><xsl:apply-templates select=".//*[df:class(., 'topic/data')]" mode="data-to-atts"
       /><xsl:apply-templates
     /></dc:creator>

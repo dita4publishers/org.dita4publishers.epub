@@ -75,7 +75,7 @@
   <xsl:include href="map2epubHtmlTocImpl.xsl"/>
   <xsl:include href="map2epubListOfFigures.xsl"/>
   <xsl:include href="map2epubListOfTables.xsl"/>
-  <xsl:include href="map2epubTocImpl.xsl"/>
+  <xsl:include href="map2epubNavImpl.xsl"/>
 <!--  <xsl:include href="map2epubIndexImpl.xsl"/>-->
   <xsl:include href="html2xhtmlImpl.xsl"/>
   <xsl:include href="epubHtmlOverrides.xsl"/>
@@ -209,6 +209,27 @@
   <xsl:variable name="epub:doGenerateCollections" as="xs:boolean"
     select="matches($generateCollections, 'yes|true|on|1', 'i')"
   />
+  
+  <!-- The type of EPUB to be generated: EPUB3 only ('epub3'),
+       EPUB2 only ('epub2'), or dual EPUB3/EPUB2 ('dual'). 
+       Dual is the default.
+    -->
+  <xsl:param name="epubType" as="xs:string" select="'dual'"/>
+  <xsl:variable name="epub:doIncludeEpub2" as="xs:boolean"
+    select="matches($epubType, 'dual', 'i')"
+  />
+  <!-- Are we producing a dual EPUB3/EPUB2 EPUB? -->
+  <xsl:variable name="epub:isDualEpub" as="xs:boolean"
+    select="matches($epubType, 'dual', 'i')"
+  />
+  <!-- Are we producing an EPUB3-only EPUB (not a dual EPUB) -->
+  <xsl:variable name="epub:isEpub3" as="xs:boolean"
+    select="matches($epubType, 'epub3|dual', 'i')"
+  />
+  <!-- Are we producing an EPUB2-only EPUB (not a dual EPUB) -->
+  <xsl:variable name="epub:isEpub2" as="xs:boolean"
+    select="matches($epubType, 'epub2', 'i')"
+  />
 
   <!-- Used by some HTML output stuff. For EPUB, don't want links to
        go to a new window.
@@ -228,6 +249,7 @@
       
       + coverGraphicUri = "<xsl:sequence select="$coverGraphicUri"/>"
       + cssOutputDir    = "<xsl:sequence select="$cssOutputDir"/>"
+      + epubType        = "<xsl:sequence select="$epubType"/>"
       + generateBindings= "<xsl:sequence select="$epub:doGenerateBindings"/>"
       + generateCollections= "<xsl:sequence select="$epub:doGenerateCollections"/>"
       + generateGlossary= "<xsl:sequence select="$generateGlossary"/>"
@@ -261,6 +283,9 @@
       + imagesOutputPath = "<xsl:sequence select="$imagesOutputPath"/>"
       + platform         = "<xsl:sequence select="$platform"/>"
       + debugBoolean     = "<xsl:sequence select="$debugBoolean"/>"
+      + epub:isEpub3     = "<xsl:sequence select="$epub:isEpub3"/>"
+      + epub:isEpub2     = "<xsl:sequence select="$epub:isEpub2"/>"
+      + epub:isDualEpub  = "<xsl:sequence select="$epub:isDualEpub"/>"
       
       ==========================================
     </xsl:message>
@@ -379,11 +404,21 @@
     <xsl:apply-templates select="." mode="generate-content">
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>     
     </xsl:apply-templates>
-    <!-- NOTE: The generate-toc mode is for the EPUB toc, not the HTML toc -->
-    <xsl:apply-templates select="." mode="generate-toc">
-      <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
-    </xsl:apply-templates>
-    <xsl:message> + [DEBUG] after generate-toc</xsl:message>
+    <xsl:if test="$epub:isEpub3">
+      <xsl:message> + [DEBUG] generating EPUB3 nav</xsl:message>
+      <xsl:apply-templates select="." mode="epub:generate-nav">
+        <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      </xsl:apply-templates>
+      <xsl:message> + [DEBUG] after generate-nav</xsl:message>
+    </xsl:if>
+    <!-- NOTE: The generate-toc mode is for the EPUB2 toc.ncx, not the HTML toc -->
+    <xsl:if test="$epub:isEpub2 or $epub:isDualEpub">
+      <xsl:message> + [DEBUG] generating EPUB2 toc.ncx...</xsl:message>
+      <xsl:apply-templates select="." mode="generate-toc">
+        <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      </xsl:apply-templates>
+      <xsl:message> + [DEBUG] after generate-toc</xsl:message>
+    </xsl:if>
     <xsl:apply-templates select="." mode="generate-index">
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
     </xsl:apply-templates>
