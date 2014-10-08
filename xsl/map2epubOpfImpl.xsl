@@ -114,7 +114,9 @@
           
           <xsl:if test="$effectiveCoverGraphicUri != ''">
             <!-- EPUB2 cover meta element -->
-            <meta name="cover" content="{$coverImageId}"/>
+            <xsl:if test="$epub:isEpub2 or $epub:isDualEpub">
+              <meta name="cover" content="{$coverImageId}"/>
+            </xsl:if>
           </xsl:if>
           <xsl:apply-templates mode="generate-opf"
             select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/data') and @name = 'opf-metadata']"/>
@@ -565,6 +567,8 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
+      <!-- @properties attribute (EPUB3): -->
+      <xsl:sequence select="@properties"/>
     </item>
   </xsl:template>
   
