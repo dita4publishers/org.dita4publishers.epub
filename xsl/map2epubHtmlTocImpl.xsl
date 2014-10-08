@@ -59,7 +59,6 @@
     <xsl:result-document href="{$resultUri}" format="html">
       <html>
         <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />         
           <title>Table of Contents</title>
           <xsl:call-template name="constructToCStyle"/>
         </head>

@@ -37,6 +37,7 @@
     method="xhtml"
     encoding="UTF-8"
     indent="yes"
+    doctype-system="about:legacy-compat"
   />
   
   
@@ -148,10 +149,16 @@
         <xsl:with-param name="topicref" select="$topicref" as="element()?" tunnel="yes"/>
       </xsl:apply-templates>      
     </xsl:variable>
-    <xsl:result-document format="topic-html" href="{$resultUri}" exclude-result-prefixes="opf">
+    <xsl:variable name="xhtml" as="node()*">
       <xsl:apply-templates select="$htmlNoNamespace" mode="html2xhtml">
         <xsl:with-param name="topicref" select="$topicref" as="element()?" tunnel="yes"/>        
       </xsl:apply-templates>
+    </xsl:variable>
+    <xsl:message> + [DEBUG] generate-content: xhtml header=<xsl:sequence select="$xhtml/*:head"/></xsl:message>
+    <xsl:result-document format="html5" 
+      href="{$resultUri}" 
+      exclude-result-prefixes="opf">
+      <xsl:sequence select="$xhtml"/>
     </xsl:result-document>
   </xsl:template>
   
@@ -172,7 +179,7 @@
         </xsl:apply-templates>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:if test="true() or $debugBoolean">
+        <xsl:if test="$debugBoolean">
           <xsl:message> + [DEBUG] topic/topic, map-driven-content-processing: no topicref, doing default processing..</xsl:message>
         </xsl:if>        
         <!-- Do default processing -->

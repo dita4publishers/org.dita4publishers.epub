@@ -298,7 +298,7 @@
   <xsl:output method="xml" name="indented-xml"
     indent="yes"
   />
-  <xsl:output name="html5" method="html" 
+  <xsl:output name="html5" method="xhtml" 
     indent="yes" 
     encoding="utf-8" 
     doctype-system="about:legacy-compat" 
@@ -401,7 +401,8 @@
       </xsl:result-document>
     </xsl:if>
         
-    <xsl:result-document href="{relpath:newFile($outdir, 'graphicMap.xml')}" format="graphic-map">
+    <xsl:result-document href="{relpath:newFile($outdir, 'graphicMap.xml')}" format="graphic-map"
+      >
       <xsl:sequence select="$graphicMap"/>
     </xsl:result-document>    
     <xsl:call-template name="make-meta-inf"/>
@@ -449,7 +450,9 @@
   </xsl:template>
   
   <xsl:template name="make-meta-inf">
-    <xsl:result-document href="{relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'container.xml')}">
+    <xsl:result-document href="{relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'container.xml')}"
+      format="indented-xml"
+      >
       <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
         <rootfiles>
           <rootfile full-path="content.opf" media-type="application/oebps-package+xml"/>

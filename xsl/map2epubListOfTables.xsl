@@ -36,8 +36,7 @@
       doctype-public="-//W3C//DTD XHTML 1.1//EN"
       doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
       <html>
-        <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />         
+        <head>                   
           <title><xsl:sequence select="$lot-title"/></title>
           <xsl:call-template name="constructToCStyle"/>
         </head>

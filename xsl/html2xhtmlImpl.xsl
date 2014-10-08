@@ -27,6 +27,9 @@
       <xsl:apply-templates mode="#current"/>
     </html>
   </xsl:template>
+  <xsl:template mode="html2xhtml" match="meta[@http-equiv = 'Content-Type']">
+    <xsl:message> + [DEBUG] html2xhtml: meta element: <xsl:sequence select="."/></xsl:message>
+  </xsl:template>
   
   <xsl:template mode="html2xhtml" match="img[not(@alt)]">
     <xsl:element name="{name(.)}">
@@ -75,7 +78,10 @@
     </blockquote>
   </xsl:template>  
   
-  <xsl:template mode="html2xhtml" match="*">
+  <xsl:template mode="html2xhtml" match="*" priority="-1">
+    <xsl:if test="ancestor::head">
+      <xsl:message> + [DEBUG] html2xhtml: * : <xsl:sequence select="."/></xsl:message>
+    </xsl:if>
     <xsl:element name="{name(.)}">
       <xsl:apply-templates select="@*,node()" mode="#current"/>
     </xsl:element>
