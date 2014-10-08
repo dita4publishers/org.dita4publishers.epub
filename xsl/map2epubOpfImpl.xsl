@@ -49,7 +49,7 @@
     <xsl:variable name="uniqueTopicRefs" as="element()*" select="df:getUniqueTopicrefs(.)"/>
         
     <xsl:result-document format="opf" href="{$resultUri}">
-      <package xmlns="http://www.idpf.org/2007/opf"
+      <package
         xmlns:dc="http://purl.org/dc/elements/1.1/"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         version="3.0"
@@ -114,8 +114,19 @@
         </metadata>
         
         <manifest>
-          <opf:item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+          <xsl:if test="$epub:isDualEpub">
+            <!-- Add the NCX file to the manifest: -->
+            <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+          </xsl:if>
+          <xsl:if test="$epub:isEpub3">
+            <item href="nav.xhtml" 
+              id="nav" 
+              media-type="application/xhtml+xml" 
+              properties="nav" 
+            />
+          </xsl:if>
           <!-- List the XHTML files -->
+          <!-- FIXME: Have to account for all navigation topicrefs. -->
           <xsl:apply-templates mode="manifest" select="$uniqueTopicRefs"/>
           <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="manifest"/>
           <xsl:apply-templates select=".//*[local:includeTopicrefInManifest(.)]" mode="manifest"/>
@@ -123,34 +134,34 @@
           <xsl:apply-templates select="." mode="generate-opf-manifest-extensions"/>
           <!-- List the images -->
           <xsl:apply-templates mode="manifest" select="$graphicMap"/>
-          <opf:item id="commonltr.css" href="{$cssOutputDir}/commonltr.css" media-type="text/css"/>
-          <opf:item id="commonrtl.css" href="{$cssOutputDir}/commonrtl.css" media-type="text/css"/>
+          <item id="commonltr.css" href="{$cssOutputDir}/commonltr.css" media-type="text/css"/>
+          <item id="commonrtl.css" href="{$cssOutputDir}/commonrtl.css" media-type="text/css"/>
           <xsl:if test="$CSS != ''">
-            <opf:item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
+            <item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
           </xsl:if>
           <xsl:if test="$generateIndexBoolean">
-            <opf:item id="generated-index" href="generated-index.html" media-type="application/xhtml+xml"/>
-          </xsl:if>
-          <xsl:if test="$epub:isDualEpub">
-            <!-- Add the NCX file to the manifest: -->
-            <opf:item id="toc.ncx"/>
+            <item id="generated-index" href="generated-index.html" media-type="application/xhtml+xml"/>
           </xsl:if>
 
         </manifest>
         
-        <spine toc="ncx">
+        <spine>
+          <xsl:if test="$epub:isEpub2 or $epub:isDualEpub">
+            <xsl:attribute name="toc" select="'ncx'"/>
+          </xsl:if>
           
+          <!-- FIXME: Have to account for all navigation topicrefs. -->
           <xsl:apply-templates mode="spine" 
             select="($uniqueTopicRefs | 
             .//*[df:isTopicHead(.)]) | 
             .//*[local:includeTopicrefInSpine(.)]"
           />
           <xsl:if test="$generateIndexBoolean">
-            <opf:itemref idref="generated-index"/>
+            <itemref idref="generated-index"/>
           </xsl:if>
           <xsl:if test="$epub:isDualEpub">
             <!-- Generate spine reference to the NCX file: -->
-            <opf:item idref="toc.ncx"/>
+            <itemref idref="toc.ncx"/>
           </xsl:if>
           
         </spine>
@@ -190,7 +201,7 @@
   </xsl:template>
   
   <xsl:template mode="epub:collections" match="*[df:class(., 'map/map')]">
-    <collection xmlns="http://www.idpf.org/2007/opf">
+    <collection>
       <xsl:apply-templates mode="#current"/>
     </collection>
   </xsl:template>
@@ -339,7 +350,7 @@
           <xsl:message> + [DEBUG] map2epubOpfImpl: targetUri="<xsl:sequence select="$targetUri"/>"</xsl:message>
           <xsl:message> + [DEBUG] map2epubOpfImpl: relativeUri="<xsl:sequence select="$relativeUri"/>"</xsl:message>
         </xsl:if>        
-        <opf:item id="{generate-id()}" href="{$relativeUri}"
+        <item id="{generate-id()}" href="{$relativeUri}"
               media-type="application/xhtml+xml"/>
       </xsl:otherwise>
     </xsl:choose>    
@@ -357,12 +368,12 @@
           then concat($topicsOutputDir, '/', $titleOnlyTopicFilename) 
           else $titleOnlyTopicFilename
           " />
-    <opf:item id="{generate-id()}" href="{$targetUri}"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'map/topicref')]" mode="spine">
-    <opf:itemref idref="{generate-id()}"/>
+    <itemref idref="{generate-id()}"/>
   </xsl:template>
   
   <xsl:template mode="bookid" match="*[df:class(., 'map/topicmeta')]">
@@ -533,7 +544,7 @@
         imageHref   =<xsl:sequence select="$imageHref"/>
       </xsl:message>
     </xsl:if>
-    <opf:item id="{@id}" href="{$imageHref}">
+    <item id="{@id}" href="{$imageHref}">
       <xsl:attribute name="media-type">
         <xsl:choose>
           <xsl:when test="$imageExtension = 'jpg'"><xsl:sequence select="'image/jpeg'"/></xsl:when>
@@ -546,7 +557,7 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
-    </opf:item>
+    </item>
   </xsl:template>
   
   <xsl:function name="local:includeTopicrefInSpine" as="xs:boolean">

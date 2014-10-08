@@ -76,6 +76,7 @@
   <xsl:include href="map2epubListOfFigures.xsl"/>
   <xsl:include href="map2epubListOfTables.xsl"/>
   <xsl:include href="map2epubNavImpl.xsl"/>
+  <xsl:include href="map2epubTocImpl.xsl"/>
 <!--  <xsl:include href="map2epubIndexImpl.xsl"/>-->
   <xsl:include href="html2xhtmlImpl.xsl"/>
   <xsl:include href="epubHtmlOverrides.xsl"/>
@@ -106,7 +107,8 @@
        produce the final ePub package.
        -->
   <xsl:param name="outdir" select="./epub"/>
-  <xsl:param name="outext" select="'.html'"/>
+  <xsl:param name="outext" select="'.xhtml'"/>
+  <xsl:param name="OUTEXT" select="$outext" as="xs:string"/>
   <xsl:param name="tempdir" select="./temp"/>
   
   <!-- Used by the copied map2htmtoc.xsl: -->
@@ -296,6 +298,12 @@
   <xsl:output method="xml" name="indented-xml"
     indent="yes"
   />
+  <xsl:output name="html5" method="html" 
+    indent="yes" 
+    encoding="utf-8" 
+    doctype-system="about:legacy-compat" 
+    omit-xml-declaration="yes"
+  />
   
   <xsl:variable name="maxTocDepthInt" select="xs:integer($maxTocDepth)" as="xs:integer"/>
   <xsl:variable name="maxNavDepthInt" select="xs:integer($maxNavDepth)" as="xs:integer"/>
@@ -433,10 +441,11 @@
       <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>        
     </xsl:apply-templates>
     <xsl:message> + [DEBUG] after generate-opf</xsl:message>
-<!--    <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
+    <xsl:message> + [DEBUG] Generating graphic copy Ant script...</xsl:message>
+    <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
     </xsl:apply-templates>
--->    <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
+    <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
   </xsl:template>
   
   <xsl:template name="make-meta-inf">

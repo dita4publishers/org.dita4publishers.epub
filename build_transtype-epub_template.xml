@@ -34,7 +34,7 @@
       basedir="${epub.temp.dir}"
     	compress="true"
       includes="META-INF${file.separator}container.xml,toc.ncx,
-      content.opf,container.opf,**/*.html,**/*.css,**/*.HTML,**/*.CSS,
+      content.opf,container.opf,**/*.html,**/*.xhtml,**/*.css,**/*.HTML,**/*.CSS,
       **/*.jpg,**/*.jpeg,**/*.gif,**/*.png,**/*.svg,**/*.JPG,**/*.JPEG,**/*.GIF,**/*.PNG,**/*.SVG"/>
     <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
       basedir="${epub.temp.dir}"
@@ -159,7 +159,7 @@
      	<param name="imagesOutputDir" expression="${images.output.dir}"/>
      	<param name="outdir" expression="${epub.xslt.outdir}"/>
      	<param name="inputdir" expression="${dita.input.dirname}"/>
-      <param name="outext" expression="${out.ext}"/><!-- Extension to use for result files, e.g., ".html" -->
+      <param name="outext" expression=".xhtml"/><!-- EPUB3 uses xhtml for result files. -->      
      	<param name="tempdir" expression="${epub.xslt.tempdir}"/>
     	<param name="rawPlatformString" expression="${os.name}"/>
     	<param name="titleOnlyTopicClassSpec" expression="${title.only.topic.class.spec}"/>
@@ -171,6 +171,7 @@
       <param name="html.toc.OUTPUTCLASS" expression="${args.xhtml.toc.class}" if="args.xhtml.toc.class" />
       <param name="maxTocDepth" expression="${d4p.max.toc.depth}" if="d4p.max.toc.depth"/>
       <param name="maxNavDepth" expression="${d4p.max.nav.depth}" if="d4p.max.nav.depth"/>
+      <param name="epubType" expression="${d4p.epubtype}" if="d4p.epubtype"/>
 
     	<!-- Parameters from dita2xhtml and similar transtypes: -->   
       <param name="WORKDIR" expression="${workdir}" if="workdir"/>
@@ -200,10 +201,10 @@
   
   <target name="epub.copy.graphics" 
 	  description="Copies graphics from input to the ePub output directory based on the graphic map generated during epub generation">
-<!--  	<ant antfile="${epub.temp.dir}/copy-graphics.xml"  		
+  	<ant antfile="${epub.temp.dir}/copy-graphics.xml"  		
   		>
   	</ant>
--->	</target>
+	</target>
 	
   <target name="epub-copy-css"  description="Copy CSS files">    
     <condition property="user.copycss.yes">
