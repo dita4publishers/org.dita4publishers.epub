@@ -61,13 +61,66 @@
             <ol>
               <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="generate-html-toc">
                 <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="1"/>
+                <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
               </xsl:apply-templates>
             </ol>
           </nav>
+      	  <!-- NOTE: Repeating the collected-data parameter here even though it's not necessary
+      	             just to make it clear to readers of the code that the parameter is available
+      	             to down-stream templates.
+      	    -->
+      	  <xsl:apply-templates select="." mode="epub:generate-landmarks-nav">
+      	    <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      	  </xsl:apply-templates>
+      	  <xsl:apply-templates select="." mode="epub:generate-pagelist-nav">
+      	    <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      	  </xsl:apply-templates>
+      	  <xsl:apply-templates select="." mode="epub:generate-custom-nav">
+      	    <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      	  </xsl:apply-templates>
       	</body>
       </html>
     </xsl:result-document>  
     <xsl:message> + [INFO] EPUB3 Nav generation done.</xsl:message>
+  </xsl:template>
+  
+  <xsl:template mode="epub:generate-landmarks-nav" match="*[df:class(., 'map/map')]">
+    <!-- Default: No landmarks nav. 
+      
+      The landmarks nav section should be e.g., 
+      
+      <nav epub:type="landmarks">
+          <h2>Guide</h2>
+          <ol>
+              <li><a epub:type="toc" href="#toc">Table of Contents</a></li>
+              <li><a epub:type="loi" href="content.html#loi">List of Illustrations</a></li>
+              <li><a epub:type="bodymatter" href="content.html#bodymatter">Start of Content</a></li>
+          </ol>
+      </nav>
+      -->
+  </xsl:template>
+  
+  <xsl:template mode="epub:generate-pagelist-nav" match="*[df:class(., 'map/map')]">
+    <!-- Default: No landmarks nav. 
+      
+      The landmarks nav section should be e.g., 
+      
+      <nav epub:type="page-list">
+        <h2>Page List</h2>
+        <ol>
+        	<li><a href="testdoc-001.xhtml#p110">110</a></li>
+        </ol>
+			</nav>
+      -->
+  </xsl:template>
+  
+  <xsl:template mode="epub:generate-custom-nav" match="*[df:class(., 'map/map')]">
+    <!-- Mode for generating arbitrary navigation structures. See 
+      http://www.idpf.org/epub/301/spec/epub-contentdocs.html#sec-xhtml-nav-def-types-pagelist
+      
+      Extensions can hook this mode to generate whatever additional navigation
+      structures they want.
+      -->
   </xsl:template>
   
   <xsl:template mode="epub:generate-nav" match="*[df:class(., 'topic/title')][not(@toc = 'no')]"/>
