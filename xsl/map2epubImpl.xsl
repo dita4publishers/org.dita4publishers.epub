@@ -156,10 +156,9 @@
   <xsl:param name="html.toc.OUTPUTCLASS" as="xs:string" select="''"/>
   
   <!-- 
-    The strategy to use when constructing output files. Default is "single-dir", meaning
-    put all result topics in the same output directory (as specified by $topicsOutputDir)
+    The strategy to use when constructing output files. Default is "as-authored".
   -->         
-  <xsl:param name="fileOrganizationStrategy" as="xs:string" select="'single-dir'"/>
+  <xsl:param name="fileOrganizationStrategy" as="xs:string" select="'as-authored'"/>
   
   <xsl:param name="generateIndex" as="xs:string" select="'no'"/>
   <xsl:variable name="generateIndexBoolean" 
