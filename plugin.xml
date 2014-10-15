@@ -10,6 +10,7 @@
   <require plugin="org.dita4publishers.common.html"/> 
   <require plugin="org.dita4publishers.common.mapdriven"/> 
   <require plugin="org.dita-community.common.xslt"/> 
+  <require plugin="org.dita-community.preprocess-extensions"/> 
 
   <template file="build_transtype-epub_template.xml"/>
   
