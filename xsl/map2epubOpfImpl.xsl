@@ -160,6 +160,14 @@
             <xsl:attribute name="toc" select="'ncx'"/>
           </xsl:if>
           
+          <!-- FIXME: I think we need to use the input map structure to know where
+               to generate this reference.
+            -->
+          <xsl:if test="$epub:isDualEpub">
+            <!-- Generate spine reference to the NCX file: -->
+            <itemref idref="ncx"/>
+          </xsl:if>
+          
           <!-- FIXME: Have to account for all navigation topicrefs. -->
           <xsl:apply-templates mode="spine" 
             select="($uniqueTopicRefs | 
@@ -168,10 +176,6 @@
           />
           <xsl:if test="$generateIndexBoolean">
             <itemref idref="generated-index"/>
-          </xsl:if>
-          <xsl:if test="$epub:isDualEpub">
-            <!-- Generate spine reference to the NCX file: -->
-            <itemref idref="toc.ncx"/>
           </xsl:if>
           
         </spine>

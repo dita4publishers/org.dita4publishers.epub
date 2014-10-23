@@ -5,6 +5,7 @@
   xmlns:df="http://dita2indesign.org/dita/functions"
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:opf="http://www.idpf.org/2007/opf"
+  xmlns="http://www.idpf.org/2007/opf"
   exclude-result-prefixes="xs df relpath"
   version="2.0">
     
@@ -48,7 +49,7 @@
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('toc_', generate-id(.), $outext)"
     />
-    <opf:item id="{generate-id()}" href="{$targetUri}"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
@@ -56,7 +57,7 @@
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('list-of-figures_', generate-id(.), $outext)"
     />
-    <opf:item id="{generate-id()}" href="{$targetUri}"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
@@ -64,7 +65,7 @@
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('list-of-tables_', generate-id(.), $outext)"
     />
-    <opf:item id="{generate-id()}" href="{$targetUri}"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
@@ -87,14 +88,14 @@
     *[df:class(., 'bookmap/figurelist')] |
     *[df:class(., 'bookmap/tablelist')]" 
     priority="10">
-    <opf:itemref idref="{generate-id()}"/>    
+    <itemref idref="{generate-id()}"/>    
   </xsl:template>
   
   <xsl:template mode="guide" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('toc_', generate-id(.), $outext)"
     />
-    <opf:reference type="toc"  href="{$targetUri}"/>    
+    <reference type="toc"  href="{$targetUri}"/>    
   </xsl:template>
   
   <xsl:template mode="generate-book-lists" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
