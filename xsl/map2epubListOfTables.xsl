@@ -61,10 +61,13 @@
   
   <xsl:template mode="generate-list-of-tables-html-toc" 
                 match="*[df:class(., 'topic/table')]">
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+
     <xsl:variable name="sourceUri" as="xs:string" select="@docUri"/>
     <xsl:variable name="rootTopic" select="document($sourceUri)" as="document-node()?"/>
     <xsl:variable name="targetUri"
-      select="htmlutil:getTopicResultUrl($outdir, $rootTopic)" as="xs:string"/>
+      select="htmlutil:getTopicResultUrl($outdir, $rootTopic, $rootMapDocUrl)" 
+      as="xs:string"/>
     <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
       as="xs:string"/>
     <xsl:variable name="enumeratedElement" 

@@ -117,7 +117,9 @@
   </xsl:template>
   
   <xsl:template match="*[df:isTopicRef(.)]" mode="generate-html-toc">
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
+
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <!-- For title that shows up in link text, use the navtitle. If it's
         not there, use the first title element in the referenced file. -->
@@ -136,7 +138,9 @@
               <xsl:apply-templates select="." mode="enumeration"/>
             </xsl:variable>
             <xsl:variable name="targetUri"
-              select="htmlutil:getTopicResultUrl($outdir, root($topic))" as="xs:string"/>
+              select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl)" 
+              as="xs:string"
+            />
             <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
               as="xs:string"/>
           <li class="html-toc-entry html-toc-entry_{$tocDepth}">
@@ -226,6 +230,8 @@
   <xsl:template match="*[df:class(., 'topic/topic')]" mode="generate-html-toc">
     <!-- Non-root topics generate ToC entries if they are within the ToC depth -->
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <xsl:variable name="rawNavPointTitle" as="xs:string*">
         <xsl:apply-templates select="*[df:class(., 'topic/title')]" mode="nav-point-title"/>
@@ -233,7 +239,8 @@
       <xsl:variable name="navPointTitle"
         select="normalize-space(string-join($rawNavPointTitle, ' '))" as="xs:string"/>
         <xsl:variable name="targetUri"
-          select="htmlutil:getTopicResultUrl($outdir, root(.))" as="xs:string"/>
+          select="htmlutil:getTopicResultUrl($outdir, root(.), $rootMapDocUrl)" 
+          as="xs:string"/>
         <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
           as="xs:string"/>
         <!-- FIXME: Likely need to map input IDs to output IDs. -->
