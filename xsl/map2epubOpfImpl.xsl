@@ -86,28 +86,11 @@
         </manifest>
         
         <spine>
-          <xsl:if test="$epubtrans:isEpub2 or $epubtrans:isDualEpub">
-            <xsl:attribute name="toc" select="'ncx'"/>
-          </xsl:if>
-          
-          <!--
-            
-            Note that this applies templates to the map as well ('.')
-            so that we can generate spine entries for the nav 
-            documents.
-          
-          -->
-          <xsl:apply-templates mode="spine" 
-            select="($uniqueTopicRefs | 
-            .//*[df:isTopicHead(.)]) | 
-            .//*[local:includeTopicrefInSpine(.)] |
-            ."
-          >
+          <xsl:call-template name="epubtrans:generate-opf-spine">
             <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-          </xsl:apply-templates>
-          <xsl:if test="$generateIndexBoolean">
-            <itemref idref="generated-index"/>
-          </xsl:if>
+            <xsl:with-param name="uniqueTopicRefs" as="element()*" 
+              select="$uniqueTopicRefs" tunnel="yes"/>            
+          </xsl:call-template>
           
         </spine>
         
@@ -278,6 +261,36 @@
     </xsl:apply-templates>
       
   </xsl:template>  
+  
+  <xsl:template name="epubtrans:generate-opf-spine">
+    <!-- Context is a map -->
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="uniqueTopicRefs" as="element()*" tunnel="yes"/>
+
+    <xsl:if test="$epubtrans:isEpub2 or $epubtrans:isDualEpub">
+      <xsl:attribute name="toc" select="'ncx'"/>
+    </xsl:if>
+    
+    <!--
+      
+      Note that this applies templates to the map as well ('.')
+      so that we can generate spine entries for the nav 
+      documents.
+    
+    -->
+    <xsl:apply-templates mode="spine" 
+      select="($uniqueTopicRefs | 
+      .//*[df:isTopicHead(.)]) | 
+      .//*[local:includeTopicrefInSpine(.)] |
+      ."
+    >
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <xsl:if test="$generateIndexBoolean">
+      <itemref idref="generated-index"/>
+    </xsl:if>
+    
+  </xsl:template>
   
   <xsl:template match="*[df:class(., 'map/map')]" mode="spine">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
@@ -505,18 +518,18 @@
           <xsl:message> + [DEBUG] map2epubOpfImpl: targetUri="<xsl:sequence select="$targetUri"/>"</xsl:message>
           <xsl:message> + [DEBUG] map2epubOpfImpl: relativeUri="<xsl:sequence select="$relativeUri"/>"</xsl:message>
         </xsl:if>
-        <xsl:variable name="itemKey" as="xs:string">
-          <xsl:apply-templates select="." mode="epubtrans:getManifestItemKey">
+        <xsl:variable name="itemID" as="xs:string">
+          <xsl:apply-templates select="." mode="epubtrans:getManifestItemID">
             <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
           </xsl:apply-templates>
         </xsl:variable>
-        <item id="{$itemKey}" href="{$relativeUri}"
+        <item id="{$itemID}" href="{$relativeUri}"
               media-type="application/xhtml+xml"/>
       </xsl:otherwise>
     </xsl:choose>    
   </xsl:template>
   
-  <xsl:template mode="epubtrans:getManifestItemKey" match="*[df:class(., 'map/topicref')]">
+  <xsl:template mode="epubtrans:getManifestItemID" match="*[df:class(., 'map/topicref')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
 
     <xsl:variable name="key" as="xs:string?"
@@ -558,7 +571,12 @@
   
   <xsl:template match="*[df:class(., 'map/topicref')]" mode="spine">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    <itemref idref="{generate-id()}"/>
+    <xsl:variable name="itemID" as="xs:string">
+      <xsl:apply-templates select="." mode="epubtrans:getManifestItemID">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <itemref idref="{$itemID}"/>
   </xsl:template>
   
   <xsl:template mode="bookid" match="*[df:class(., 'map/topicmeta')]">
