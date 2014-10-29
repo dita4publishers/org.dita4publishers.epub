@@ -22,6 +22,15 @@
     
   -->
   
+  <!-- Map of topicref elements with keys to the first key. 
+  
+       This is not quite the same as the key space, because it's 
+       only looking at the first key in @keys.
+  -->
+  <xsl:key name="topicrefsByFirstKey" match="*[df:class(., 'map/topicref')][@keys != '']"
+    use="tokenize(@keys, ' ')[1]"
+  />
+  
   <!-- Output format for the content.opf file -->
   <xsl:output name="opf"
     indent="yes"
@@ -55,7 +64,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         version="3.0"
         unique-identifier="bookid"
-        lang="{$lang}"
+        xml:lang="{$lang}"
         >
         <xsl:apply-templates select="." mode="epubtrans:set-prefix-attribute">
           <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
@@ -69,48 +78,11 @@
         </metadata>
         
         <manifest>
-          <xsl:if test="$epubtrans:isDualEpub">
-            <!-- Add the NCX file to the manifest: -->
-            <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
-          </xsl:if>
-          <xsl:if test="$epubtrans:isEpub3">
-            <!-- FIXME: Need to do this for each separate nav file to be generated -->
-            <item href="{epubtrans:getNavFilename('toc')}" 
-              id="{epubtrans:getNavId('toc')}" 
-              media-type="application/xhtml+xml" 
-              properties="nav" 
-            />
-          </xsl:if>
-          <!-- List the XHTML files -->
-          <!-- FIXME: Have to account for all navigation topicrefs. -->
-          <xsl:apply-templates mode="manifest" select="$uniqueTopicRefs">
+          <xsl:call-template name="epubtrans:generate-opf-manifest">
             <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-          </xsl:apply-templates>
-          <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="manifest">
-            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-          </xsl:apply-templates>
-          <xsl:apply-templates select=".//*[local:includeTopicrefInManifest(.)]" mode="manifest">
-            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-          </xsl:apply-templates>
-          <!-- Hook for extension points: -->
-          <xsl:apply-templates select="." mode="generate-opf-manifest-extensions">
-            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-          </xsl:apply-templates>
-          <!-- List the images -->
-          <xsl:apply-templates mode="manifest" select="$graphicMap">
-            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-          </xsl:apply-templates>
-          <item id="commonltr.css" href="{$cssOutputDir}/commonltr.css" media-type="text/css"/>
-          <item id="commonrtl.css" href="{$cssOutputDir}/commonrtl.css" media-type="text/css"/>
-          <xsl:if test="$CSS != ''">
-            <item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
-          </xsl:if>
-          <xsl:if test="$generateIndexBoolean">
-            <item id="generated-index" 
-                  href="{concat('generated-index', $outext)}"
-                  media-type="application/xhtml+xml"/>
-          </xsl:if>
-
+            <xsl:with-param name="uniqueTopicRefs" as="element()*" 
+              select="$uniqueTopicRefs" tunnel="yes"/>
+          </xsl:call-template>
         </manifest>
         
         <spine>
@@ -172,6 +144,57 @@
     <xsl:message> + [INFO] OPF file generation done.</xsl:message>
   </xsl:template>
   
+  <xsl:template name="epubtrans:generate-opf-manifest">
+    <!-- Context is the map -->
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="graphicMap" as="element()" tunnel="yes"/>
+    <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
+    <xsl:param name="uniqueTopicRefs" as="element()*" tunnel="yes"/>
+    
+    <xsl:if test="$epubtrans:isDualEpub">
+      <!-- Add the NCX file to the manifest: -->
+      <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    </xsl:if>
+    <xsl:if test="$epubtrans:isEpub3">
+      <!-- FIXME: Need to do this for each separate nav file to be generated -->
+      <item href="{epubtrans:getNavFilename('toc')}" 
+        id="{epubtrans:getNavId('toc')}" 
+        media-type="application/xhtml+xml" 
+        properties="nav" 
+      />
+    </xsl:if>
+    <!-- List the XHTML files -->
+    <!-- FIXME: Have to account for all navigation topicrefs. -->
+    <xsl:apply-templates mode="manifest" select="$uniqueTopicRefs">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="manifest">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <xsl:apply-templates select=".//*[local:includeTopicrefInManifest(.)]" mode="manifest">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <!-- Hook for extension points: -->
+    <xsl:apply-templates select="." mode="generate-opf-manifest-extensions">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <!-- List the images -->
+    <xsl:apply-templates mode="manifest" select="$graphicMap">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <item id="commonltr.css" href="{$cssOutputDir}/commonltr.css" media-type="text/css"/>
+    <item id="commonrtl.css" href="{$cssOutputDir}/commonrtl.css" media-type="text/css"/>
+    <xsl:if test="$CSS != ''">
+      <item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
+    </xsl:if>
+    <xsl:if test="$generateIndexBoolean">
+      <item id="generated-index" 
+            href="{concat('generated-index', $outext)}"
+            media-type="application/xhtml+xml"/>
+    </xsl:if>
+
+  </xsl:template>
+
   <xsl:template name="epubtrans:generate-opf-metadata">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="lang" as="xs:string" select="'en-US'"/>
@@ -468,6 +491,7 @@
 
   <xsl:template match="*[df:isTopicRef(.)]" mode="manifest">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
     <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()*"/>
     <xsl:choose>
       <xsl:when test="not($topic)">
@@ -476,15 +500,43 @@
       <xsl:otherwise>
         <xsl:variable name="targetUri" select="htmlutil:getTopicResultUrl($outdir, root($topic))" as="xs:string"/>
         <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
-        <xsl:if test="false()">          
+        <xsl:if test="$doDebug">          
           <xsl:message> + [DEBUG] map2epubOpfImpl: outdir="<xsl:sequence select="$outdir"/>"</xsl:message>
           <xsl:message> + [DEBUG] map2epubOpfImpl: targetUri="<xsl:sequence select="$targetUri"/>"</xsl:message>
           <xsl:message> + [DEBUG] map2epubOpfImpl: relativeUri="<xsl:sequence select="$relativeUri"/>"</xsl:message>
-        </xsl:if>        
-        <item id="{generate-id()}" href="{$relativeUri}"
+        </xsl:if>
+        <xsl:variable name="itemKey" as="xs:string">
+          <xsl:apply-templates select="." mode="epubtrans:getManifestItemKey">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          </xsl:apply-templates>
+        </xsl:variable>
+        <item id="{$itemKey}" href="{$relativeUri}"
               media-type="application/xhtml+xml"/>
       </xsl:otherwise>
     </xsl:choose>    
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:getManifestItemKey" match="*[df:class(., 'map/topicref')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+
+    <xsl:variable name="key" as="xs:string?"
+      select="if (@keys) then tokenize(@keys, ' ')[1] else ()"
+      />
+    <xsl:variable name="itemKey" as="xs:string">
+      <xsl:choose>
+        <xsl:when test="$key and (key('topicrefsByFirstKey', $key, root(.))[1] = .)">
+          <!-- This topicref is the first with the key, so it should be the active
+               topicref with this key.
+            -->
+          <xsl:sequence select="$key"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="generate-id(.)"></xsl:sequence>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    
+    <xsl:sequence select="normalize-space($itemKey)"/>
   </xsl:template>
 
   <xsl:template match="*[df:isTopicHead(.)]" mode="manifest">
