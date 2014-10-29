@@ -11,14 +11,15 @@
                 xmlns:enum="http://dita4publishers.org/enumerables"
                 xmlns="http://www.daisy.org/z3986/2005/ncx/"
                 xmlns:local="urn:functions:local"
-                xmlns:epub="urn:d4p:epubtranstype"
-                exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms epub"
+                xmlns:epub="http://www.idpf.org/2007/ops"
+                xmlns:epubtrans="urn:d4p:epubtranstype"
+                exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms epubtrans"
   >
   <!-- ============================================================================= 
     
        Generate the <nav> structure for EPUB3
        
-       Implements mode "epub:generate-nav"
+       Implements mode "epubtrans:generate-nav"
        
        NOTE: Mode generate-toc is for the EPUB2 toc.ncx file. 
        
@@ -26,15 +27,30 @@
   
   <xsl:output indent="yes" name="ncx" method="xml"/>
   
-  <xsl:template match="*[df:class(., 'map/map')]" mode="epub:generate-nav">
+  <xsl:template match="*[df:class(., 'map/map')]" mode="epubtrans:generate-nav">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="collected-data" as="element()" tunnel="yes"/>
+        
+    <xsl:variable name="map" as="element()" select="."/>
+    
+ <!-- ================= 
+      
+      See 
+      
+        http://www.idpf.org/epub/301/spec/epub-contentdocs.html#sec-xhtml-nav-def
+       
+      for the EPUB3 rules for navigation markup. These templates attempt to enforce
+      those rules.
+      
+     ================= -->
+    
     <xsl:variable name="pubTitle" as="xs:string*">
       <xsl:apply-templates select="*[df:class(., 'topic/title')] | @title" mode="pubtitle"/>
     </xsl:variable>           
+    <xsl:message> + [INFO] Constructing nav structures...</xsl:message>
     <xsl:variable name="resultUri" 
-      select="relpath:newFile($outdir, 'nav.xhtml')" 
+      select="relpath:newFile($outdir, epubtrans:getNavFilename('toc'))" 
       as="xs:string"/>
-    <xsl:message> + [INFO] Constructing nav structure...</xsl:message>
     
     <xsl:message> + [INFO] Generating EPUB3 Nav document "<xsl:sequence select="$resultUri"/>"...</xsl:message>
     
@@ -48,62 +64,132 @@
       		<!-- FIXME: May need to generate appropriate CSS references here -->
       	</head>
       	<body>
-          <nav epub:type="toc" id="toc">
-            <!-- FIXME: get from variable: -->
-            <h1 class="title">Table of Contents</h1>
-            <!-- NOTE: We're using the EPUB2 HTML ToC generation code here.
-              
-                 In EPUB3, the nav document can also serve as the content ToC,
-                 whereas for EPUB2 there is always a toc.ncx in addition to any
-                 HTML ToC.
-                        
-            -->
-            <ol>
-              <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="generate-html-toc">
-                <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="1"/>
-                <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
-              </xsl:apply-templates>
-            </ol>
-          </nav>
-      	  <!-- NOTE: Repeating the collected-data parameter here even though it's not necessary
-      	             just to make it clear to readers of the code that the parameter is available
-      	             to down-stream templates.
-      	    -->
-      	  <xsl:apply-templates select="." mode="epub:generate-landmarks-nav">
-      	    <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
-      	  </xsl:apply-templates>
-      	  <xsl:apply-templates select="." mode="epub:generate-pagelist-nav">
-      	    <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
-      	  </xsl:apply-templates>
-      	  <xsl:apply-templates select="." mode="epub:generate-custom-nav">
-      	    <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
-      	  </xsl:apply-templates>
+      	  <xsl:for-each select="$navPageTypes">
+      	    <xsl:variable name="navType" as="xs:string" select="."/>
+      	    <xsl:message> + [INFO]   Generating nav structure for type "<xsl:value-of select="$navType"/>"...</xsl:message>
+      	    <xsl:for-each select="$map">
+        	    <xsl:call-template name="generate-nav-structure">
+        	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+        	      <xsl:with-param name="navType" select="$navType" as="xs:string" tunnel="yes"/>
+        	    </xsl:call-template>
+      	    </xsl:for-each>
+      	  </xsl:for-each>
       	</body>
       </html>
     </xsl:result-document>  
-    <xsl:message> + [INFO] EPUB3 Nav generation done.</xsl:message>
+
   </xsl:template>
   
-  <xsl:template mode="epub:generate-landmarks-nav" match="*[df:class(., 'map/map')]">
-    <!-- Default: No landmarks nav. 
-      
-      The landmarks nav section should be e.g., 
-      
-      <nav epub:type="landmarks">
-          <h2>Guide</h2>
-          <ol>
-              <li><a epub:type="toc" href="#toc">Table of Contents</a></li>
-              <li><a epub:type="loi" href="content.html#loi">List of Illustrations</a></li>
-              <li><a epub:type="bodymatter" href="content.html#bodymatter">Start of Content</a></li>
-          </ol>
-      </nav>
+  <xsl:template name="generate-nav-structure">
+    <!-- Context node must be a map -->
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="navType" as="xs:string" tunnel="yes"/>
+    <xsl:param name="collected-data" as="node()*" tunnel="yes"/>
+    
+    <!-- Note that per the EPUB3 spec, nav elements must contain exactly one
+         ordered list.
       -->
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] generate-nav-structure: context: <xsl:value-of select="name(.)"/>, <xsl:value-of select="@class"/></xsl:message>
+      <xsl:message> + [DEBUG] generate-nav-structure:   navType: "<xsl:value-of select="$navType"/>"</xsl:message>
+    </xsl:if>
+    
+    <nav epub:type="{$navType}" id="{epubtrans:getNavId($navType)}">
+      <h1 class="title"><xsl:sequence select="epubtrans:getNavTitle(., $navType)"/></h1>
+      <ol>
+        <xsl:choose>
+          <xsl:when test="$navType = 'toc'">
+            <xsl:apply-templates mode="epubtrans:generate-nav-toc" select=".">
+      	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:when>
+          <xsl:when test="$navType = 'toc-brief'">
+            <xsl:apply-templates mode="epubtrans:generate-nav-toc" select=".">
+              <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="1"/>
+            </xsl:apply-templates>
+          </xsl:when>
+          <xsl:when test="$navType = 'landmarks'">
+            <xsl:apply-templates mode="epubtrans:generate-nav-landmarks" select=".">
+      	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:when>
+          <xsl:when test="$navType = 'loa'">
+            <xsl:apply-templates mode="epubtrans:generate-nav-loa" select=".">
+      	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:when>
+          <xsl:when test="$navType = 'loi'">
+            <xsl:apply-templates mode="epubtrans:generate-nav-loi" select=".">
+      	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:when>
+          <xsl:when test="$navType = 'lot'">
+            <xsl:apply-templates mode="epubtrans:generate-nav-lot" select=".">
+      	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:when>
+          <xsl:when test="$navType = 'lov'">
+            <xsl:apply-templates mode="epubtrans:generate-nav-lov" select=".">
+      	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:when>
+          <xsl:when test="$navType = 'lof'">
+            <!-- Not a type defined in EPUB spec.-->
+            <xsl:apply-templates mode="epubtrans:generate-nav-lof" select=".">
+      	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:apply-templates mode="epubtrans:generate-nav-custom" select=".">
+      	      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:otherwise>
+        </xsl:choose>
+      </ol>
+    </nav>
   </xsl:template>
   
-  <xsl:template mode="epub:generate-pagelist-nav" match="*[df:class(., 'map/map')]">
-    <!-- Default: No landmarks nav. 
+  <xsl:template mode="epubtrans:generate-nav-toc" match="*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="collected-data" as="node()*" tunnel="yes"/>
+    
+    <!-- NOTE: This template generates the <li> elements that populate the root
+               <ol> for the <nav> element.
+      -->
+    <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="generate-html-toc">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="1"/>
+      <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+    </xsl:apply-templates>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:generate-nav-loa 
+                      epubtrans:generate-nav-loi 
+                      epubtrans:generate-nav-lot 
+                      epubtrans:generate-nav-lov 
+                      epubtrans:generate-nav-custom 
+                      epubtrans:generate-nav-landmarks
+                      " 
+                      match="*[df:class(., 'map/map')]"
+                      priority="-1" 
+    >
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="navType" as="xs:string" tunnel="yes"/>
+
+    <li>Navigation type <xsl:value-of select="$navType"/> not implemented.</li>
+
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:generate-pagelist-nav" match="*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:generate-pagelist-nav: handling element <xsl:value-of select="name(.)"/></xsl:message>
+    </xsl:if>
+
+    <!-- Default: No pagelist nav. 
       
-      The landmarks nav section should be e.g., 
+      The pagelist nav section should be e.g., 
       
       <nav epub:type="page-list">
         <h2>Page List</h2>
@@ -114,7 +200,12 @@
       -->
   </xsl:template>
   
-  <xsl:template mode="epub:generate-custom-nav" match="*[df:class(., 'map/map')]">
+  <xsl:template mode="epubtrans:generate-custom-nav" match="*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:generate-custom-nav: handling element <xsl:value-of select="name(.)"/></xsl:message>
+    </xsl:if>
+
     <!-- Mode for generating arbitrary navigation structures. See 
       http://www.idpf.org/epub/301/spec/epub-contentdocs.html#sec-xhtml-nav-def-types-pagelist
       
@@ -123,10 +214,10 @@
       -->
   </xsl:template>
   
-  <xsl:template mode="epub:generate-nav" match="*[df:class(., 'topic/title')][not(@toc = 'no')]"/>
+  <xsl:template mode="epubtrans:generate-nav" match="*[df:class(., 'topic/title')][not(@toc = 'no')]"/>
 
   <!-- Convert each topicref to a ToC entry. -->
-  <xsl:template match="*[df:isTopicRef(.)][not(@toc = 'no')]" mode="epub:generate-nav">
+  <xsl:template match="*[df:isTopicRef(.)][not(@toc = 'no')]" mode="epubtrans:generate-nav">
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
 
@@ -134,7 +225,7 @@
       <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()*"/>
       <xsl:choose>
         <xsl:when test="not($topic)">
-          <xsl:message> + [WARNING] epub:generate-nav: Failed to resolve topic reference to href
+          <xsl:message> + [WARNING] epubtrans:generate-nav: Failed to resolve topic reference to href
               "<xsl:sequence select="string(@href)"/>"</xsl:message>
         </xsl:when>
         <xsl:otherwise>
@@ -183,11 +274,11 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="*[df:isTopicGroup(.)]" priority="20" mode="epub:generate-nav">
+  <xsl:template match="*[df:isTopicGroup(.)]" priority="20" mode="epubtrans:generate-nav">
     <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="#current"/>
   </xsl:template>
 
-  <xsl:template match="*[df:class(., 'topic/topic')]" mode="epub:generate-nav">
+  <xsl:template match="*[df:class(., 'topic/topic')]" mode="epubtrans:generate-nav">
     <!-- Non-root topics generate ToC entries if they are within the ToC depth -->
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
     <xsl:if test="$tocDepth le $maxTocDepthInt">
@@ -201,7 +292,7 @@
 
   <!-- topichead elements get a navPoint, but don't actually point to
        anything.  Same with topicref that has no @href. -->
-  <xsl:template match="*[df:isTopicHead(.)][not(@toc = 'no')]" mode="epub:generate-nav">
+  <xsl:template match="*[df:isTopicHead(.)][not(@toc = 'no')]" mode="epubtrans:generate-nav">
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
 
     <xsl:if test="$tocDepth le $maxTocDepthInt">
@@ -224,7 +315,7 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="*[df:class(., 'topic/tm')]" mode="epub:generate-nav">
+  <xsl:template match="*[df:class(., 'topic/tm')]" mode="epubtrans:generate-nav">
     <xsl:apply-templates mode="#current"/>
     <xsl:choose>
       <xsl:when test="@type = 'reg'">
@@ -250,15 +341,15 @@
     *[df:class(., 'topic/keyword')] |
     *[df:class(., 'topic/term')]
     "
-    mode="epub:generate-nav">
+    mode="epubtrans:generate-nav">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
-  <xsl:template match="*[df:class(., 'topic/title')]//text()" mode="epub:generate-nav">
+  <xsl:template match="*[df:class(., 'topic/title')]//text()" mode="epubtrans:generate-nav">
     <xsl:copy/>
   </xsl:template>
 
-  <xsl:template match="text()" mode="epub:generate-nav"/>
+  <xsl:template match="text()" mode="epubtrans:generate-nav"/>
 
   <xsl:template match="@*|node()" mode="fix-navigation-href">
     <xsl:copy>
@@ -323,17 +414,113 @@
     </a>
   </xsl:template>
 
-  <xsl:template match="mapdriven:collected-data" mode="epub:generate-nav">
+  <xsl:template match="mapdriven:collected-data" mode="epubtrans:generate-nav">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
-  <xsl:template match="enum:enumerables" mode="epub:generate-nav">
+  <xsl:template match="enum:enumerables" mode="epubtrans:generate-nav">
     <!-- Nothing to do with enumerables in this context -->
   </xsl:template>
 
-  <xsl:template match="glossdata:glossary-entries" mode="epub:generate-nav">
+  <xsl:template match="glossdata:glossary-entries" mode="epubtrans:generate-nav">
     <xsl:message> + [INFO] EPUB3 nav generation: glossary entry processing not yet
       implemented.</xsl:message>
   </xsl:template>
+  
+  <xsl:function name="epubtrans:getNavFilename" as="xs:string">
+    <!-- Returns the filename to use for the navigation file -->
+    <xsl:param name="navType" as="xs:string"/>
+    <xsl:variable name="result">
+      <xsl:call-template name="get-nav-filename">
+        <xsl:with-param name="navType" as="xs:string" select="$navType"/>
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:sequence select="normalize-space($result)"/>
+  </xsl:function>
+  
+  <xsl:template name="get-nav-filename">
+    <xsl:param name="navType" as="xs:string"/>
+    <!-- Override this template to change the logic for nav filename construction -->
+    <xsl:variable name="namePart" as="xs:string"
+      select="if ($navType = 'toc') 
+                 then 'nav' 
+                 else concat('nav-', $navType)"
+    />
+    <xsl:variable name="filename" select="concat($namePart, '.xhtml')"/>
+    <xsl:value-of select="$filename"/>
+  </xsl:template>
+
+  <xsl:function name="epubtrans:getNavId" as="xs:string">
+    <!-- Returns the ID to use in the EPUB manifest for the navigation file of the specified type -->
+    <xsl:param name="navType" as="xs:string"/>
+    
+    <xsl:variable name="result">
+      <xsl:call-template name="get-nav-id">
+        <xsl:with-param name="navType" as="xs:string" select="$navType"/>
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:sequence select="normalize-space($result)"/>
+  </xsl:function>
+  
+  <xsl:template name="get-nav-id">
+    <xsl:param name="navType" as="xs:string"/>
+    <!-- Override this template to change the logic for nav ID construction -->
+    <xsl:variable name="id" as="xs:string"
+      select="if ($navType = 'toc') 
+                 then 'nav' 
+                 else concat('nav-', $navType)"
+    />
+    <xsl:sequence select="$id"/>
+  </xsl:template>
+  
+  <xsl:function name="epubtrans:getNavTitle" as="node()*">
+    <xsl:param name="map" as="element()"/>
+    <xsl:param name="navType" as="xs:string"/>
+    <xsl:variable name="navTitle" as="node()*">
+      <xsl:apply-templates select="$map" mode="epubtrans:getNavTitle">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+        <xsl:with-param name="navType" as="xs:string" tunnel="yes" select="$navType"/>
+      </xsl:apply-templates>        
+    </xsl:variable>
+    <xsl:sequence select="$navTitle"/>
+  </xsl:function>
+  
+  <xsl:template match="*[df:class(., 'map/map')]" mode="epubtrans:getNavTitle">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="true()"/>
+    <xsl:param name="navType" as="xs:string" tunnel="yes"/>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:getNavTitle: Handling map, navType="<xsl:value-of select="$navType"/>"</xsl:message>
+    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="$navType = 'toc'">
+        <xsl:text>Table of Contents</xsl:text><!-- FIXME: Localize string -->
+      </xsl:when>
+      <xsl:when test="$navType = 'landmarks'">
+        <xsl:text>Landmarks</xsl:text><!-- FIXME: Localize string -->
+      </xsl:when>
+      <xsl:when test="$navType = 'loa'">
+        <xsl:text>List of Audio</xsl:text><!-- FIXME: Localize string -->
+      </xsl:when>
+      <xsl:when test="$navType = 'loi'">
+        <xsl:text>List of Illustrations</xsl:text><!-- FIXME: Localize string -->
+      </xsl:when>
+      <xsl:when test="$navType = 'lot'">
+        <xsl:text>List of Tables</xsl:text><!-- FIXME: Localize string -->
+      </xsl:when>
+      <xsl:when test="$navType = 'lov'">
+        <xsl:text>List of Videos</xsl:text><!-- FIXME: Localize string -->
+      </xsl:when>
+      <xsl:when test="$navType = 'toc-brief'">
+        <xsl:text>Brief Table of Contents</xsl:text><!-- FIXME: Localize string -->
+      </xsl:when>
+      <xsl:when test="$navType = 'lof'"><!-- Note a type defined in EPUB spec. EPUB spec allows other types. -->
+        <xsl:text>List of Figures</xsl:text><!-- FIXME: Localize string -->
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="upper-case($navType)"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
 
 </xsl:stylesheet>

@@ -86,8 +86,11 @@
   </xsl:template>  
   
   <xsl:template mode="html2xhtml" match="*" priority="-1">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:if test="ancestor::head">
-      <xsl:message> + [DEBUG] html2xhtml: * : <xsl:sequence select="."/></xsl:message>
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] html2xhtml: * : <xsl:sequence select="."/></xsl:message>
+      </xsl:if>
     </xsl:if>
     <xsl:element name="{name(.)}">
       <xsl:apply-templates select="@*,node()" mode="#current"/>

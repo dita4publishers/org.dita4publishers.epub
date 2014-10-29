@@ -129,8 +129,9 @@
             <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
           </xsl:if>
           <xsl:if test="$epub:isEpub3">
-            <item href="nav.xhtml" 
-              id="nav" 
+            <!-- FIXME: Need to do this for each separate nav file to be generated -->
+            <item href="{epub:getNavFilename('toc')}" 
+              id="{epub:getNavId('toc')}" 
               media-type="application/xhtml+xml" 
               properties="nav" 
             />
@@ -160,19 +161,18 @@
             <xsl:attribute name="toc" select="'ncx'"/>
           </xsl:if>
           
-          <!-- FIXME: I think we need to use the input map structure to know where
-               to generate this reference.
-            -->
-          <xsl:if test="$epub:isDualEpub">
-            <!-- Generate spine reference to the NCX file: -->
-            <itemref idref="ncx"/>
-          </xsl:if>
+          <!--
+            
+            Note that this applies templates to the map as well ('.')
+            so that we can generate spine entries for the nav 
+            documents.
           
-          <!-- FIXME: Have to account for all navigation topicrefs. -->
+          -->
           <xsl:apply-templates mode="spine" 
             select="($uniqueTopicRefs | 
             .//*[df:isTopicHead(.)]) | 
-            .//*[local:includeTopicrefInSpine(.)]"
+            .//*[local:includeTopicrefInSpine(.)] |
+            ."
           />
           <xsl:if test="$generateIndexBoolean">
             <itemref idref="generated-index"/>
@@ -207,6 +207,11 @@
       </package>
     </xsl:result-document>  
     <xsl:message> + [INFO] OPF file generation done.</xsl:message>
+  </xsl:template>
+  
+  <xsl:template match="*[df:class(., 'map/map')]" mode="spine">
+     <!-- Generate entries for each of the navigation files to be generated. -->
+    <itemref idref="{epub:getNavId('toc')}"/>
   </xsl:template>
   
   <xsl:template mode="epub:bindings" match="*" priority="-1">
