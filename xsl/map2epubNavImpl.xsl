@@ -9,10 +9,10 @@
                 xmlns:glossdata="http://dita4publishers.org/glossdata"
                 xmlns:mapdriven="http://dita4publishers.org/mapdriven"
                 xmlns:enum="http://dita4publishers.org/enumerables"
-                xmlns="http://www.daisy.org/z3986/2005/ncx/"
                 xmlns:local="urn:functions:local"
                 xmlns:epub="http://www.idpf.org/2007/ops"
                 xmlns:epubtrans="urn:d4p:epubtranstype"
+                xmlns="http://www.w3.org/1999/xhtml" 
                 exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms epubtrans"
   >
   <!-- ============================================================================= 
@@ -56,7 +56,6 @@
     
     <xsl:result-document href="{$resultUri}" format="html5">
       <html 
-        xmlns="http://www.w3.org/1999/xhtml" 
         xmlns:epub="http://www.idpf.org/2007/ops" 
         >
       	<head>
@@ -64,7 +63,7 @@
       		<!-- FIXME: May need to generate appropriate CSS references here -->
       	</head>
       	<body>
-      	  <xsl:for-each select="$navPageTypes">
+      	  <xsl:for-each select="$navTypes">
       	    <xsl:variable name="navType" as="xs:string" select="."/>
       	    <xsl:message> + [INFO]   Generating nav structure for type "<xsl:value-of select="$navType"/>"...</xsl:message>
       	    <xsl:for-each select="$map">

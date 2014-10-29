@@ -246,9 +246,15 @@
        
        The default value is "toc", the normal navigation table of contents.
     -->
-  <xsl:param name="epubNavPages" as="xs:string" select="'toc'"/>
-  <xsl:variable name="navPageTypes" as="xs:string*"
-    select="tokenize($epubNavPages, ' ')"
+  <xsl:param name="epubNavTypes" as="xs:string" select="'toc'"/>
+  <xsl:variable name="baseNavTypes" as="xs:string*"
+    select="tokenize($epubNavTypes, ' ')"
+  />
+  <!-- EPUB3 requires a 'toc' navigation -->
+  <xsl:variable name="navTypes" as="xs:string+"
+    select="if (not('toc' = $baseNavTypes)) 
+               then ('toc', $baseNavTypes) 
+               else $baseNavTypes"
   />
 
   <!-- Used by some HTML output stuff. For EPUB, don't want links to
