@@ -169,7 +169,8 @@
     </xsl:if>
     <xsl:variable name="xhtml" as="node()*">
       <xsl:apply-templates select="$htmlNoNamespace" mode="html2xhtml">
-        <xsl:with-param name="topicref" select="$topicref" as="element()?" tunnel="yes"/>        
+        <xsl:with-param name="topicref" select="$topicref" as="element()?" tunnel="yes"/>   
+        <xsl:with-param name="resultUri" as="xs:string" tunnel="yes" select="$resultUri"/>
       </xsl:apply-templates>
     </xsl:variable>
     <xsl:if test="$doDebug">

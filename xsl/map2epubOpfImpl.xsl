@@ -97,14 +97,19 @@
         <!-- NOTE: guide is deprecated for EPUB3. Allowed for EPUB2 
                    compatiblity.
           -->
-        <guide>
-            <xsl:apply-templates mode="guide"  select=".">
-              <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-              <xsl:with-param name="uniqueTopicRefs" as="element()*"  tunnel="yes" 
-                select="$uniqueTopicRefs"
-              />
-            </xsl:apply-templates>            
+        <xsl:variable name="guideContents" as="node()*">
+          <xsl:apply-templates mode="guide"  select=".">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="uniqueTopicRefs" as="element()*"  tunnel="yes" 
+            select="$uniqueTopicRefs"
+            />
+          </xsl:apply-templates>            
+        </xsl:variable>
+        <xsl:if test="count($guideContents/*) gt 0">
+          <guide>
+            <xsl:sequence select="$guideContents"/>
           </guide>
+        </xsl:if>
 
         <xsl:if test="$epubtrans:doGenerateBindings">          
           <bindings>
@@ -116,11 +121,11 @@
           </bindings>
         </xsl:if>
         <xsl:if test="$epubtrans:doGenerateCollections">          
-            <xsl:apply-templates mode="epubtrans:collections" select=".">
-              <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-              <xsl:with-param name="uniqueTopicRefs" as="element()*" 
-                select="$uniqueTopicRefs" tunnel="yes"/>
-            </xsl:apply-templates>
+          <xsl:apply-templates mode="epubtrans:collections" select=".">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="uniqueTopicRefs" as="element()*" 
+              select="$uniqueTopicRefs" tunnel="yes"/>
+          </xsl:apply-templates>
         </xsl:if>
       </package>
     </xsl:result-document>  
