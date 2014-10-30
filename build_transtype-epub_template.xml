@@ -45,7 +45,9 @@
       includes="mimetype"
       update="true"
     	keepcompression="true"
-    	compress="false"/>
+    	compress="false"
+    	createunicodeextrafields="never"    	
+    />
   </target>
   
     
@@ -76,13 +78,16 @@
       </not>
     </condition>
   	
-    <condition property="css.output.dir" value="${topics.output.dir}">
+  	<!-- It appears that user.csspath will always have a value,
+  	     even if it's an empty string.
+  	  -->
+    <condition property="css.output.dir" value="css">
       <not>
-        <isset property="args.css.output.dir" />
+        <isset property="user.csspath" />
       </not>
     </condition>
-    <condition property="css.output.dir" value="${args.css.output.dir}">
-      <isset property="args.css.output.dir" />
+    <condition property="css.output.dir" value="${user.csspath}">
+      <isset property="user.csspath" />
     </condition>
   	
   	<condition property="epub.hide.parent.link" value="yes">
@@ -219,9 +224,9 @@
     <mkdir dir="${user.csspath.real}"/>    
     <!-- Always copy system default css files -->
     <copy todir="${user.csspath.real}">
-      <fileset dir="${dita.plugin.org.dita.base.dir}" includes="*.css"/>
+      <fileset dir="${dita.plugin.org.dita.xhtml.dir}/resource" includes="*.css"/>
     </copy>    
-    <!-- Copy user specify css file when required -->
+    <!-- Copy user specified css file when required -->
     <antcall target="epub-copy-css-user"/>
   </target>
 

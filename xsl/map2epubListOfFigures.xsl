@@ -84,7 +84,9 @@
       <html>
         <head>                   
           <title><xsl:sequence select="$lof-title"/></title>
-          <xsl:call-template name="constructToCStyle"/>
+          <xsl:call-template name="constructToCStyle">
+            <xsl:with-param name="resultUri" as="xs:string" tunnel="yes" select="$targetUri"/>
+          </xsl:call-template>
         </head>
         <body class="toc-list-of-figures html-toc">
           <h2 class="toc-title"><xsl:sequence select="$lof-title"/></h2>

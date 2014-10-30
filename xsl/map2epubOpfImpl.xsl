@@ -165,11 +165,20 @@
     <xsl:apply-templates mode="manifest" select="$graphicMap">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
-    <item id="commonltr.css" href="{$cssOutputDir}/commonltr.css" media-type="text/css"/>
-    <item id="commonrtl.css" href="{$cssOutputDir}/commonrtl.css" media-type="text/css"/>
+    
+    <!-- CSS items: 
+    
+         First two are the OT-provided base CSS. $CSS is for a user-specified CSS file.
+         
+         NOTE: $cssOutDir should have the same value as CSSPATH.
+    -->
+    
+    <item id="commonltr.css" href="{relpath:newFile($cssOutDir, 'commonltr.css')}" media-type="text/css"/>
+    <item id="commonrtl.css" href="{relpath:newFile($cssOutDir, 'commonrtl.css')}" media-type="text/css"/>
     <xsl:if test="$CSS != ''">
-      <item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
+      <item id="{$CSS}" href="{relpath:newFile($cssOutDir, $CSS)}" media-type="text/css"/>
     </xsl:if>
+    
     <xsl:if test="$generateIndexBoolean">
       <item id="generated-index" 
             href="{concat('generated-index', $outext)}"

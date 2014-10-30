@@ -61,7 +61,9 @@
       <html>
         <head>
           <title>Table of Contents</title>
-          <xsl:call-template name="constructToCStyle"/>
+          <xsl:call-template name="constructToCStyle">
+            <xsl:with-param name="resultUri" as="xs:string" tunnel="yes" select="$resultUri"/>
+          </xsl:call-template>
         </head>
         <body class="toc-list-of-tables html-toc">
           <!-- FIXME: localize and parameterize the ToC page title. -->
@@ -76,6 +78,17 @@
   </xsl:template>
   
   <xsl:template name="constructToCStyle">
+    <xsl:param name="resultUri" as="xs:string" tunnel="yes"/>
+    
+    <xsl:variable name="cssDirPath" as="xs:string"
+      select="relpath:getRelativePath(cssOutputPath, relpath:getParent($resultUri))"
+    />
+    <xsl:if test="$CSS">
+      <xsl:variable name="cssPath" as="xs:string"
+        select="relpath:newFile($cssOutDir, $CSS)"
+      />
+      <link rel="stylesheet" type="text/css" href="{$cssPath}" /><xsl:text>&#x0a;</xsl:text>
+    </xsl:if>
     <!-- FIXME: This template is a short-term fix for the fact that the 
          TOC files are not output in the same location as the topics,
          so a reference to the base CSS file is wrong with the

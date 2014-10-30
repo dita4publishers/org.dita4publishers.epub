@@ -130,8 +130,30 @@
   <!-- The path of the directory, relative the $outdir parameter,
     to hold the CSS files in the EPub package. Should not have
     a leading "/". 
+    
+    NOTE: cssOutputDir is obsolete as of D4P 1.0 as it's redundant
+    with the CSSPATH parameter. CSSPATH is used in some common code
+    to set the CSS output path.
   -->  
-  <xsl:param name="cssOutputDir" select="'topics'" as="xs:string"/>
+  <xsl:param name="cssOutputDir" select="'css'" as="xs:string"/>
+  <!-- As far as I can tell from the base Ant scripts, CSSPATH will always
+       have a value, even if it's an empty string.
+    -->
+  <xsl:param name="CSSPATH" as="xs:string" select="$cssOutputDir"/>
+  <!-- The relative path from $outdir to the CSS directory. This must be the same
+       as CSSPATH because CSSPATH is used in some HTML output code.
+    -->
+  <xsl:variable name="cssOutDir" as="xs:string">
+    <xsl:if test="$cssOutputDir != $CSSPATH">
+      <xsl:message> + [WARN] The cssOutputDir parameter value ("<xsl:value-of select="$cssOutputDir"/>") != CSSPATH parameter value ("<xsl:value-of select="$CSSPATH"/>"). CSSPATH will be used.</xsl:message>
+    </xsl:if>
+    <xsl:sequence select="$CSSPATH"/>
+  </xsl:variable>
+  <!-- Trigger resolution of the cssOutDir variable so we get any messages: -->
+  <xsl:variable name="_gargage">
+    <xsl:message><xsl:value-of select="if ($cssOutDir != $cssOutputDir) then '' else ''"/></xsl:message>
+  </xsl:variable>
+  
   
   <xsl:param name="debug" select="'false'" as="xs:string"/>
   
@@ -274,7 +296,6 @@
       Parameters:
       
       + coverGraphicUri = "<xsl:sequence select="$coverGraphicUri"/>"
-      + cssOutputDir    = "<xsl:sequence select="$cssOutputDir"/>"
       + epubType        = "<xsl:sequence select="$epubType"/>"
       + generateBindings= "<xsl:sequence select="$epubtrans:doGenerateBindings"/>"
       + generateCollections= "<xsl:sequence select="$epubtrans:doGenerateCollections"/>"
@@ -303,7 +324,7 @@
       
       Global Variables:
       
-      + cssOutputPath    = "<xsl:sequence select="$cssOutputPath"/>"
+      + cssOutDir        = "<xsl:sequence select="$cssOutDir"/>"
       + effectiveCoverGraphicUri = "<xsl:sequence select="$effectiveCoverGraphicUri"/>"
       + topicsOutputPath = "<xsl:sequence select="$topicsOutputPath"/>"
       + imagesOutputPath = "<xsl:sequence select="$imagesOutputPath"/>"
@@ -369,15 +390,15 @@
   </xsl:variable>  
   
   <xsl:variable name="cssOutputPath">
-      <xsl:choose>
-        <xsl:when test="$cssOutputDir != ''">
-          <xsl:sequence select="concat($outdir, $cssOutputDir)"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:sequence select="$outdir"/>
-        </xsl:otherwise>
-      </xsl:choose>    
-</xsl:variable>  
+    <xsl:choose>
+      <xsl:when test="$cssOutDir != ''">
+        <xsl:sequence select="relpath:newFile($outdir, $cssOutDir)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$outdir"/>
+      </xsl:otherwise>
+    </xsl:choose>    
+  </xsl:variable>  
   
   <xsl:template match="/">
     <xsl:if test="$debugBoolean">
