@@ -39,6 +39,7 @@
     encoding="UTF-8"
     indent="yes"
     doctype-system="about:legacy-compat"
+    include-content-type="no"
   />
   
   
@@ -51,15 +52,15 @@
     <xsl:variable name="uniqueTopicRefs" as="element()*" select="df:getUniqueTopicrefs(.)"/>
     
     
-<xsl:if test="$doDebug">    
-  <xsl:message> + [DEBUG] ------------------------------- 
+    <xsl:if test="$doDebug">    
+      <xsl:message> + [DEBUG] ------------------------------- 
  + [DEBUG] Unique topics:      
       <xsl:for-each select="$uniqueTopicRefs">
  + [DEBUG] <xsl:sequence select="name(.)"/>: generated id="<xsl:sequence select="generate-id(.)"/>", URI=<xsl:sequence select="document-uri(root(.))"/>                
       </xsl:for-each>
  + [DEBUG] -------------------------------    
-    </xsl:message>
-</xsl:if>    
+      </xsl:message>
+    </xsl:if>    
     <xsl:apply-templates select="$uniqueTopicRefs" mode="generate-content"/>
     <xsl:message> + [INFO] Generating title-only topics for topicheads...</xsl:message>
     <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="generate-content"/>
@@ -153,22 +154,29 @@
     <!-- Result URI to which the document should be written. -->
     <xsl:param name="resultUri" as="xs:string" tunnel="yes"/>
     
-    <xsl:message> + [INFO] Writing topic <xsl:value-of select="$topicref/@href"/> to HTML file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
+    
     <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] generate-content: handling topic <xsl:value-of select="name(.)"/>...</xsl:message>
+      <xsl:message> + [DEBUG] generate-content:    Generating base HTML using default-mode HTML generation....</xsl:message>
     </xsl:if>
     <xsl:variable name="htmlNoNamespace" as="node()*">
       <xsl:apply-templates select="." mode="map-driven-content-processing">
         <xsl:with-param name="topicref" select="$topicref" as="element()?" tunnel="yes"/>
       </xsl:apply-templates>      
     </xsl:variable>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] generate-content:    Generating XHTML from base HTML...</xsl:message>
+    </xsl:if>
     <xsl:variable name="xhtml" as="node()*">
       <xsl:apply-templates select="$htmlNoNamespace" mode="html2xhtml">
         <xsl:with-param name="topicref" select="$topicref" as="element()?" tunnel="yes"/>        
       </xsl:apply-templates>
     </xsl:variable>
     <xsl:if test="$doDebug">
-      <xsl:message> + [DEBUG] generate-content: xhtml header=<xsl:sequence select="$xhtml/*:head"/></xsl:message>
+      <xsl:message> + [DEBUG] xhtml:
+<xsl:sequence select="$xhtml"/></xsl:message>
     </xsl:if>
+    <xsl:message> + [INFO] Writing topic <xsl:value-of select="$topicref/@href"/> to HTML file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
     <xsl:result-document format="html5" 
       href="{$resultUri}" 
       exclude-result-prefixes="opf">

@@ -348,6 +348,7 @@
     encoding="utf-8" 
     doctype-system="about:legacy-compat" 
     omit-xml-declaration="yes"
+    include-content-type="no"
   />
   
   <xsl:variable name="maxTocDepthInt" select="xs:integer($maxTocDepth)" as="xs:integer"/>
