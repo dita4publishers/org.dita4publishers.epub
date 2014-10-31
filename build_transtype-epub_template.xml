@@ -1,13 +1,6 @@
 <project name="dita2epub" default="dita2epub"
   xmlns:dita="http://dita-ot.sourceforge.net"
   >
-  <!-- Thanks to Tony Graham's blog entry:
-    
-    http://inasmuch.as/2010/12/10/ant-for-epub/
-    
-    For hints on how to do the EPUB Zipping.
-    
-    -->
   
   <!-- test to see where the plugin is located, plugins or demo -->
   <dirname property="epub.dir" file="${ant.file.dita2epub}"/>
@@ -42,27 +35,19 @@
       uncompressed. Looks like ant puts later zipped files in
       first, so mimetype is in second zip task. -->
     <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
+      basedir="${epub.temp.dir}"
     	compress="true"
-    	encoding="UTF-8"
-    	level="9"
-      >
-      <fileset dir="${epub.temp.dir}">
-        <patternset includes="META-INF/container.xml,toc.ncx,
+      includes="META-INF${file.separator}container.xml,toc.ncx,
       content.opf,container.opf,**/*.html,**/*.xhtml,**/*.css,**/*.HTML,**/*.CSS,
       **/*.jpg,**/*.jpeg,**/*.gif,**/*.png,**/*.svg,**/*.JPG,**/*.JPEG,**/*.GIF,**/*.PNG,**/*.SVG"/>
-      </fileset>
-    </zip>
-    <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"      
+    <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
+      basedir="${epub.temp.dir}"
+      includes="mimetype"
       update="true"
     	keepcompression="true"
     	compress="false"
-    	encoding="UTF-8"
-    	createunicodeextrafields="never"
-    >
-      <fileset dir="${epub.temp.dir}">
-        <include name="manifest"/>
-      </fileset>
-    </zip>
+    	createunicodeextrafields="never"    	
+    />
   </target>
   
     
