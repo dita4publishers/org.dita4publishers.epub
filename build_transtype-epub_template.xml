@@ -46,8 +46,10 @@
       update="true"
     	keepcompression="true"
     	compress="false"
-    	createunicodeextrafields="never"    	
+    	createunicodeextrafields="never"    
+    	zip64Mode="never"
     />
+    <!-- For Ant 1.9 or newer, need to specify zip64Mode="never" -->
   </target>
   
     
