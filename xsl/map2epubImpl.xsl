@@ -383,10 +383,10 @@
       <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>        
     </xsl:apply-templates>
     <xsl:message> + [DEBUG] after generate-opf</xsl:message>
-<!--    <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
+    <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
     </xsl:apply-templates>
--->    <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
+    <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
   </xsl:template>
   
   <xsl:template name="make-meta-inf">

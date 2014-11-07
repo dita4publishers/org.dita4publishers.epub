@@ -103,7 +103,7 @@
         </metadata>
         
         <manifest xmlns:opf="http://www.idpf.org/2007/opf">
-          <opf:item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+          <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
           <!-- List the XHTML files -->
           <xsl:apply-templates mode="manifest" select="$uniqueTopicRefs"/>
           <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="manifest"/>
@@ -112,13 +112,13 @@
           <xsl:apply-templates select="." mode="generate-opf-manifest-extensions"/>
           <!-- List the images -->
           <xsl:apply-templates mode="manifest" select="$graphicMap"/>
-          <opf:item id="commonltr.css" href="{$cssOutputDir}/commonltr.css" media-type="text/css"/>
-          <opf:item id="commonrtl.css" href="{$cssOutputDir}/commonrtl.css" media-type="text/css"/>
+          <item id="commonltr.css" href="{$cssOutputDir}/commonltr.css" media-type="text/css"/>
+          <item id="commonrtl.css" href="{$cssOutputDir}/commonrtl.css" media-type="text/css"/>
           <xsl:if test="$CSS != ''">
-            <opf:item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
+            <item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
           </xsl:if>
           <xsl:if test="$generateIndexBoolean">
-            <opf:item id="generated-index" href="generated-index.html" media-type="application/xhtml+xml"/>
+            <item id="generated-index" href="generated-index.html" media-type="application/xhtml+xml"/>
           </xsl:if>
         </manifest>
         
@@ -130,7 +130,7 @@
             .//*[local:includeTopicrefInSpine(.)]"
           />
           <xsl:if test="$generateIndexBoolean">
-            <opf:itemref idref="generated-index"/>
+            <itemref idref="generated-index"/>
           </xsl:if>
           
         </spine>
@@ -276,7 +276,7 @@
           <xsl:message> + [DEBUG] map2epubOpfImpl: targetUri="<xsl:sequence select="$targetUri"/>"</xsl:message>
           <xsl:message> + [DEBUG] map2epubOpfImpl: relativeUri="<xsl:sequence select="$relativeUri"/>"</xsl:message>
         </xsl:if>        
-        <opf:item id="{generate-id()}" href="{$relativeUri}"
+        <item id="{generate-id()}" href="{$relativeUri}"
               media-type="application/xhtml+xml"/>
       </xsl:otherwise>
     </xsl:choose>    
@@ -294,12 +294,12 @@
           then concat($topicsOutputDir, '/', $titleOnlyTopicFilename) 
           else $titleOnlyTopicFilename
           " />
-    <opf:item id="{generate-id()}" href="{$targetUri}"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'map/topicref')]" mode="spine">
-    <opf:itemref idref="{generate-id()}"/>
+    <itemref idref="{generate-id()}"/>
   </xsl:template>
   
   <xsl:template mode="bookid" match="*[df:class(., 'map/topicmeta')]">
@@ -466,7 +466,7 @@
         imageHref   =<xsl:sequence select="$imageHref"/>
       </xsl:message>
     </xsl:if>
-    <opf:item id="{@id}" href="{$imageHref}">
+    <item id="{@id}" href="{$imageHref}">
       <xsl:attribute name="media-type">
         <xsl:choose>
           <xsl:when test="$imageExtension = 'jpg'"><xsl:sequence select="'image/jpeg'"/></xsl:when>
@@ -479,7 +479,7 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
-    </opf:item>
+    </item>
   </xsl:template>
   
   <xsl:function name="local:includeTopicrefInSpine" as="xs:boolean">

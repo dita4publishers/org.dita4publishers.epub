@@ -48,7 +48,7 @@
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('toc_', generate-id(.), '.html')"
     />
-    <opf:item id="{generate-id()}" href="{$targetUri}"
+    <item id="{generate-id()}" href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
@@ -56,7 +56,7 @@
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('list-of-figures_', generate-id(.), '.html')"
     />
-    <opf:item id="{generate-id()}" href="{$targetUri}"
+    <item id="{generate-id()}" href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
@@ -64,7 +64,7 @@
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('list-of-tables_', generate-id(.), '.html')"
     />
-    <opf:item id="{generate-id()}" href="{$targetUri}"
+    <item id="{generate-id()}" href="{$targetUri}"  xmlns="http://www.idpf.org/2007/opf"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
@@ -87,14 +87,14 @@
     *[df:class(., 'bookmap/figurelist')] |
     *[df:class(., 'bookmap/tablelist')]" 
     priority="10">
-    <opf:itemref idref="{generate-id()}"/>    
+    <itemref idref="{generate-id()}"  xmlns="http://www.idpf.org/2007/opf"/>    
   </xsl:template>
   
   <xsl:template mode="guide" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('toc_', generate-id(.), '.html')"
     />
-    <opf:reference type="toc"  href="{$targetUri}"/>    
+    <reference type="toc"  href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"/>    
   </xsl:template>
   
   <xsl:template mode="generate-book-lists" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
