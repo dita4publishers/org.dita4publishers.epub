@@ -268,7 +268,10 @@
       <xsl:call-template name="commonattributes">
         <xsl:with-param name="default-output-class" select="$htmlClass" as="xs:string"/>      
       </xsl:call-template>
-      <xsl:apply-templates select="$topicref" mode="enumeration"/>
+      <xsl:if test="not(../ancestor::*[df:class(., 'topic/topic')])">
+        <!-- Only do this if we're the topic the topicref actually pointed to. -->
+        <xsl:apply-templates select="$topicref" mode="enumeration"/>
+      </xsl:if>
       <xsl:apply-templates/>
     </xsl:element>    
   </xsl:template>  
