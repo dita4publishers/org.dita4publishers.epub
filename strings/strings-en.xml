@@ -25,4 +25,5 @@
   <str name="ListOfTables">List of Tables</str>
   <str name="ListOfVideos">List of Videos</str>
   <str name="BriefToC">Brief Table of Contents</str>
+  <str name="Notes">Notes</str>
 </strings>
