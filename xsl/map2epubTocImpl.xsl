@@ -44,7 +44,7 @@
     
     <!-- Build the ToC tree so we can then calculate the playorder of the navitems. -->
     <xsl:variable name="navmap" as="element()">
-      <ncx:navMap>
+      <navMap>
         <xsl:choose>
           <xsl:when test="$pubTitle != ''">
             <!-- FIXME: If there is a pubtitle, generate a root navPoint for the title.
@@ -76,7 +76,7 @@
             <content src="{concat('generated-index', $outext)}"/>
           </navPoint>          
         </xsl:if>
-      </ncx:navMap>
+      </navMap>
     </xsl:variable>
         
     <xsl:message> + [INFO] Generating ToC (NCX) file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
