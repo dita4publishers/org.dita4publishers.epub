@@ -29,8 +29,17 @@
   <target name="epub"
     unless="noMap"
     depends="dita.map.epub, zipepub"/>
+  
+  <target name="checkAnt1.9">
+    <antversion property="ant.version"/>
+    <condition property="isAnt1.9">
+      <antversion atleast="1.9.1" />
+    </condition>
+  </target>
 	  
-  <target name="zipepub">
+  <target name="zipepub" depends="checkAnt1.9, zipEpubOldAnt, zipEpubNewAnt"/>
+  
+  <target name="zipEpubNewAnt" if="${isAnt1.9}"> 
     <!-- Two steps because mimetype must go in first,
       uncompressed. Looks like ant puts later zipped files in
       first, so mimetype is in second zip task. -->
@@ -51,7 +60,31 @@
     />
     <!-- For Ant 1.9 or newer, need to specify zip64Mode="never" -->
   </target>
-  
+
+  <target name="zipEpubOldAnt" unless="${isAnt1.9}"> 
+    
+    <echo>- [WARN] Using ${ant.version}. You must use 1.9.1 or newer to produce a correct EPUB Zip package.</echo>
+    <echo>- [WARN] EPUB will not pass epubcheck.</echo>
+    <!-- Two steps because mimetype must go in first,
+      uncompressed. Looks like ant puts later zipped files in
+      first, so mimetype is in second zip task. -->
+    <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
+      basedir="${epub.temp.dir}"
+    	compress="true"
+      includes="META-INF${file.separator}container.xml,toc.ncx,
+      content.opf,container.opf,**/*.html,**/*.xhtml,**/*.css,**/*.HTML,**/*.CSS,
+      **/*.jpg,**/*.jpeg,**/*.gif,**/*.png,**/*.svg,**/*.JPG,**/*.JPEG,**/*.GIF,**/*.PNG,**/*.SVG"/>
+    <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
+      basedir="${epub.temp.dir}"
+      includes="mimetype"
+      update="true"
+    	keepcompression="true"
+    	compress="false"
+    	createunicodeextrafields="never"    
+    />
+    
+  </target>
+
     
   <target name="dita.map.epub.init"
     description="Init properties for Epub">
