@@ -215,50 +215,29 @@
   
   <xsl:template mode="nav-point-title" match="*[contains(@class, '/figurelist ')]" priority="20">
     <!-- FIXME: Get title from variables -->
-    <xsl:variable name="navPointTitleString" select="'List of Figures'" as="xs:string"/>
+    <xsl:variable name="navPointTitleString">
+      <xsl:call-template name="getString">
+          <xsl:with-param name="stringName" select="'ListOfFigures'"/>
+      </xsl:call-template>
+    </xsl:variable>
     <xsl:sequence select="$navPointTitleString"/>    
   </xsl:template>
   
   <xsl:template mode="nav-point-title" match="*[contains(@class, '/tablelist ')]" priority="20">
     <!-- FIXME: Get title from variables -->
-    <xsl:variable name="navPointTitleString" select="'List of Tables'"/>
+    <xsl:variable name="navPointTitleString">
+      <xsl:call-template name="getString">
+          <xsl:with-param name="stringName" select="'ListOfTables'"/>
+      </xsl:call-template>
+    </xsl:variable>
     <xsl:sequence select="$navPointTitleString"/>    
   </xsl:template>
   
   <xsl:template match="*[df:isTopicGroup(.)]" priority="10" mode="generate-toc">
-    <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
-    <xsl:if test="$tocDepth le $maxNavDepthInt">
-      <xsl:variable name="rawNavPointTitle" as="xs:string*">
-        <xsl:apply-templates select="." mode="nav-point-title"/>
-      </xsl:variable>
-      <!-- FIXME: I think this is now bogus. TC ruled that topic groups never
-           contribute to the nav tree even if they have a nav title.
-        -->
-      <xsl:variable name="navPointTitle" 
-        select="normalize-space(string-join($rawNavPointTitle, ' '))" 
-        as="xs:string"/>
-  <!--    <xsl:message> + [DEBUG] isTopicGroup(): navPointTitle="<xsl:sequence select="$navPointTitle"/>"</xsl:message>-->
-      <xsl:choose>
-        <xsl:when test="$navPointTitle != ''">
-          <navPoint id="{generate-id()}"
-            > 
-            <navLabel>
-              <text><xsl:sequence select="$navPointTitle"/></text>
-            </navLabel>
-            <!-- FIXME: This is bogus, but we should never get here. -->
-            <content src="topics/topicgroup_00000.html"/>          
-            <xsl:apply-templates select="*[df:class(.,'map/topicref')]" mode="#current">
-              <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes"
-                select="$tocDepth + 1"
-              />            
-            </xsl:apply-templates>
-          </navPoint>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="#current"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:if>    
+    <!-- Per 1.2 spec: topicgroups never contribute to the navigation hierarchy, even
+         if they have a navigation title.
+      -->
+    <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="#current"/>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/topic')]" mode="generate-toc">

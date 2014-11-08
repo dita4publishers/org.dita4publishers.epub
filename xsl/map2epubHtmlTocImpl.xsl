@@ -66,8 +66,11 @@
           </xsl:call-template>
         </head>
         <body class="toc-list-of-tables html-toc">
-          <!-- FIXME: localize and parameterize the ToC page title. -->
-          <h2 class="toc-title">Contents</h2>
+          <h2 class="toc-title">
+            <xsl:call-template name="getString">
+                <xsl:with-param name="stringName" select="'Contents'"/>
+            </xsl:call-template>
+          </h2>
           <div class="html-toc toc-entries">
             <xsl:apply-templates select="$navmap" mode="html-toc"/>
           </div>

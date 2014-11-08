@@ -18,5 +18,6 @@
 
   <feature extension="dita.conductor.transtype.check" value="epub" type="txt"/>
   <feature extension="dita.conductor.target.relative" file="build.xml"/>
+  <feature extension="dita.xsl.strings" value="strings/strings.xml" type="file"/>
 
 </plugin>

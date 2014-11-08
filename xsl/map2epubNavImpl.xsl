@@ -492,31 +492,49 @@
     </xsl:if>
     <xsl:choose>
       <xsl:when test="$navType = 'toc'">
-        <xsl:text>Table of Contents</xsl:text><!-- FIXME: Localize string -->
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="'Contents'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'landmarks'">
-        <xsl:text>Landmarks</xsl:text><!-- FIXME: Localize string -->
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="'Landmarks'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'loa'">
-        <xsl:text>List of Audio</xsl:text><!-- FIXME: Localize string -->
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="'ListOfAudio'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'loi'">
-        <xsl:text>List of Illustrations</xsl:text><!-- FIXME: Localize string -->
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="'ListOfIllustrations'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'lot'">
-        <xsl:text>List of Tables</xsl:text><!-- FIXME: Localize string -->
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="'ListOfTables'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'lov'">
-        <xsl:text>List of Videos</xsl:text><!-- FIXME: Localize string -->
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="'ListOfVideos'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'toc-brief'">
-        <xsl:text>Brief Table of Contents</xsl:text><!-- FIXME: Localize string -->
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="'BriefToC'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'lof'"><!-- Note a type defined in EPUB spec. EPUB spec allows other types. -->
-        <xsl:text>List of Figures</xsl:text><!-- FIXME: Localize string -->
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="'ListOfFigures'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:value-of select="upper-case($navType)"/>
+        <xsl:call-template name="getString">
+            <xsl:with-param name="stringName" select="upper-case($navType)"/>
+        </xsl:call-template>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>

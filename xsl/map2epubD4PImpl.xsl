@@ -32,8 +32,9 @@
   <!-- TOC (.ncx) generation context -->
   
   <xsl:template mode="nav-point-title" match="*[df:class(., 'pubmap-d/toc')]" priority="20">
-    <!-- FIXME: Localize this string. -->
-    <xsl:sequence select="'Table of Contents'"/>
+    <xsl:call-template name="getString">
+        <xsl:with-param name="stringName" select="'Contents'"/>
+    </xsl:call-template>
   </xsl:template>
   
   <xsl:template 
