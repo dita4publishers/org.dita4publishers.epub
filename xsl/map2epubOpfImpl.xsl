@@ -56,7 +56,10 @@
     
     <xsl:message> + [INFO] Generating OPF file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
     
-    <xsl:variable name="uniqueTopicRefs" as="element()*" select="df:getUniqueTopicrefs(.)"/>
+    <xsl:variable name="uniqueTopicRefs" as="element()*" 
+      select="df:getUniqueTopicrefs(.)[not(@format = 'ditamap')]"
+    />
+    <xsl:message> + [DEBUG] uniqueTopicRefs=<xsl:sequence select="$uniqueTopicRefs"/></xsl:message>
         
     <xsl:result-document format="opf" href="{$resultUri}">
       <package
