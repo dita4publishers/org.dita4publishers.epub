@@ -9,7 +9,8 @@
   xmlns:gmap="http://dita4publishers/namespaces/graphic-input-to-output-map"  
   xmlns="http://www.idpf.org/2007/opf"
   xmlns:local="urn:functions:local"
-  exclude-result-prefixes="df xs relpath htmlutil gmap local"
+                xmlns:epubtrans="urn:d4p:epubtranstype"
+  exclude-result-prefixes="df xs relpath htmlutil gmap local epubtrans"
   >
 
   <!-- Convert a DITA map to an EPUB content.opf file. 
@@ -21,6 +22,15 @@
     
   -->
   
+  <!-- Map of topicref elements with keys to the first key. 
+  
+       This is not quite the same as the key space, because it's 
+       only looking at the first key in @keys.
+  -->
+  <xsl:key name="topicrefsByFirstKey" match="*[df:class(., 'map/topicref')][@keys != '']"
+    use="tokenize(@keys, ' ')[1]"
+  />
+  
   <!-- Output format for the content.opf file -->
   <xsl:output name="opf"
     indent="yes"
@@ -28,6 +38,7 @@
   />
 
   <xsl:template match="*[df:class(., 'map/map')]" mode="generate-opf">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="graphicMap" as="element()" tunnel="yes"/>
     <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
     <xsl:message> + [INFO] Generating OPF manifest file...</xsl:message>
@@ -45,150 +56,373 @@
     
     <xsl:message> + [INFO] Generating OPF file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
     
-    <xsl:variable name="uniqueTopicRefs" as="element()*" select="df:getUniqueTopicrefs(.)"/>
+    <xsl:variable name="uniqueTopicRefs" as="element()*" 
+      select="df:getUniqueTopicrefs(.)[not(@format = 'ditamap')]"
+    />
+    <xsl:message> + [DEBUG] uniqueTopicRefs=<xsl:sequence select="$uniqueTopicRefs"/></xsl:message>
         
     <xsl:result-document format="opf" href="{$resultUri}">
-      <package xmlns="http://www.idpf.org/2007/opf"
+      <package
         xmlns:dc="http://purl.org/dc/elements/1.1/"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        version="2.0"
-        unique-identifier="bookid">
-        <metadata xmlns:opf="http://www.idpf.org/2007/opf">
-          
-          <!-- dc:title, dc:language, and dc:identifier are required, so
-            if the ditamap doesn't have values, they go in as empty
-            elements. -->
-          
-          <dc:title>
-            <xsl:apply-templates select="*[df:class(., 'topic/title')] | @title" mode="pubtitle"/>
-          </dc:title>
-          
-          <dc:language id="language"><xsl:sequence select="$lang"/></dc:language>
-          
-          <xsl:choose>
-            <xsl:when test="*[df:class(., 'map/topicmeta')]">
-              <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]" mode="bookid"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <dc:identifier id="bookid">no-bookid-value</dc:identifier>
-            </xsl:otherwise>
-          </xsl:choose>
-          
-          <!-- Remaining metadata fields optional, so 
-            their tags only get output if values exist. -->
-          
-          <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/author')]" 
-              mode="generate-opf"/>
-          
-          <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/publisher')]" 
-            mode="generate-opf"/>
-          
-          <xsl:apply-templates 
-            select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/copyright')] |
-            *[df:class(., 'map/topicmeta')]/*[df:class(., 'pubmeta-d/pubrights')]
-            " 
-            mode="generate-opf"/>
-          
-          <!-- NOTE: keywords can be directly in topicmeta or in metadata under topicmeta -->
-          <xsl:apply-templates mode="generate-opf"
-            select="*[df:class(., 'map/topicmeta')]//*[df:class(., 'topic/keywords')]"
-          />
-          
-          <xsl:if test="$effectiveCoverGraphicUri != ''">
-            <meta name="cover" content="{$coverImageId}"/>
-          </xsl:if>
-          <xsl:apply-templates mode="generate-opf"
-            select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/data') and @name = 'opf-metadata']"/>
-          
+        version="3.0"
+        unique-identifier="bookid"
+        xml:lang="{$lang}"
+        >
+        <xsl:apply-templates select="." mode="epubtrans:set-prefix-attribute">
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+        </xsl:apply-templates>
+        
+        <metadata>
+          <xsl:call-template name="epubtrans:generate-opf-metadata">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="lang" as="xs:string" select="$lang"/>
+          </xsl:call-template>
         </metadata>
         
-        <manifest xmlns:opf="http://www.idpf.org/2007/opf">
-          <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
-          <!-- List the XHTML files -->
-          <xsl:apply-templates mode="manifest" select="$uniqueTopicRefs"/>
-          <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="manifest"/>
-          <xsl:apply-templates select=".//*[local:includeTopicrefInManifest(.)]" mode="manifest"/>
-          <!-- Hook for extension points: -->
-          <xsl:apply-templates select="." mode="generate-opf-manifest-extensions"/>
-          <!-- List the images -->
-          <xsl:apply-templates mode="manifest" select="$graphicMap"/>
-          <item id="commonltr.css" href="{$cssOutputDir}/commonltr.css" media-type="text/css"/>
-          <item id="commonrtl.css" href="{$cssOutputDir}/commonrtl.css" media-type="text/css"/>
-          <xsl:if test="$CSS != ''">
-            <item id="{$CSS}" href="{$cssOutputDir}/{$CSS}" media-type="text/css"/>
-          </xsl:if>
-          <xsl:if test="$generateIndexBoolean">
-            <item id="generated-index" href="generated-index.html" media-type="application/xhtml+xml"/>
-          </xsl:if>
+        <manifest>
+          <xsl:call-template name="epubtrans:generate-opf-manifest">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="uniqueTopicRefs" as="element()*" 
+              select="$uniqueTopicRefs" tunnel="yes"/>
+          </xsl:call-template>
         </manifest>
         
-        <spine toc="ncx">
-          
-          <xsl:apply-templates mode="spine" 
-            select="($uniqueTopicRefs | 
-            .//*[df:isTopicHead(.)]) | 
-            .//*[local:includeTopicrefInSpine(.)]"
-          />
-          <xsl:if test="$generateIndexBoolean">
-            <itemref idref="generated-index"/>
-          </xsl:if>
+        <spine>
+          <xsl:call-template name="epubtrans:generate-opf-spine">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="uniqueTopicRefs" as="element()*" 
+              select="$uniqueTopicRefs" tunnel="yes"/>            
+          </xsl:call-template>
           
         </spine>
         
+        <!-- NOTE: guide is deprecated for EPUB3. Allowed for EPUB2 
+                   compatiblity.
+          -->
+        <xsl:variable name="guideContents" as="node()*">
+          <xsl:apply-templates mode="guide"  select=".">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="uniqueTopicRefs" as="element()*"  tunnel="yes" 
+            select="$uniqueTopicRefs"
+            />
+          </xsl:apply-templates>            
+        </xsl:variable>
+        <xsl:if test="count($guideContents/*) gt 0">
           <guide>
-            <xsl:apply-templates mode="guide"  select=".">
+            <xsl:sequence select="$guideContents"/>
+          </guide>
+        </xsl:if>
+
+        <xsl:if test="$epubtrans:doGenerateBindings">          
+          <bindings>
+            <xsl:apply-templates mode="epubtrans:bindings" select=".">
+              <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
               <xsl:with-param name="uniqueTopicRefs" as="element()*" 
                 select="$uniqueTopicRefs" tunnel="yes"/>
-            </xsl:apply-templates>            
-          </guide>
-        
+            </xsl:apply-templates>
+          </bindings>
+        </xsl:if>
+        <xsl:if test="$epubtrans:doGenerateCollections">          
+          <xsl:apply-templates mode="epubtrans:collections" select=".">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="uniqueTopicRefs" as="element()*" 
+              select="$uniqueTopicRefs" tunnel="yes"/>
+          </xsl:apply-templates>
+        </xsl:if>
       </package>
     </xsl:result-document>  
     <xsl:message> + [INFO] OPF file generation done.</xsl:message>
   </xsl:template>
   
+  <xsl:template name="epubtrans:generate-opf-manifest">
+    <!-- Context is the map -->
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="graphicMap" as="element()" tunnel="yes"/>
+    <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
+    <xsl:param name="uniqueTopicRefs" as="element()*" tunnel="yes"/>
+    
+    <xsl:if test="$epubtrans:isDualEpub">
+      <!-- Add the NCX file to the manifest: -->
+      <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    </xsl:if>
+    <xsl:if test="$epubtrans:isEpub3">
+      <!-- FIXME: Need to do this for each separate nav file to be generated -->
+      <item href="{epubtrans:getNavFilename('toc')}" 
+        id="{epubtrans:getNavId('toc')}" 
+        media-type="application/xhtml+xml" 
+        properties="nav" 
+      />
+    </xsl:if>
+    <!-- List the XHTML files -->
+    <!-- FIXME: Have to account for all navigation topicrefs. -->
+    <xsl:apply-templates mode="manifest" select="$uniqueTopicRefs">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="manifest">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <xsl:apply-templates select=".//*[local:includeTopicrefInManifest(.)]" mode="manifest">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <!-- Hook for extension points: -->
+    <xsl:apply-templates select="." mode="generate-opf-manifest-extensions">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <!-- List the images -->
+    <xsl:apply-templates mode="manifest" select="$graphicMap">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    
+    <!-- CSS items: 
+    
+         First two are the OT-provided base CSS. $CSS is for a user-specified CSS file.
+         
+         NOTE: $cssOutDir should have the same value as CSSPATH.
+    -->
+    
+    <item id="commonltr.css" href="{relpath:newFile($cssOutDir, 'commonltr.css')}" media-type="text/css"/>
+    <item id="commonrtl.css" href="{relpath:newFile($cssOutDir, 'commonrtl.css')}" media-type="text/css"/>
+    <xsl:if test="$CSS != ''">
+      <item id="{$CSS}" href="{relpath:newFile($cssOutDir, $CSS)}" media-type="text/css"/>
+    </xsl:if>
+    
+    <xsl:if test="$generateIndexBoolean">
+      <item id="generated-index" 
+            href="{concat('generated-index', $outext)}"
+            media-type="application/xhtml+xml"/>
+    </xsl:if>
+
+  </xsl:template>
+
+  <xsl:template name="epubtrans:generate-opf-metadata">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="lang" as="xs:string" select="'en-US'"/>
+    <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
+    
+    <!-- Context node is the map -->
+    <!-- NOTE: the spec seems to require the "Z" (indicating a UTC time) but I don't
+               know of format-dateTime() is actually timezone aware, so this
+               construction may not be 100% correct.
+      -->
+    <xsl:variable name="formatted-time" as="xs:string"
+      select="format-dateTime(current-dateTime(), '[Y]-[M,2]-[D,2]T[h,2]:[m,2]:[s,2]Z')"
+    />
+    <meta property="dcterms:modified"><xsl:value-of 
+      select="$formatted-time"/></meta>
+    <!-- NOTE: For EPUB3, the <meta> element has different attributes from
+         EPUB2. Instead of @name and @value, it uses @property to specify
+         the property name and the element content to specify the value.
+      -->
+    
+    <!-- dc:title, dc:language, and dc:identifier are required, so
+      if the ditamap doesn't have values, they go in as empty
+      elements. -->
+    
+    <dc:title>
+      <xsl:apply-templates select="*[df:class(., 'topic/title')] | @title" mode="pubtitle">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </dc:title>
+    
+    <dc:language id="language"><xsl:sequence select="$lang"/></dc:language>
+    
+    <xsl:choose>
+      <xsl:when test="*[df:class(., 'map/topicmeta')]">
+        <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]" mode="bookid">
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+        </xsl:apply-templates>
+      </xsl:when>
+      <xsl:otherwise>
+        <dc:identifier id="bookid">no-bookid-value</dc:identifier>
+      </xsl:otherwise>
+    </xsl:choose>
+    
+    <!-- Remaining metadata fields optional, so 
+      their tags only get output if values exist. -->
+    
+    <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/author')]" 
+        mode="generate-opf">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    
+    <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/publisher')]" 
+      mode="generate-opf">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    
+    <xsl:apply-templates 
+      select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/copyright')] |
+      *[df:class(., 'map/topicmeta')]/*[df:class(., 'pubmeta-d/pubrights')]
+      " 
+      mode="generate-opf">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    
+    <!-- NOTE: keywords can be directly in topicmeta or in metadata under topicmeta -->
+    <xsl:apply-templates mode="generate-opf"
+      select="*[df:class(., 'map/topicmeta')]//*[df:class(., 'topic/keywords')]"
+    >
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    
+    <xsl:if test="$effectiveCoverGraphicUri != ''">
+      <!-- EPUB2 cover meta element -->
+      <xsl:if test="$epubtrans:isEpub2 or $epubtrans:isDualEpub">
+        <meta name="cover" content="{$coverImageId}"/>
+      </xsl:if>
+    </xsl:if>
+    <xsl:apply-templates mode="generate-opf"
+      select="*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/data') and @name = 'opf-metadata']">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+      
+  </xsl:template>  
+  
+  <xsl:template name="epubtrans:generate-opf-spine">
+    <!-- Context is a map -->
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="uniqueTopicRefs" as="element()*" tunnel="yes"/>
+
+    <xsl:if test="$epubtrans:isEpub2 or $epubtrans:isDualEpub">
+      <xsl:attribute name="toc" select="'ncx'"/>
+    </xsl:if>
+    
+    <!--
+      
+      Note that this applies templates to the map as well ('.')
+      so that we can generate spine entries for the nav 
+      documents.
+    
+    -->
+    <xsl:apply-templates mode="spine" 
+      select="($uniqueTopicRefs | 
+      .//*[df:isTopicHead(.)]) | 
+      .//*[local:includeTopicrefInSpine(.)] |
+      ."
+    >
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <xsl:if test="$generateIndexBoolean">
+      <itemref idref="generated-index"/>
+    </xsl:if>
+    
+  </xsl:template>
+  
+  <xsl:template match="*[df:class(., 'map/map')]" mode="spine">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+     <!-- Generate entries for each of the navigation files to be generated. -->
+    <itemref idref="{epubtrans:getNavId('toc')}"/>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:bindings" match="*" priority="-1">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <!-- Do nothing. There are no default bindings.
+      -->
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:collections" match="*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <collection>
+      <xsl:apply-templates mode="#current">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </collection>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:collections" match="*" priority="-1">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <!-- Nothing to do. No default collections. -->
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:set-prefix-attribute" match="*" priority="-1">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <!-- Do nothing. Override this mode if you need to set the 
+         @prefix attribute on the <package> element.
+      -->
+  </xsl:template>
+  
   <xsl:template mode="guide" match="*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="uniqueTopicRefs" as="element()*" tunnel="yes"/>
     <!-- FIXME: Generate a guide entry for the cover page -->            
     <!--<reference type="cover" title="Cover Page" href="${frontCoverUri}"/>-->
     <xsl:apply-templates mode="#current" 
       select="*[df:class(., 'map/topicref')][not(@processing-role = 'resource-only')]"
-    />
+    >
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
     
   </xsl:template>
   
-  <xsl:template mode="guide" match="text()"/>
+  <xsl:template mode="guide" match="text()">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>    
+  </xsl:template>
   
   <xsl:template mode="guide" match="*[df:class(., 'map/topicref')]">
-    <xsl:apply-templates mode="#current" select="*[df:class(., 'map/topicref')][not(@processing-role = 'resource-only')]"/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:apply-templates mode="#current" select="*[df:class(., 'map/topicref')][not(@processing-role = 'resource-only')]">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
   </xsl:template>
   
   <xsl:template mode="generate-opf-manifest-extensions" match="*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Default implementation. Override to add files to the OPF manifest. -->
   </xsl:template>
 
   <xsl:template mode="spine-extensions" match="*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Default implementation. Override to add files to the OPF spine. -->
   </xsl:template>
 
   <xsl:template match="*[df:class(., 'map/map')]/*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/author')]" 
     mode="generate-opf">  
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:variable name="role" as="xs:string"
       select="if (@type) then string(@type) else 'aut'"
     />
-    <dc:creator opf:role="{$role}"
-      ><xsl:apply-templates select=".//*[df:class(., 'topic/data')]" mode="data-to-atts"
-      /><xsl:apply-templates
-    /></dc:creator>
+    <xsl:choose>
+      <xsl:when test="$epubtrans:isEpub2">
+        <dc:creator id="{$role}"
+          ><xsl:apply-templates select=".//*[df:class(., 'topic/data')]" mode="data-to-atts">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          </xsl:apply-templates><xsl:apply-templates>
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          </xsl:apply-templates></dc:creator>
+      </xsl:when>
+      <xsl:otherwise>
+        <dc:creator id="{$role}"><xsl:apply-templates>
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+        </xsl:apply-templates></dc:creator>
+        <xsl:apply-templates select=".//*[df:class(., 'topic/data')]" mode="data-to-refines"
+          >
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          <xsl:with-param name="refinesId" as="xs:string" select="$role"/>
+        </xsl:apply-templates>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
-  <xsl:template mode="data-to-atts" match="text()"/><!-- Suppress all text by default -->
+  <xsl:template match="*[df:class(., 'topic/data')]" mode="data-to-refines">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="refinesId" as="xs:string"/>
+    <meta refines="#{$refinesId}" property="{@name}">
+      <xsl:value-of select="if (@value != '') then @value else ."/>
+    </meta>
+  </xsl:template>
+  
+  <xsl:template mode="data-to-atts" match="text()">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+  </xsl:template><!-- Suppress all text by default -->
   
   <xsl:template match="*[df:class(., 'topic/data')]" mode="data-to-atts" priority="-1">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:message> + [INFO] mode data-to-atss: Unhandled data element <xsl:sequence select="name(.)"/>, @name="<xsl:sequence select="string(@name)"/>"</xsl:message>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/author')]//*[df:class(., 'topic/data') and @name = 'file-as']" mode="data-to-atts">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:attribute name="opf:file-as" select="normalize-space(.)"/>
   </xsl:template>
 
@@ -197,31 +431,49 @@
     *[df:class(., 'map/map')]/*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/publisher')]
     " 
     mode="generate-opf"> 
-    <dc:publisher><xsl:apply-templates/></dc:publisher>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <dc:publisher><xsl:apply-templates>
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates></dc:publisher>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/publisher')]/*">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Make sure that markup within publisher is handled (e.g., for bookmap). -->
-    <xsl:apply-templates/>
+    <xsl:apply-templates>
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
   </xsl:template>
 
   <xsl:template match="*[df:class(., 'map/map')]/*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/copyright')]" 
     mode="generate-opf"> 
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- copyryear and copyrholder are required children of copyright element -->
     <dc:rights>Copyright <xsl:value-of select="*[df:class(., 'topic/copyryear')]/@year"/><xsl:text> </xsl:text><xsl:value-of select="*[df:class(., 'topic/copyrholder')]"/></dc:rights>
   </xsl:template>
 
   <xsl:template match="*[df:class(., 'pubmeta-d/pubrights')]" 
     mode="generate-opf"> 
-    <dc:rights>
-      <xsl:apply-templates mode="#current" select="*[df:class(., 'pubmeta-d/copyrfirst')]"/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:variable name="content" as="node()*">
+      <xsl:apply-templates mode="#current" select="*[df:class(., 'pubmeta-d/copyrfirst')]">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
       <xsl:text> </xsl:text>
-      <xsl:apply-templates mode="generate-opf" select="* except *[df:class(., 'pubmeta-d/copyrfirst')]"/>
-    </dc:rights>
+      <xsl:apply-templates mode="generate-opf" select="* except *[df:class(., 'pubmeta-d/copyrfirst')]">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <xsl:if test="normalize-space($content) != ''">
+      <dc:rights>
+        <xsl:sequence select="$content"/>
+      </dc:rights>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template mode="generate-opf" match="*[df:class(., 'pubmeta-d/copyrfirst')]">
-    Copyright <xsl:value-of select="normalize-space(.)"/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:text>Copyright </xsl:text><xsl:value-of select="normalize-space(.)"/>
     <xsl:if test="../*[df:class(., 'pubmeta-d/copyrlast')]">
       <xsl:text>, </xsl:text>
       <xsl:sequence select="normalize-space(../*[df:class(., 'pubmeta-d/copyrlast')])"/>
@@ -229,17 +481,21 @@
   </xsl:template>
   
   <xsl:template mode="generate-opf" match="*[df:class(., 'pubmeta-d/copyrlast')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Handled in processing of copyrfirst -->
   </xsl:template>
   
   <xsl:template mode="generate-opf" match="*[df:class(., 'pubmeta-d/pubowner')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:variable name="pubOwners" as="element()*">
       <xsl:sequence select="*"/>
     </xsl:variable>
     
     <xsl:choose>
       <xsl:when test="count($pubOwners) le 1">
-        <xsl:apply-templates select="$pubOwners" mode="pubOwner"/>
+        <xsl:apply-templates select="$pubOwners" mode="pubOwner">
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+        </xsl:apply-templates>
       </xsl:when>
       <xsl:when test="count($pubOwners) = 2">
         <xsl:apply-templates select="$pubOwners[1]" mode="pubOwner"/>
@@ -259,30 +515,66 @@
   </xsl:template>
   
   <xsl:template mode="pubOwner" match="*">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="*[df:isTopicRef(.)]" mode="manifest">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+    
     <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()*"/>
     <xsl:choose>
       <xsl:when test="not($topic)">
         <xsl:message> + [WARNING] manifest: Failed to resolve topic reference to href "<xsl:sequence select="string(@href)"/>"</xsl:message>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:variable name="targetUri" select="htmlutil:getTopicResultUrl($outdir, root($topic))" as="xs:string"/>
+        <xsl:variable name="targetUri" 
+          select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl, $doDebug)"
+          as="xs:string"
+        />
         <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
-        <xsl:if test="false()">          
+        <xsl:if test="$doDebug">          
           <xsl:message> + [DEBUG] map2epubOpfImpl: outdir="<xsl:sequence select="$outdir"/>"</xsl:message>
           <xsl:message> + [DEBUG] map2epubOpfImpl: targetUri="<xsl:sequence select="$targetUri"/>"</xsl:message>
           <xsl:message> + [DEBUG] map2epubOpfImpl: relativeUri="<xsl:sequence select="$relativeUri"/>"</xsl:message>
-        </xsl:if>        
-        <item id="{generate-id()}" href="{$relativeUri}"
+        </xsl:if>
+        <xsl:variable name="itemID" as="xs:string">
+          <xsl:apply-templates select="." mode="epubtrans:getManifestItemID">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          </xsl:apply-templates>
+        </xsl:variable>
+        <item id="{$itemID}" href="{$relativeUri}"
               media-type="application/xhtml+xml"/>
       </xsl:otherwise>
     </xsl:choose>    
   </xsl:template>
+  
+  <xsl:template mode="epubtrans:getManifestItemID" match="*[df:class(., 'map/topicref')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+
+    <xsl:variable name="key" as="xs:string?"
+      select="if (@keys) then tokenize(@keys, ' ')[1] else ()"
+      />
+    <xsl:variable name="itemKey" as="xs:string">
+      <xsl:choose>
+        <xsl:when test="$key and (key('topicrefsByFirstKey', $key, root(.))[1] = .)">
+          <!-- This topicref is the first with the key, so it should be the active
+               topicref with this key.
+            -->
+          <xsl:sequence select="$key"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="generate-id(.)"></xsl:sequence>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    
+    <xsl:sequence select="normalize-space($itemKey)"/>
+  </xsl:template>
 
   <xsl:template match="*[df:isTopicHead(.)]" mode="manifest">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:if test="false()">
       <xsl:message> + [DEBUG] in mode manifest, handling topichead <xsl:sequence select="df:getNavtitleForTopicref(.)"/></xsl:message>
     </xsl:if>
@@ -299,10 +591,17 @@
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'map/topicref')]" mode="spine">
-    <itemref idref="{generate-id()}"/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:variable name="itemID" as="xs:string">
+      <xsl:apply-templates select="." mode="epubtrans:getManifestItemID">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <itemref idref="{$itemID}"/>
   </xsl:template>
   
   <xsl:template mode="bookid" match="*[df:class(., 'map/topicmeta')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- OPF requires one dc:identifier, which must have an ID. There may
          be other book identifiers.
          
@@ -333,9 +632,11 @@
       </xsl:otherwise>
     </xsl:choose>
     
-    </xsl:template>
-    <xsl:template name="constructDcIdentifiers">
-      <xsl:param name="bookids" as="element()+"/>
+  </xsl:template>
+
+  <xsl:template name="constructDcIdentifiers">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="bookids" as="element()+"/>
       
       <!-- $bookids is a list of elements that are specializations of 
            <data> and that represent some form of book ID.
@@ -349,19 +650,24 @@
   
   <xsl:template match="*[df:class(., 'bookmap/bookid')] | *[df:class(., 'pubmeta-d/pubid ')]" 
     mode="list-bookids">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Assume that all topic/data children of bookid or pubid are identifiers. -->
     <xsl:sequence select="*[df:class(., 'topic/data')]"/>
   </xsl:template>
   
-  <xsl:template match="text()" mode="list-bookids"/> 
+  <xsl:template match="text()" mode="list-bookids">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+  </xsl:template> 
   
   <xsl:template match="*[df:class(., 'bookmap/bookid')] | *[df:class(., 'pubmeta-d/pubid ')]" 
     mode="bookid">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/data')]" 
     mode="bookid">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="id" as="xs:string?" required="no"/>
     
     <xsl:variable name="schemeBase" as="xs:string"
@@ -371,7 +677,7 @@
     <xsl:variable name="scheme" as="xs:string"
       select="if (starts-with(lower-case($schemeBase), 'isbn')) then 'isbn' else $schemeBase"
     />
-    <dc:identifier opf:scheme="{$scheme}">
+    <dc:identifier>
       <xsl:if test="$id">
         <xsl:attribute name="id" select="$id"/>
       </xsl:if>
@@ -381,10 +687,12 @@
   </xsl:template>
   
   <xsl:template match="*" mode="bookid" priority="-1">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Do nothing by default -->
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'pubmap/pubid')]" mode="bookid">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:choose>
       <xsl:when test=".//*[df:class(., 'topic/data') and @name = 'epub-bookid']">
         <xsl:sequence select="normalize-space(.//*[df:class(., 'topic/data') and @name = 'epub-bookid'][1])"></xsl:sequence>
@@ -421,37 +729,47 @@
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/keywords')]" mode="generate-opf">
-    <xsl:if test="$debugBoolean">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] generate-opf: handling topic/keywords</xsl:message>
     </xsl:if>
     <xsl:apply-templates select="*[df:class(., 'topic/keyword')]" mode="#current"/>
   </xsl:template>
 
   <xsl:template match="*[df:class(., 'topic/keyword')]" mode="generate-opf">
-    <xsl:if test="$debugBoolean">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] generate-opf: handling topic/keyword</xsl:message>
     </xsl:if>
     <dc:subject><xsl:apply-templates/></dc:subject>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/data') and @name = 'opf-metadata']" mode="generate-opf">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:apply-templates select="*[df:class(., 'topic/data')]" mode="generate-opf-metadata"/>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/data')]" mode="generate-opf-metadata">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:variable name="value" as="xs:string"
       select="if (@value)
         then string(@value)
         else string(.)"
     />
+    <!-- NOTE: This is the EPUB2 syntax for <meta> elements. Not sure how 
+         to produce EPUB3 meta elements, where the @name attribute is replaced
+         by a prefix-qualified property name.
+      -->
     <meta name="{@name}" content="{$value}"/>
   </xsl:template>
 
   <xsl:template match="gmap:graphic-map" mode="manifest">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
   <xsl:template match="gmap:graphic-map-item" mode="manifest">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:variable name="imageFilename" select="relpath:getName(@output-url)" as="xs:string"/>
     <xsl:variable name="imageExtension" select="lower-case(relpath:getExtension($imageFilename))" as="xs:string"/>
     <xsl:variable name="hrefPath" as="xs:string" 
@@ -479,6 +797,8 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
+      <!-- @properties attribute (EPUB3): -->
+      <xsl:sequence select="@properties"/>
     </item>
   </xsl:template>
   
@@ -507,12 +827,21 @@
   </xsl:function>  
   
   <xsl:template mode="include-topicref-in-spine" match="*">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Do nothing, don't explicitly include by default. -->
   </xsl:template>
   
   <xsl:template mode="include-topicref-in-manifest" match="*">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Do nothing, don't explicitly include by default. -->
   </xsl:template>
   
-  <xsl:template match="text()" mode="generate-opf manifest guide include-topicref-in-manifest include-topicref-in-spine"/>
+  <xsl:template match="text()" 
+    mode="generate-opf 
+          manifest guide 
+          include-topicref-in-manifest 
+          include-topicref-in-spine">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+  </xsl:template>
 </xsl:stylesheet>

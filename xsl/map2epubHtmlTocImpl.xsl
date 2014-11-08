@@ -23,8 +23,9 @@
     
     <!-- Build the ToC tree so we can then calculate the playorder of the navitems. -->
     
-    <xsl:variable name="navmap" as="element()">      
-      <ul class="html-toc-root html-toc html-toc_0">        
+    <xsl:variable name="navmap" as="element()">
+      <!-- NOTE: EPUB3 mandates use of <ol> for nav structures, not <ul> -->      
+      <ol class="html-toc-root html-toc html-toc_0">        
         <xsl:choose>
           <xsl:when test="$pubTitle != ''">
             <!-- FIXME: If there is a pubtitle, generate a root navPoint for the title.
@@ -47,25 +48,29 @@
           <xsl:message> + [DEBUG] found index terms, adding navpoint to generated
             index...</xsl:message>
           <li class="html-toc-entry html-toc-entry_1">
-            <span class="html-toc-entry-text html-toc-entry-text_1"><a href="generated-index.html">Index</a></span>
+            <a class="html-toc-entry-text html-toc-entry-text_1" href="generated-index.html">Index</a>
           </li>
         </xsl:if>
-      </ul>  
+      </ol>  
     </xsl:variable>
         
     <xsl:message> + [INFO] Generating HTML ToC file "<xsl:sequence select="$resultUri"
     />"...</xsl:message>
     
-    <xsl:result-document href="{$resultUri}" format="html">
+    <xsl:result-document href="{$resultUri}" format="html5">
       <html>
         <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />         
           <title>Table of Contents</title>
-          <xsl:call-template name="constructToCStyle"/>
+          <xsl:call-template name="constructToCStyle">
+            <xsl:with-param name="resultUri" as="xs:string" tunnel="yes" select="$resultUri"/>
+          </xsl:call-template>
         </head>
         <body class="toc-list-of-tables html-toc">
-          <!-- FIXME: localize and parameterize the ToC page title. -->
-          <h2 class="toc-title">Contents</h2>
+          <h2 class="toc-title">
+            <xsl:call-template name="getString">
+                <xsl:with-param name="stringName" select="'Contents'"/>
+            </xsl:call-template>
+          </h2>
           <div class="html-toc toc-entries">
             <xsl:apply-templates select="$navmap" mode="html-toc"/>
           </div>
@@ -76,6 +81,17 @@
   </xsl:template>
   
   <xsl:template name="constructToCStyle">
+    <xsl:param name="resultUri" as="xs:string" tunnel="yes"/>
+    
+    <xsl:variable name="cssDirPath" as="xs:string"
+      select="relpath:getRelativePath(cssOutputPath, relpath:getParent($resultUri))"
+    />
+    <xsl:if test="$CSS">
+      <xsl:variable name="cssPath" as="xs:string"
+        select="relpath:newFile($cssOutDir, $CSS)"
+      />
+      <link rel="stylesheet" type="text/css" href="{$cssPath}" /><xsl:text>&#x0a;</xsl:text>
+    </xsl:if>
     <!-- FIXME: This template is a short-term fix for the fact that the 
          TOC files are not output in the same location as the topics,
          so a reference to the base CSS file is wrong with the
@@ -117,7 +133,9 @@
   </xsl:template>
   
   <xsl:template match="*[df:isTopicRef(.)]" mode="generate-html-toc">
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
+
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <!-- For title that shows up in link text, use the navtitle. If it's
         not there, use the first title element in the referenced file. -->
@@ -136,11 +154,14 @@
               <xsl:apply-templates select="." mode="enumeration"/>
             </xsl:variable>
             <xsl:variable name="targetUri"
-              select="htmlutil:getTopicResultUrl($outdir, root($topic))" as="xs:string"/>
+              select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl)" 
+              as="xs:string"
+            />
             <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
               as="xs:string"/>
           <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-            <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"><a href="{$relativeUri}">
+            <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"
+               href="{$relativeUri}">
                 <xsl:value-of
                   select="
                   if ($enumeration = '')
@@ -148,7 +169,7 @@
                   else concat($enumeration, ' ', $navPointTitle)
                   "
                 />
-              </a></span>
+              </a>
               <xsl:variable name="subentries" as="node()*">
                 <xsl:apply-templates mode="#current"
                   select="$topic/*[df:class(., 'topic/topic')]">
@@ -164,9 +185,10 @@
                 </xsl:if>
               </xsl:variable>
               <xsl:if test="count($subentries) > 0">
-                <ul class="html-toc html-toc_{$tocDepth + 1}">
+                <!-- NOTE: EPUB3 mandates use of <ol> for nav structures, not <ul> -->
+                <ol class="html-toc html-toc_{$tocDepth + 1}">
                   <xsl:sequence select="$subentries"/>
-                </ul>
+                </ol>
               </xsl:if>
             </li>
         </xsl:otherwise>
@@ -183,7 +205,7 @@
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <xsl:variable name="targetUri"
-        select="relpath:newFile($outdir, concat('list-of-figures_', generate-id(.), '.html'))" 
+        select="relpath:newFile($outdir, concat('list-of-figures_', generate-id(.), $outext))" 
         as="xs:string"
       />
       <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
@@ -193,10 +215,10 @@
       </xsl:variable>
       
       <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-        <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"
-          ><a href="{$relativeUri}">
+        <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"
+            href="{$relativeUri}">
             <xsl:sequence select="$lof-title"/>
-        </a></span>
+        </a>
       </li>
     </xsl:if>
   </xsl:template>
@@ -205,7 +227,7 @@
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <xsl:variable name="targetUri"
-        select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), '.html'))" 
+        select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), $outext))" 
         as="xs:string"
       />
       <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
@@ -214,10 +236,9 @@
         <xsl:text>List of Tables</xsl:text><!-- FIXME: Get this string from string config -->
       </xsl:variable>
       <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-        <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"
-          ><a href="{$relativeUri}">
+        <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}" href="{$relativeUri}">
             <xsl:sequence select="$lot-title"/>
-          </a></span>
+        </a>
       </li>
     </xsl:if>
   </xsl:template>
@@ -225,6 +246,8 @@
   <xsl:template match="*[df:class(., 'topic/topic')]" mode="generate-html-toc">
     <!-- Non-root topics generate ToC entries if they are within the ToC depth -->
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <xsl:variable name="rawNavPointTitle" as="xs:string*">
         <xsl:apply-templates select="*[df:class(., 'topic/title')]" mode="nav-point-title"/>
@@ -232,24 +255,26 @@
       <xsl:variable name="navPointTitle"
         select="normalize-space(string-join($rawNavPointTitle, ' '))" as="xs:string"/>
         <xsl:variable name="targetUri"
-          select="htmlutil:getTopicResultUrl($outdir, root(.))" as="xs:string"/>
+          select="htmlutil:getTopicResultUrl($outdir, root(.), $rootMapDocUrl)" 
+          as="xs:string"/>
         <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
           as="xs:string"/>
         <!-- FIXME: Likely need to map input IDs to output IDs. -->
         <xsl:variable name="fragId" as="xs:string" select="string(@id)"/>
       <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-        <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"><a href="{concat($relativeUri, '#', $fragId)}">
+        <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}" href="{concat($relativeUri, '#', $fragId)}">
           <xsl:sequence select="$navPointTitle"/>
-          </a></span>
+        </a>
         <xsl:variable name="subentries" as="node()*">
           <xsl:apply-templates select="*[df:class(.,'topic/topic')]" mode="#current">
             <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="$tocDepth + 1"/>
           </xsl:apply-templates>
         </xsl:variable>
         <xsl:if test="count($subentries) > 0">
-          <ul class="html-toc html-toc_{$tocDepth + 1}">
+          <!-- NOTE: EPUB3 mandates use of <ol> for nav structures, not <ul> -->
+          <ol class="html-toc html-toc_{$tocDepth + 1}">
             <xsl:sequence select="$subentries"/>
-          </ul>
+          </ol>
         </xsl:if>
       </li>
     </xsl:if>
@@ -274,7 +299,8 @@
           then concat($topicsOutputDir, '/', $titleOnlyTopicFilename) 
           else $titleOnlyTopicFilename"/>
       <li class="html-toc-entry html-toc-entry_{$tocDepth}">
-        <span class="html-toc-entry-text html-toc-entry-text_{$tocDepth}"><a href="{$contentUri}">
+        <a class="html-toc-entry-text html-toc-entry-text_{$tocDepth}" 
+           href="{$contentUri}">
             <xsl:value-of
               select="
               if ($enumeration = '')
@@ -282,16 +308,17 @@
               else concat($enumeration, ' ', $rawNavPointTitle)
               "
             />
-          </a></span>
+          </a>
         <xsl:variable name="subentries" as="node()*">
           <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="#current">
             <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="$tocDepth + 1"/>
           </xsl:apply-templates>
         </xsl:variable>
         <xsl:if test="count($subentries) > 0">
-          <ul class="html-toc html-toc__{$tocDepth}">
+          <!-- NOTE: EPUB3 mandates use of <ol> for nav structures, not <ul> -->
+          <ol class="html-toc html-toc__{$tocDepth}">
             <xsl:sequence select="$subentries"/>
-          </ul>
+          </ol>
         </xsl:if>
       </li>
     </xsl:if>

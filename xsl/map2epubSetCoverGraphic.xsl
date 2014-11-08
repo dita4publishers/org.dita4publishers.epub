@@ -14,11 +14,14 @@
 
   <xsl:template match="*[df:class(., 'map/map')]" mode="additional-graphic-refs" priority="10">
     <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
+    <xsl:message> + [DEBUG] **** generating cover-image graphic-ref</xsl:message>
     <xsl:if test="$effectiveCoverGraphicUri != ''">
       <gmap:graphic-ref 
         id="{$coverImageId}"
         href="{$effectiveCoverGraphicUri}" 
-        filename="{relpath:getName($effectiveCoverGraphicUri)}"/>
+        filename="{relpath:getName($effectiveCoverGraphicUri)}"
+        properties="cover-image"
+      />
     </xsl:if>
   </xsl:template>
      

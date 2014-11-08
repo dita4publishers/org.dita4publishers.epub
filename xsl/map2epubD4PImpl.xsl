@@ -32,8 +32,9 @@
   <!-- TOC (.ncx) generation context -->
   
   <xsl:template mode="nav-point-title" match="*[df:class(., 'pubmap-d/toc')]" priority="20">
-    <!-- FIXME: Localize this string. -->
-    <xsl:sequence select="'Table of Contents'"/>
+    <xsl:call-template name="getString">
+        <xsl:with-param name="stringName" select="'Contents'"/>
+    </xsl:call-template>
   </xsl:template>
   
   <xsl:template 
@@ -43,7 +44,7 @@
     >
     <xsl:call-template name="construct_navpoint">
       <xsl:with-param name="targetUri" as="xs:string"
-        select="concat('toc_', generate-id(.), '.html')"
+        select="concat('toc_', generate-id(.), $outext)"
       />
     </xsl:call-template>    
   </xsl:template>
@@ -61,25 +62,25 @@
   
   <xsl:template mode="manifest" match="*[df:class(., 'pubmap-d/toc')]">
     <xsl:variable name="targetUri" as="xs:string"
-        select="concat('toc_', generate-id(.), '.html')"
+        select="concat('toc_', generate-id(.), $outext)"
      />
-    <item id="{generate-id()}" href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
   <xsl:template mode="manifest" match="*[df:class(., 'pubmap-d/figurelist')]">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('list-of-figures_', generate-id(.), '.html')"
+      select="concat('list-of-figures_', generate-id(.), $outext)"
     />
-    <item id="{generate-id()}" href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
   <xsl:template mode="manifest" match="*[df:class(., 'pubmap-d/tablelist')]">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('list-of-tables_', generate-id(.), '.html')"
+      select="concat('list-of-tables_', generate-id(.), $outext)"
     />
-    <item id="{generate-id()}" href="{$targetUri}"  xmlns="http://www.idpf.org/2007/opf"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
@@ -102,29 +103,33 @@
     *[df:class(., 'pubmap-d/figurelist')] |
     *[df:class(., 'pubmap-d/tablelist')]" 
     priority="10">
-    <itemref idref="{generate-id()}" xmlns="http://www.idpf.org/2007/opf"/>    
+    <itemref idref="{generate-id()}"/>    
   </xsl:template>
   
   <xsl:template mode="guide" match="*[df:class(., 'pubmap-d/front-cover')]" priority="10">
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+
     <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()*"/>
     <xsl:if test="$topic">
-      <xsl:variable name="targetUri" select="htmlutil:getTopicResultUrl($outdir, root($topic))" as="xs:string"/>
+      <xsl:variable name="targetUri"         as="xs:string"
+        select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl)" 
+      />
       <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
-      <reference type="cover"  href="{$relativeUri}" xmlns="http://www.idpf.org/2007/opf"/>    
+      <reference type="cover"  href="{$relativeUri}"/>    
     </xsl:if>
   </xsl:template>
   
   <xsl:template mode="guide" match="*[df:class(., 'pubmap-d/toc')][not(@href)]" priority="10">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('toc_', generate-id(.), '.html')"
+      select="concat('toc_', generate-id(.), $outext)"
     />
-    <reference type="toc"  href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"/>    
+    <reference type="toc"  href="{$targetUri}"/>    
   </xsl:template>
  
   <xsl:template mode="generate-book-lists" match="*[df:class(., 'pubmap-d/toc')][not(@href)]" priority="10">
     <xsl:message> + [DEBUG] generate-book-lists: pubmap-d/toc</xsl:message>
     <xsl:variable name="htmlFilename" as="xs:string"
-      select="concat('toc_', generate-id(.), '.html')"
+      select="concat('toc_', generate-id(.), $outext)"
     />
     <xsl:variable name="resultUri" as="xs:string"
       select="relpath:newFile($outdir, $htmlFilename)"

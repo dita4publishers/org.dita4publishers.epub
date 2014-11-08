@@ -5,6 +5,7 @@
   xmlns:df="http://dita2indesign.org/dita/functions"
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:opf="http://www.idpf.org/2007/opf"
+  xmlns="http://www.idpf.org/2007/opf"
   exclude-result-prefixes="xs df relpath"
   version="2.0">
     
@@ -17,8 +18,9 @@
   <!-- TOC (.ncx) generation context -->
   
   <xsl:template mode="nav-point-title" match="*[df:class(., 'bookmap/toc')]" priority="20">
-    <!-- FIXME: Localize this string. -->
-    <xsl:sequence select="'Table of Contents'"/>
+    <xsl:call-template name="getString">
+        <xsl:with-param name="stringName" select="'Contents'"/>
+    </xsl:call-template>
   </xsl:template>
 
   <xsl:template 
@@ -28,7 +30,7 @@
     >
     <xsl:call-template name="construct_navpoint">
       <xsl:with-param name="targetUri" as="xs:string"
-        select="concat('toc_', generate-id(.), '.html')"
+        select="concat('toc_', generate-id(.), $outext)"
       />
     </xsl:call-template>    
   </xsl:template>
@@ -46,25 +48,25 @@
   
   <xsl:template mode="manifest" match="*[df:class(., 'bookmap/toc')]">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('toc_', generate-id(.), '.html')"
+      select="concat('toc_', generate-id(.), $outext)"
     />
-    <item id="{generate-id()}" href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
   <xsl:template mode="manifest" match="*[df:class(., 'bookmap/figurelist')]">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('list-of-figures_', generate-id(.), '.html')"
+      select="concat('list-of-figures_', generate-id(.), $outext)"
     />
-    <item id="{generate-id()}" href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
   <xsl:template mode="manifest" match="*[df:class(., 'bookmap/tablelist')]">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('list-of-tables_', generate-id(.), '.html')"
+      select="concat('list-of-tables_', generate-id(.), $outext)"
     />
-    <item id="{generate-id()}" href="{$targetUri}"  xmlns="http://www.idpf.org/2007/opf"
+    <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
@@ -87,20 +89,20 @@
     *[df:class(., 'bookmap/figurelist')] |
     *[df:class(., 'bookmap/tablelist')]" 
     priority="10">
-    <itemref idref="{generate-id()}"  xmlns="http://www.idpf.org/2007/opf"/>    
+    <itemref idref="{generate-id()}"/>    
   </xsl:template>
   
   <xsl:template mode="guide" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
     <xsl:variable name="targetUri" as="xs:string"
-      select="concat('toc_', generate-id(.), '.html')"
+      select="concat('toc_', generate-id(.), $outext)"
     />
-    <reference type="toc"  href="{$targetUri}" xmlns="http://www.idpf.org/2007/opf"/>    
+    <reference type="toc"  href="{$targetUri}"/>    
   </xsl:template>
   
   <xsl:template mode="generate-book-lists" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
     <xsl:message> + [DEBUG] generate-book-lists: bookmap/toc</xsl:message>
     <xsl:variable name="htmlFilename" as="xs:string"
-      select="concat('toc_', generate-id(.), '.html')"
+      select="concat('toc_', generate-id(.), $outext)"
     />
     <xsl:variable name="resultUri" as="xs:string"
       select="relpath:newFile($outdir, $htmlFilename)"

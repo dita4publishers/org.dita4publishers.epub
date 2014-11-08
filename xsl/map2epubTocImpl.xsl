@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:ncx="http://www.daisy.org/z3986/2005/ncx/"
@@ -10,11 +11,17 @@
                 xmlns:local="urn:functions:local"
                 exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms"
   >
-  <!-- Convert a DITA map to an EPUB toc.ncx file. -->
-  
-  <xsl:output indent="yes" name="ncx" method="xml"/>
 
-
+  <!-- ============================================================================= 
+    
+       Generate the toc.ncx navigation for EPUB 2.
+       
+       Implements modes "generate-toc"
+       
+       NOTE: Mode generate-toc is for the EPUB2 toc.ncx file. Mode generate-nav is
+       for the EPUB3 <nav> document.
+       
+       ============================================================================= -->
   <xsl:template match="*[df:class(., 'map/map')]" mode="generate-toc">
     <xsl:param name="collected-data" as="element()" tunnel="yes"/>
     <xsl:variable name="pubTitle" as="xs:string*">
@@ -66,7 +73,7 @@
             <navLabel>
               <text>Index</text>
             </navLabel>
-            <content src="generated-index.html"/>
+            <content src="{concat('generated-index', $outext)}"/>
           </navPoint>          
         </xsl:if>
       </navMap>
@@ -142,6 +149,8 @@
   <!-- Convert each topicref to a navPoint. -->
   <xsl:template match="*[df:isTopicRef(.)]" mode="generate-toc">
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+    
     <xsl:if test="$tocDepth le $maxNavDepthInt">
       <!-- For title that shows up in ncx:text, use the navtitle. If it's
         not there, use the first title element in the referenced file. -->
@@ -161,7 +170,9 @@
             </xsl:apply-templates>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:variable name="targetUri" select="htmlutil:getTopicResultUrl($outdir, root($topic))" as="xs:string"/>
+          <xsl:variable name="targetUri" 
+            select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl)" 
+            as="xs:string"/>
           <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
           <xsl:if test="false()"> 
             <xsl:message> + [DEBUG] map2epubTocImpl: outdir="<xsl:sequence select="$outdir"/>"</xsl:message>
@@ -204,55 +215,36 @@
   
   <xsl:template mode="nav-point-title" match="*[contains(@class, '/figurelist ')]" priority="20">
     <!-- FIXME: Get title from variables -->
-    <xsl:variable name="navPointTitleString" select="'List of Figures'" as="xs:string"/>
+    <xsl:variable name="navPointTitleString">
+      <xsl:call-template name="getString">
+          <xsl:with-param name="stringName" select="'ListOfFigures'"/>
+      </xsl:call-template>
+    </xsl:variable>
     <xsl:sequence select="$navPointTitleString"/>    
   </xsl:template>
   
   <xsl:template mode="nav-point-title" match="*[contains(@class, '/tablelist ')]" priority="20">
     <!-- FIXME: Get title from variables -->
-    <xsl:variable name="navPointTitleString" select="'List of Tables'"/>
+    <xsl:variable name="navPointTitleString">
+      <xsl:call-template name="getString">
+          <xsl:with-param name="stringName" select="'ListOfTables'"/>
+      </xsl:call-template>
+    </xsl:variable>
     <xsl:sequence select="$navPointTitleString"/>    
   </xsl:template>
   
   <xsl:template match="*[df:isTopicGroup(.)]" priority="10" mode="generate-toc">
-    <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
-    <xsl:if test="$tocDepth le $maxNavDepthInt">
-      <xsl:variable name="rawNavPointTitle" as="xs:string*">
-        <xsl:apply-templates select="." mode="nav-point-title"/>
-      </xsl:variable>
-      <!-- FIXME: I think this is now bogus. TC ruled that topic groups never
-           contribute to the nav tree even if they have a nav title.
-        -->
-      <xsl:variable name="navPointTitle" 
-        select="normalize-space(string-join($rawNavPointTitle, ' '))" 
-        as="xs:string"/>
-  <!--    <xsl:message> + [DEBUG] isTopicGroup(): navPointTitle="<xsl:sequence select="$navPointTitle"/>"</xsl:message>-->
-      <xsl:choose>
-        <xsl:when test="$navPointTitle != ''">
-          <navPoint id="{generate-id()}"
-            > 
-            <navLabel>
-              <text><xsl:sequence select="$navPointTitle"/></text>
-            </navLabel>
-            <!-- FIXME: This is bogus, but we should never get here. -->
-            <content src="topics/topicgroup_00000.html"/>          
-            <xsl:apply-templates select="*[df:class(.,'map/topicref')]" mode="#current">
-              <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes"
-                select="$tocDepth + 1"
-              />            
-            </xsl:apply-templates>
-          </navPoint>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="#current"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:if>    
+    <!-- Per 1.2 spec: topicgroups never contribute to the navigation hierarchy, even
+         if they have a navigation title.
+      -->
+    <xsl:apply-templates select="*[df:class(., 'map/topicref')]" mode="#current"/>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/topic')]" mode="generate-toc">
     <!-- Non-root topics generate ToC entries if they are within the ToC depth -->
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+    
     <xsl:if test="$tocDepth le $maxNavDepthInt">
       <xsl:variable name="rawNavPointTitle" as="xs:string*">
         <xsl:apply-templates select="*[df:class(., 'topic/title')]" mode="nav-point-title"/>
@@ -263,7 +255,9 @@
         <navLabel>
           <text><xsl:sequence select="$navPointTitle"/></text>
         </navLabel>
-        <xsl:variable name="targetUri" select="htmlutil:getTopicResultUrl($outdir, root(.))" as="xs:string"/>
+        <xsl:variable name="targetUri" 
+          select="htmlutil:getTopicResultUrl($outdir, root(.), $rootMapDocUrl)" 
+          as="xs:string"/>
         <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
         <xsl:if test="false()">          
           <xsl:message> + [DEBUG] map2epubTocImpl: generate-toc: outdir="<xsl:sequence select="$outdir"/>"</xsl:message>
@@ -382,7 +376,7 @@
     >
     <xsl:call-template name="construct_navpoint">
       <xsl:with-param name="targetUri" as="xs:string"
-        select="concat('list-of-figures_', generate-id(.), '.html')"
+        select="concat('list-of-figures_', generate-id(.), $outext)"
       />
     </xsl:call-template>    
   </xsl:template>
@@ -394,7 +388,7 @@
     >
     <xsl:call-template name="construct_navpoint">
       <xsl:with-param name="targetUri" as="xs:string"
-        select="concat('list-of-tables_', generate-id(.), '.html')"
+        select="concat('list-of-tables_', generate-id(.), $outext)"
       />
     </xsl:call-template>    
   </xsl:template>
@@ -466,6 +460,5 @@
   <xsl:template mode="is-nav-point" match="*">
     <xsl:sequence select="false()"/>
   </xsl:template>
-
 
 </xsl:stylesheet>

@@ -24,7 +24,7 @@
     <xsl:param name="collected-data" as="element()*"/>
 
     <xsl:variable name="targetUri"
-      select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), '.html'))" 
+      select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), $outext))" 
       as="xs:string"
     />
     <xsl:variable name="lot-title" as="node()*">
@@ -32,14 +32,14 @@
     </xsl:variable>
     <xsl:message> + [INFO] Generating list of tables as "<xsl:sequence select="$targetUri"/>"</xsl:message>
     <xsl:result-document href="{$targetUri}"
-      format="html"
-      doctype-public="-//W3C//DTD XHTML 1.1//EN"
-      doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+      format="html5"
+      >
       <html>
-        <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />         
+        <head>                   
           <title><xsl:sequence select="$lot-title"/></title>
-          <xsl:call-template name="constructToCStyle"/>
+          <xsl:call-template name="constructToCStyle">
+            <xsl:with-param name="resultUri" as="xs:string" tunnel="yes" select="$targetUri"/>
+          </xsl:call-template>
         </head>
         <body class="toc-list-of-tables html-toc">
           <h2 class="toc-title"><xsl:sequence select="$lot-title"/></h2>
@@ -63,10 +63,13 @@
   
   <xsl:template mode="generate-list-of-tables-html-toc" 
                 match="*[df:class(., 'topic/table')]">
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+
     <xsl:variable name="sourceUri" as="xs:string" select="@docUri"/>
     <xsl:variable name="rootTopic" select="document($sourceUri)" as="document-node()?"/>
     <xsl:variable name="targetUri"
-      select="htmlutil:getTopicResultUrl($outdir, $rootTopic)" as="xs:string"/>
+      select="htmlutil:getTopicResultUrl($outdir, $rootTopic, $rootMapDocUrl)" 
+      as="xs:string"/>
     <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
       as="xs:string"/>
     <xsl:variable name="enumeratedElement" 

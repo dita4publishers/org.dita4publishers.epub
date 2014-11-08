@@ -29,8 +29,17 @@
   <target name="epub"
     unless="noMap"
     depends="dita.map.epub, zipepub"/>
+  
+  <target name="checkAnt1.9">
+    <antversion property="ant.version"/>
+    <condition property="isAnt1.9">
+      <antversion atleast="1.9.1" />
+    </condition>
+  </target>
 	  
-  <target name="zipepub">
+  <target name="zipepub" depends="checkAnt1.9, zipEpubOldAnt, zipEpubNewAnt"/>
+  
+  <target name="zipEpubNewAnt" if="${isAnt1.9}"> 
     <!-- Two steps because mimetype must go in first,
       uncompressed. Looks like ant puts later zipped files in
       first, so mimetype is in second zip task. -->
@@ -45,9 +54,37 @@
       includes="mimetype"
       update="true"
     	keepcompression="true"
-    	compress="false"/>
+    	compress="false"
+    	createunicodeextrafields="never"    
+    	zip64Mode="never"
+    />
+    <!-- For Ant 1.9 or newer, need to specify zip64Mode="never" -->
   </target>
-  
+
+  <target name="zipEpubOldAnt" unless="${isAnt1.9}"> 
+    
+    <echo>- [WARN] Using ${ant.version}. You must use 1.9.1 or newer to produce a correct EPUB Zip package.</echo>
+    <echo>- [WARN] EPUB will not pass epubcheck.</echo>
+    <!-- Two steps because mimetype must go in first,
+      uncompressed. Looks like ant puts later zipped files in
+      first, so mimetype is in second zip task. -->
+    <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
+      basedir="${epub.temp.dir}"
+    	compress="true"
+      includes="META-INF${file.separator}container.xml,toc.ncx,
+      content.opf,container.opf,**/*.html,**/*.xhtml,**/*.css,**/*.HTML,**/*.CSS,
+      **/*.jpg,**/*.jpeg,**/*.gif,**/*.png,**/*.svg,**/*.JPG,**/*.JPEG,**/*.GIF,**/*.PNG,**/*.SVG"/>
+    <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
+      basedir="${epub.temp.dir}"
+      includes="mimetype"
+      update="true"
+    	keepcompression="true"
+    	compress="false"
+    	createunicodeextrafields="never"    
+    />
+    
+  </target>
+
     
   <target name="dita.map.epub.init"
     description="Init properties for Epub">
@@ -76,13 +113,16 @@
       </not>
     </condition>
   	
-    <condition property="css.output.dir" value="${topics.output.dir}">
+  	<!-- It appears that user.csspath will always have a value,
+  	     even if it's an empty string.
+  	  -->
+    <condition property="css.output.dir" value="css">
       <not>
-        <isset property="args.css.output.dir" />
+        <isset property="user.csspath" />
       </not>
     </condition>
-    <condition property="css.output.dir" value="${args.css.output.dir}">
-      <isset property="args.css.output.dir" />
+    <condition property="css.output.dir" value="${user.csspath}">
+      <isset property="user.csspath" />
     </condition>
   	
   	<condition property="epub.hide.parent.link" value="yes">
@@ -203,17 +243,9 @@
   	
   </target>
   
-  <target name="epub.copy.graphics.check">
-    <condition property="epub.do.copy.graphics">
-      <available file="${epub.temp.dir}/copy-graphics.xml"/>
-    </condition>
-    
-  </target>
-  
-  <target name="epub.copy.graphics" if="epub.do.copy.graphics"
-    depends="epub.copy.graphics.check"
+  <target name="epub.copy.graphics" 
 	  description="Copies graphics from input to the ePub output directory based on the graphic map generated during epub generation">
-  	<ant antfile="${epub.temp.dir}/copy-graphics.xml"
+  	<ant antfile="${epub.temp.dir}/copy-graphics.xml"  		
   		>
   	</ant>
 	</target>
@@ -227,9 +259,9 @@
     <mkdir dir="${user.csspath.real}"/>    
     <!-- Always copy system default css files -->
     <copy todir="${user.csspath.real}">
-      <fileset dir="${dita.plugin.org.dita.base.dir}" includes="*.css"/>
+      <fileset dir="${dita.plugin.org.dita.xhtml.dir}/resource" includes="*.css"/>
     </copy>    
-    <!-- Copy user specify css file when required -->
+    <!-- Copy user specified css file when required -->
     <antcall target="epub-copy-css-user"/>
   </target>
 

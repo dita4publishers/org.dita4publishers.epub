@@ -9,7 +9,8 @@
   xmlns:glossdata="http://dita4publishers.org/glossdata"
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:mapdriven="http://dita4publishers.org/mapdriven"
-  exclude-result-prefixes="xs xd df relpath"
+  xmlns:epubtrans="urn:d4p:epubtranstype"
+  exclude-result-prefixes="xs xd df relpath epubtrans"
   version="2.0">
   
   <!-- =============================================================
@@ -29,7 +30,9 @@
        ePub publication:
        
        1. content.opf file, which defines the contents and publication metadata for the ePub
-       2. toc.ncx, which defines the navigation table of contents for the ePub.
+       2. toc.ncx, which defines the navigation table of contents for the ePub (when producing
+          an EPUB2 or dual EPUB2/3 EPUB).
+       2. nav.xhtml, the EPUB3 navigation table of contents (when producing an EPUB3)
        3. The HTML content, generated from the map and topics referenced by the input map.
        4. An input-file-to-output-file map document that is used to copy referenced non-XML
           objects to the appropriate output location.
@@ -74,6 +77,7 @@
   <xsl:include href="map2epubHtmlTocImpl.xsl"/>
   <xsl:include href="map2epubListOfFigures.xsl"/>
   <xsl:include href="map2epubListOfTables.xsl"/>
+  <xsl:include href="map2epubNavImpl.xsl"/>
   <xsl:include href="map2epubTocImpl.xsl"/>
 <!--  <xsl:include href="map2epubIndexImpl.xsl"/>-->
   <xsl:include href="html2xhtmlImpl.xsl"/>
@@ -105,7 +109,8 @@
        produce the final ePub package.
        -->
   <xsl:param name="outdir" select="./epub"/>
-  <xsl:param name="outext" select="'.html'"/>
+  <xsl:param name="outext" select="'.xhtml'"/>
+  <xsl:param name="OUTEXT" select="$outext" as="xs:string"/>
   <xsl:param name="tempdir" select="./temp"/>
   
   <!-- Used by the copied map2htmtoc.xsl: -->
@@ -125,8 +130,30 @@
   <!-- The path of the directory, relative the $outdir parameter,
     to hold the CSS files in the EPub package. Should not have
     a leading "/". 
+    
+    NOTE: cssOutputDir is obsolete as of D4P 1.0 as it's redundant
+    with the CSSPATH parameter. CSSPATH is used in some common code
+    to set the CSS output path.
   -->  
-  <xsl:param name="cssOutputDir" select="'topics'" as="xs:string"/>
+  <xsl:param name="cssOutputDir" select="'css'" as="xs:string"/>
+  <!-- As far as I can tell from the base Ant scripts, CSSPATH will always
+       have a value, even if it's an empty string.
+    -->
+  <xsl:param name="CSSPATH" as="xs:string" select="$cssOutputDir"/>
+  <!-- The relative path from $outdir to the CSS directory. This must be the same
+       as CSSPATH because CSSPATH is used in some HTML output code.
+    -->
+  <xsl:variable name="cssOutDir" as="xs:string">
+    <xsl:if test="$cssOutputDir != $CSSPATH">
+      <xsl:message> + [WARN] The cssOutputDir parameter value ("<xsl:value-of select="$cssOutputDir"/>") != CSSPATH parameter value ("<xsl:value-of select="$CSSPATH"/>"). CSSPATH will be used.</xsl:message>
+    </xsl:if>
+    <xsl:sequence select="$CSSPATH"/>
+  </xsl:variable>
+  <!-- Trigger resolution of the cssOutDir variable so we get any messages: -->
+  <xsl:variable name="_gargage">
+    <xsl:message><xsl:value-of select="if ($cssOutDir != $cssOutputDir) then '' else ''"/></xsl:message>
+  </xsl:variable>
+  
   
   <xsl:param name="debug" select="'false'" as="xs:string"/>
   
@@ -153,10 +180,9 @@
   <xsl:param name="html.toc.OUTPUTCLASS" as="xs:string" select="''"/>
   
   <!-- 
-    The strategy to use when constructing output files. Default is "single-dir", meaning
-    put all result topics in the same output directory (as specified by $topicsOutputDir)
+    The strategy to use when constructing output files. Default is "as-authored".
   -->         
-  <xsl:param name="fileOrganizationStrategy" as="xs:string" select="'single-dir'"/>
+  <xsl:param name="fileOrganizationStrategy" as="xs:string" select="'as-authored'"/>
   
   <xsl:param name="generateIndex" as="xs:string" select="'no'"/>
   <xsl:variable name="generateIndexBoolean" 
@@ -196,7 +222,63 @@
   <xsl:param name="mathJaxLocalJavascriptUri" select="'js/mathjax/MathJax.js'"/>
   
   <xsl:variable name="coverImageId" select="'coverimage'" as="xs:string"/>
+
+  <!-- Generate the OPF package bindings section. -->
+  <xsl:param name="generateBindings" as="xs:string" select="'no'"/>
+  <xsl:variable name="epubtrans:doGenerateBindings" as="xs:boolean"
+    select="matches($generateBindings, 'yes|true|on|1', 'i')"
+  />
+
+  <!-- Generate the OPF package collections section. -->
+  <xsl:param name="generateCollections" as="xs:string" select="'no'"/>
+  <xsl:variable name="epubtrans:doGenerateCollections" as="xs:boolean"
+    select="matches($generateCollections, 'yes|true|on|1', 'i')"
+  />
   
+  <!-- The type of EPUB to be generated: EPUB3 only ('epub3'),
+       EPUB2 only ('epub2'), or dual EPUB3/EPUB2 ('dual'). 
+       Dual is the default.
+    -->
+  <xsl:param name="epubType" as="xs:string" select="'dual'"/>
+  <xsl:variable name="epubtrans:doIncludeEpub2" as="xs:boolean"
+    select="matches($epubType, 'dual', 'i')"
+  />
+  <!-- Are we producing a dual EPUB3/EPUB2 EPUB? -->
+  <xsl:variable name="epubtrans:isDualEpub" as="xs:boolean"
+    select="matches($epubType, 'dual', 'i')"
+  />
+  <!-- Are we producing an EPUB3-only EPUB (not a dual EPUB) -->
+  <xsl:variable name="epubtrans:isEpub3" as="xs:boolean"
+    select="matches($epubType, 'epub3|dual', 'i')"
+  />
+  <!-- Are we producing an EPUB2-only EPUB (not a dual EPUB) -->
+  <xsl:variable name="epubtrans:isEpub2" as="xs:boolean"
+    select="matches($epubType, 'epub2', 'i')"
+  />
+  
+  <!-- Specifies the set of EPUB3 navigation pages to generated
+       as a list of blank-delimited tokens.
+       
+       E.g, "toc lot lof" (Toc, list of tables, list of figures).
+    
+       The keywords should be taken from the list defined in the EPUB
+       spec: http://www.idpf.org/epub/vocab/structure/#h_navigation.
+       This transform adds "lof" (list of figures). The EPUB spec allows
+       use of values not defined in the EPUB spec.
+       
+       The default value is "toc", the normal navigation table of contents.
+    -->
+  <xsl:param name="epubNavTypes" as="xs:string" select="'toc'"/>
+  <xsl:variable name="baseNavTypes" as="xs:string*"
+    select="tokenize($epubNavTypes, ' ')"
+  />
+  <!-- EPUB3 requires a 'toc' navigation -->
+  <xsl:variable name="navTypes" as="xs:string+"
+    select="if (not('toc' = $baseNavTypes)) 
+               then ('toc', $baseNavTypes) 
+               else $baseNavTypes"
+  />
+
   <!-- Used by some HTML output stuff. For EPUB, don't want links to
        go to a new window.
     -->
@@ -214,7 +296,9 @@
       Parameters:
       
       + coverGraphicUri = "<xsl:sequence select="$coverGraphicUri"/>"
-      + cssOutputDir    = "<xsl:sequence select="$cssOutputDir"/>"
+      + epubType        = "<xsl:sequence select="$epubType"/>"
+      + generateBindings= "<xsl:sequence select="$epubtrans:doGenerateBindings"/>"
+      + generateCollections= "<xsl:sequence select="$epubtrans:doGenerateCollections"/>"
       + generateGlossary= "<xsl:sequence select="$generateGlossary"/>"
       + generateHtmlToc = "<xsl:sequence select="$generateHtmlToc"/>"
       + maxTocDepth     = "<xsl:sequence select="$maxTocDepth"/>"
@@ -240,12 +324,15 @@
       
       Global Variables:
       
-      + cssOutputPath    = "<xsl:sequence select="$cssOutputPath"/>"
+      + cssOutDir        = "<xsl:sequence select="$cssOutDir"/>"
       + effectiveCoverGraphicUri = "<xsl:sequence select="$effectiveCoverGraphicUri"/>"
       + topicsOutputPath = "<xsl:sequence select="$topicsOutputPath"/>"
       + imagesOutputPath = "<xsl:sequence select="$imagesOutputPath"/>"
       + platform         = "<xsl:sequence select="$platform"/>"
       + debugBoolean     = "<xsl:sequence select="$debugBoolean"/>"
+      + epubtrans:isEpub3     = "<xsl:sequence select="$epubtrans:isEpub3"/>"
+      + epubtrans:isEpub2     = "<xsl:sequence select="$epubtrans:isEpub2"/>"
+      + epubtrans:isDualEpub  = "<xsl:sequence select="$epubtrans:isDualEpub"/>"
       
       ==========================================
     </xsl:message>
@@ -255,6 +342,13 @@
   
   <xsl:output method="xml" name="indented-xml"
     indent="yes"
+  />
+  <xsl:output name="html5" method="xhtml" 
+    indent="yes" 
+    encoding="utf-8" 
+    doctype-system="about:legacy-compat" 
+    omit-xml-declaration="yes"
+    include-content-type="no"
   />
   
   <xsl:variable name="maxTocDepthInt" select="xs:integer($maxTocDepth)" as="xs:integer"/>
@@ -297,26 +391,28 @@
   </xsl:variable>  
   
   <xsl:variable name="cssOutputPath">
-      <xsl:choose>
-        <xsl:when test="$cssOutputDir != ''">
-          <xsl:sequence select="concat($outdir, $cssOutputDir)"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:sequence select="$outdir"/>
-        </xsl:otherwise>
-      </xsl:choose>    
-</xsl:variable>  
+    <xsl:choose>
+      <xsl:when test="$cssOutDir != ''">
+        <xsl:sequence select="relpath:newFile($outdir, $cssOutDir)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$outdir"/>
+      </xsl:otherwise>
+    </xsl:choose>    
+  </xsl:variable>  
   
   <xsl:template match="/">
     <xsl:if test="$debugBoolean">
         <xsl:message> + [DEBUG] Root template in default mode. Root element is "<xsl:sequence select="name(/*[1])"/>", class="<xsl:sequence select="string(/*[1]/@class)"/>:</xsl:message>
     </xsl:if>    
     <xsl:apply-templates>
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="rootMapDocUrl" select="document-uri(.)" as="xs:string" tunnel="yes"/>      
     </xsl:apply-templates>
   </xsl:template>
   
   <xsl:template match="/*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
     <xsl:variable name="effectiveCoverGraphicUri" as="xs:string">
       <xsl:apply-templates select="." mode="get-cover-graphic-uri"/>
@@ -344,7 +440,7 @@
       <xsl:call-template name="mapdriven:collect-data"/>      
     </xsl:variable>
     
-    <xsl:if test="true() or $debugBoolean">
+    <xsl:if test="true() or $doDebug">
       <xsl:message> + [DEBUG] Writing file <xsl:sequence select="relpath:newFile($outdir, 'collected-data.xml')"/>...</xsl:message>
       <xsl:result-document href="{relpath:newFile($outdir, 'collected-data.xml')}"
         format="indented-xml"
@@ -353,7 +449,8 @@
       </xsl:result-document>
     </xsl:if>
         
-    <xsl:result-document href="{relpath:newFile($outdir, 'graphicMap.xml')}" format="graphic-map">
+    <xsl:result-document href="{relpath:newFile($outdir, 'graphicMap.xml')}" format="graphic-map"
+      >
       <xsl:sequence select="$graphicMap"/>
     </xsl:result-document>    
     <xsl:call-template name="make-meta-inf"/>
@@ -364,33 +461,64 @@
     <xsl:apply-templates select="." mode="generate-content">
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>     
     </xsl:apply-templates>
-    <!-- NOTE: The generate-toc mode is for the EPUB toc, not the HTML toc -->
-    <xsl:apply-templates select="." mode="generate-toc">
-      <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
-    </xsl:apply-templates>
-    <xsl:message> + [DEBUG] after generate-toc</xsl:message>
+    <xsl:if test="$epubtrans:isEpub3">
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] generating EPUB3 nav</xsl:message>
+      </xsl:if>
+      <xsl:apply-templates select="." mode="epubtrans:generate-nav">
+        <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      </xsl:apply-templates>
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] after generate-nav</xsl:message>
+      </xsl:if>
+    </xsl:if>
+    <!-- NOTE: The generate-toc mode is for the EPUB2 toc.ncx, not the HTML toc -->
+    <xsl:if test="$epubtrans:isEpub2 or $epubtrans:isDualEpub">
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] generating EPUB2 toc.ncx...</xsl:message>
+      </xsl:if>
+      <xsl:apply-templates select="." mode="generate-toc">
+        <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      </xsl:apply-templates>
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] after generate-toc</xsl:message>
+      </xsl:if>
+    </xsl:if>
     <xsl:apply-templates select="." mode="generate-index">
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
     </xsl:apply-templates>
-    <xsl:message> + [DEBUG] after generate-index</xsl:message>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] after generate-index</xsl:message>
+    </xsl:if>
     <xsl:apply-templates select="." mode="generate-book-lists">
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
     </xsl:apply-templates>
-    <xsl:message> + [DEBUG] after generate-book-lists</xsl:message>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] after generate-book-lists</xsl:message>
+    </xsl:if>
     <xsl:apply-templates select="." mode="generate-opf">
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
       <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>        
     </xsl:apply-templates>
-    <xsl:message> + [DEBUG] after generate-opf</xsl:message>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] after generate-opf</xsl:message>
+    </xsl:if>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] Generating graphic copy Ant script...</xsl:message>
+    </xsl:if>
     <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
     </xsl:apply-templates>
-    <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template name="make-meta-inf">
-    <xsl:result-document href="{relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'container.xml')}">
+    <xsl:result-document href="{relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'container.xml')}"
+      format="indented-xml"
+      >
       <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
         <rootfiles>
           <rootfile full-path="content.opf" media-type="application/oebps-package+xml"/>

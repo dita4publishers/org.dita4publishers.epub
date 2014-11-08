@@ -24,12 +24,12 @@
         <xsl:apply-templates select="*[df:class(., 'topic/title')] | @title" mode="pubtitle"/>
       </xsl:variable>           
       <xsl:variable name="resultUri" 
-        select="relpath:newFile($outdir, 'generated-index.html')" 
+        select="relpath:newFile($outdir, concat('generated-index', $outext))" 
         as="xs:string"/>
 
       <xsl:message> + [INFO] Generating index file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
 
-      <xsl:result-document href="{$resultUri}" format="topic-html"
+      <xsl:result-document href="{$resultUri}" format="html5"
         exclude-result-prefixes="index-terms"
         >
         <html xmlns="http://www.w3.org/1999/xhtml">
@@ -102,13 +102,17 @@
   <xsl:template match="text()" mode="gather-index-terms" priority="-1"/>    
   
   <xsl:template match="*[df:isTopicRef(.)]" mode="gather-index-terms">
-      <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()*"/>
+     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+
+    <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()*"/>
       <xsl:choose>
         <xsl:when test="not($topic)">
           <!-- Do nothing. Unresolveable topics will already have been reported. -->
         </xsl:when>
         <xsl:otherwise>
-          <xsl:variable name="targetUri" select="htmlutil:getTopicResultUrl($outdir, root($topic))" as="xs:string"/>
+          <xsl:variable name="targetUri" 
+            select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl)" 
+            as="xs:string"/>
           <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
             <!-- Any subordinate topics in the currently-referenced topic are
               reflected in the ToC before any subordinate topicrefs.
