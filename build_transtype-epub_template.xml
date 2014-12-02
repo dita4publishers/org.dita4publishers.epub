@@ -205,6 +205,9 @@
      	<param name="inputdir" expression="${dita.input.dirname}"/>
       <param name="outext" expression=".xhtml"/><!-- EPUB3 uses xhtml for result files. -->      
      	<param name="tempdir" expression="${epub.xslt.tempdir}"/>
+      <param name="fileOrganizationStrategy" expression="${html2.file.organization.strategy}"
+                                                if="html2.file.organization.strategy"/>
+
     	<param name="rawPlatformString" expression="${os.name}"/>
     	<param name="titleOnlyTopicClassSpec" expression="${title.only.topic.class.spec}"/>
     	<param name="titleOnlyTopicTitleClassSpec" expression="${title.only.topic.title.class.spec}"/>
