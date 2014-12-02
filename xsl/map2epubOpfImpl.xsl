@@ -59,13 +59,19 @@
     <xsl:variable name="uniqueTopicRefs" as="element()*" 
       select="df:getUniqueTopicrefs(.)[not(@format = 'ditamap')]"
     />
-    <xsl:message> + [DEBUG] uniqueTopicRefs=<xsl:sequence select="$uniqueTopicRefs"/></xsl:message>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] uniqueTopicRefs=<xsl:sequence select="$uniqueTopicRefs"/></xsl:message>
+    </xsl:if>
+    
+    <xsl:variable name="epubVersion" as="xs:string"
+      select="if ($epubtrans:isEpub2) then '2.0' else '3.0'"
+    />
         
     <xsl:result-document format="opf" href="{$resultUri}">
       <package
         xmlns:dc="http://purl.org/dc/elements/1.1/"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        version="3.0"
+        version="{$epubVersion}"
         unique-identifier="bookid"
         xml:lang="{$lang}"
         >
@@ -142,17 +148,19 @@
     <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
     <xsl:param name="uniqueTopicRefs" as="element()*" tunnel="yes"/>
     
-    <xsl:if test="$epubtrans:isDualEpub">
+    <xsl:if test="$epubtrans:isDualEpub or $epubtrans:isEpub2">
       <!-- Add the NCX file to the manifest: -->
       <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
     </xsl:if>
     <xsl:if test="$epubtrans:isEpub3">
       <!-- FIXME: Need to do this for each separate nav file to be generated -->
-      <item href="{epubtrans:getNavFilename('toc')}" 
-        id="{epubtrans:getNavId('toc')}" 
-        media-type="application/xhtml+xml" 
-        properties="nav" 
-      />
+      <xsl:if test="$epubtrans:isEpub3">
+        <item href="{epubtrans:getNavFilename('toc')}" 
+          id="{epubtrans:getNavId('toc')}" 
+          media-type="application/xhtml+xml" 
+          properties="nav" 
+        />
+      </xsl:if>
     </xsl:if>
     <!-- List the XHTML files -->
     <!-- FIXME: Have to account for all navigation topicrefs. -->
@@ -312,7 +320,9 @@
   <xsl:template match="*[df:class(., 'map/map')]" mode="spine">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
      <!-- Generate entries for each of the navigation files to be generated. -->
-    <itemref idref="{epubtrans:getNavId('toc')}"/>
+    <xsl:if test="$epubtrans:isEpub3">
+      <itemref idref="{epubtrans:getNavId('toc')}"/>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template mode="epubtrans:bindings" match="*" priority="-1">
