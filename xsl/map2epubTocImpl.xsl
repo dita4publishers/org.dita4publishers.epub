@@ -157,7 +157,7 @@
       <xsl:variable name="navPointTitle">
         <xsl:apply-templates select="." mode="nav-point-title"/>      
       </xsl:variable>
-      
+            
       <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()*"/>
       <xsl:choose>
         <xsl:when test="not($topic)">
