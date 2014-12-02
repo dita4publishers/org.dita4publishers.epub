@@ -440,7 +440,7 @@
       <xsl:call-template name="mapdriven:collect-data"/>      
     </xsl:variable>
     
-    <xsl:if test="true() or $doDebug">
+    <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] Writing file <xsl:sequence select="relpath:newFile($outdir, 'collected-data.xml')"/>...</xsl:message>
       <xsl:result-document href="{relpath:newFile($outdir, 'collected-data.xml')}"
         format="indented-xml"

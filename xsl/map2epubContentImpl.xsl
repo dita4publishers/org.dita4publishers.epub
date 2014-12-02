@@ -102,7 +102,7 @@
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
     
-    <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>
+<!--    <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>-->
     
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] Handling topicref to "<xsl:sequence select="string(@href)"/>" in mode generate-content</xsl:message>
