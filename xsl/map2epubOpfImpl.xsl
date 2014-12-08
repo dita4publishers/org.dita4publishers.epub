@@ -465,7 +465,7 @@
   <xsl:template match="*[df:class(., 'pubmeta-d/pubrights')]" 
     mode="generate-opf"> 
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    <xsl:variable name="content" as="node()*">
+    <xsl:variable name="content">
       <xsl:apply-templates mode="#current" select="*[df:class(., 'pubmeta-d/copyrfirst')]">
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
       </xsl:apply-templates>
