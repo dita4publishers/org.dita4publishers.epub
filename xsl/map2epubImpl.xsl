@@ -101,8 +101,12 @@
   <xsl:variable name="inputURLstub" as="xs:string" 
     select="concat('file:///', translate($tempFilesDir,':\','|/'), '/')"/>
   
-  
-  <xsl:param name="inputdir" select="relpath:getParent(document-uri(.))"/>
+  <!-- 
+       NOTE: As of OT 2.0, there is no Ant parameter that provides the input directory,
+             so we use the @xtrf attribute to get the directory containing the input
+             map.
+    -->
+  <xsl:param name="inputdir" select="relpath:getParent(relpath:getParent(/*/@xtrf))" as="xs:string"/>
   <!-- Directory into which the generated output is put.
 
        This should be the directory that will be zipped up to
@@ -314,7 +318,6 @@
       + titleOnlyTopicTitleClassSpec = "<xsl:sequence select="$titleOnlyTopicTitleClassSpec"/>"
       + topicsOutputDir = "<xsl:sequence select="$topicsOutputDir"/>"
 
-      + DITAEXT         = "<xsl:sequence select="$DITAEXT"/>"
       + WORKDIR         = "<xsl:sequence select="$WORKDIR"/>"
       + PATH2PROJ       = "<xsl:sequence select="$PATH2PROJ"/>"
       + KEYREF-FILE     = "<xsl:sequence select="$KEYREF-FILE"/>"
