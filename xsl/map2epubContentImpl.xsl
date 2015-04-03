@@ -81,10 +81,12 @@
           ditaarch:DITAArchVersion="1.2"
           domains="(topic topic)"
           >
+          <xsl:attribute name="xml:base"><xsl:value-of select="base-uri()"/></xsl:attribute>
           <xsl:attribute name="class"
             select="$titleOnlyTopicClassSpec"
           />
           <title>
+            <xsl:attribute name="xml:base"><xsl:value-of select="base-uri()"/></xsl:attribute>
             <xsl:attribute name="class"
               select="$titleOnlyTopicTitleClassSpec"
             />
