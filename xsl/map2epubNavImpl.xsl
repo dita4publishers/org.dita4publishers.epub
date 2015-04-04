@@ -13,7 +13,7 @@
                 xmlns:epub="http://www.idpf.org/2007/ops"
                 xmlns:epubtrans="urn:d4p:epubtranstype"
                 xmlns="http://www.w3.org/1999/xhtml" 
-                exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms epubtrans"
+                exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms epubtrans mapdriven enum glossdata"
   >
   <!-- ============================================================================= 
     
