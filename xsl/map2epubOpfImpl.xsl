@@ -73,8 +73,15 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         version="{$epubVersion}"
         unique-identifier="bookid"
-        xml:lang="{$lang}"
         >
+        <xsl:choose>
+          <xsl:when test="$epubtrans:isEpub3">
+            <xsl:attribute name="xml:lang"><xsl:sequence select="$lang"/></xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- @xml:lang is not allowed on opf:package in ePub2 --> 
+          </xsl:otherwise>
+        </xsl:choose>
         <xsl:apply-templates select="." mode="epubtrans:set-prefix-attribute">
           <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
         </xsl:apply-templates>
