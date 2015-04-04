@@ -99,6 +99,15 @@
   	  </not>
   	</condition>
 
+    <!-- The epubType value d4p.epubtype -->
+    
+    <condition property="d4p.epubtype" value="dual">
+      <not>
+        <isset property="d4p.epubtype" />
+      </not>
+    </condition>
+    
+
   	<!-- The name of the directory, within the ePub package, to contain all images: -->
 
     <condition property="images.output.dir" value="images">
