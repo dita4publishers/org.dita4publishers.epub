@@ -114,7 +114,8 @@
             />
           </xsl:apply-templates>            
         </xsl:variable>
-        <xsl:if test="count($guideContents/*) gt 0">
+        <!-- $guideContents is either the empty sequence or a sequence of nodes without an outer element -->
+        <xsl:if test="count($guideContents) gt 0">
           <guide>
             <xsl:sequence select="$guideContents"/>
           </guide>
