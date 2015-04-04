@@ -285,6 +285,11 @@
   <!-- used to resolved outer image -->
   <xsl:param name="uplevels" select="''" />
 
+  <!-- Used to determine whether to include DITA-OT default CSS files -->
+  <xsl:param name="copySystemCssNo" select="'false'" />
+  
+  <xsl:variable name="copySystemCssNoBoolean" as="xs:boolean" select="matches($copySystemCssNo,'yes|true|on|1','i')" />
+  
   <!-- Used by some HTML output stuff. For EPUB, don't want links to
        go to a new window.
     -->
@@ -319,7 +324,8 @@
       + titleOnlyTopicClassSpec = "<xsl:sequence select="$titleOnlyTopicClassSpec"/>"
       + titleOnlyTopicTitleClassSpec = "<xsl:sequence select="$titleOnlyTopicTitleClassSpec"/>"
       + topicsOutputDir = "<xsl:sequence select="$topicsOutputDir"/>"
-
+      + copySystemCssNo = "<xsl:sequence select="$copySystemCssNo"/>"
+      
       + WORKDIR         = "<xsl:sequence select="$WORKDIR"/>"
       + PATH2PROJ       = "<xsl:sequence select="$PATH2PROJ"/>"
       + KEYREF-FILE     = "<xsl:sequence select="$KEYREF-FILE"/>"
