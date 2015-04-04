@@ -197,8 +197,15 @@
          NOTE: $cssOutDir should have the same value as CSSPATH.
     -->
     
-    <item id="commonltr.css" href="{relpath:newFile($cssOutDir, 'commonltr.css')}" media-type="text/css"/>
-    <item id="commonrtl.css" href="{relpath:newFile($cssOutDir, 'commonrtl.css')}" media-type="text/css"/>
+    <xsl:choose>
+      <xsl:when test="$copySystemCssNoBoolean">
+        <!-- Do not include DITA-OT Default CSS files -->    
+      </xsl:when>
+      <xsl:otherwise>
+        <item id="commonltr.css" href="{relpath:newFile($cssOutDir, 'commonltr.css')}" media-type="text/css"/>
+        <item id="commonrtl.css" href="{relpath:newFile($cssOutDir, 'commonrtl.css')}" media-type="text/css"/>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:if test="$CSS != ''">
       <item id="{$CSS}" href="{relpath:newFile($cssOutDir, $CSS)}" media-type="text/css"/>
     </xsl:if>
