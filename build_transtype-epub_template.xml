@@ -14,7 +14,12 @@
     <isset property="epub.exclude.auto.rellinks" />
   </condition>
 
-
+  <!-- property that when set will prevent the DITA-OT OOTB CSS from being copied
+for inclusion in the epub file -->
+  <condition property="system.copycss.no">
+    <isset property="args.system.copycss.no"/>
+  </condition>
+  
 	<target name="dita2epub"
     unless="noMap"
     xmlns:dita="http://dita-ot.sourceforge.net"
@@ -206,6 +211,7 @@
       classpathref="dost.class.path"
       style="${args.xsl}">
      	<param name="cssOutputDir" expression="${css.output.dir}"/>
+      <param name="copySystemCssNo" expression="${system.copycss.no}" if="system.copycss.no"/>
       <param name="debug" expression="${debug}"/>
     	<param name="coverGraphicUri" expression="${cover.graphic.uri}" if="cover.graphic.file"/>
     	<param name="idURIStub" expression="${epub.pubid.uri.stub}"/>
@@ -266,18 +272,25 @@
 	</target>
 
   <target name="epub-copy-css"  description="Copy CSS files">
+    
     <condition property="user.copycss.yes">
       <isset property="args.css.present"/>
     </condition>
+        
     <property name="user.csspath.real" value="${epub.temp.dir}/${css.output.dir}"/>
   	<echo message="Copying css files to '${user.csspath.real}"/>
     <mkdir dir="${user.csspath.real}"/>
-    <!-- Always copy system default css files -->
+    <!-- Copy system default css files unless system.copycss.no is set -->
+    <antcall target="epub-copy-css-system"/>
+    <!-- Copy user specified css file when required -->
+    <antcall target="epub-copy-css-user"/>
+  </target>
+
+  <target name="epub-copy-css-system" unless="${system.copycss.no}">
+    <echo message="copying system [${system.copycss.no}]" />
     <copy todir="${user.csspath.real}">
       <fileset dir="${dita.plugin.org.dita.xhtml.dir}/resource" includes="*.css"/>
     </copy>
-    <!-- Copy user specified css file when required -->
-    <antcall target="epub-copy-css-user"/>
   </target>
 
   <target name="epub-copy-css-user" if="user.copycss.yes">
