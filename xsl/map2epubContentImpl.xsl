@@ -34,6 +34,16 @@
     
     =============================================================  -->
   
+
+  <!-- for epub2; epub3 and dual will use @name="html5" from map2epubImpl.xsl;
+for epub2, cannot have @doctype-system="about:legacy:compat" (per epubcheck) -->
+  <xsl:output name="topic-html-epub2"
+    method="xhtml"
+    encoding="UTF-8"
+    indent="yes"
+    include-content-type="no"
+  />
+  
   <xsl:output name="topic-html"
     method="xhtml"
     encoding="UTF-8"
@@ -180,11 +190,22 @@
 <xsl:sequence select="$xhtml"/></xsl:message>
     </xsl:if>
     <xsl:message> + [INFO] Writing topic <xsl:value-of select="$topicref/@href"/> to HTML file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
-    <xsl:result-document format="html5" 
-      href="{$resultUri}" 
-      exclude-result-prefixes="opf">
-      <xsl:sequence select="$xhtml"/>
-    </xsl:result-document>
+    <xsl:choose>
+      <xsl:when test="$epubtrans:isEpub3">
+        <xsl:result-document format="html5" 
+          href="{$resultUri}" 
+          exclude-result-prefixes="opf">
+          <xsl:sequence select="$xhtml"/>
+        </xsl:result-document>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:result-document format="topic-html-epub2" 
+          href="{$resultUri}" 
+          exclude-result-prefixes="opf">
+          <xsl:sequence select="$xhtml"/>
+        </xsl:result-document>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
   <xsl:template mode="map-driven-content-processing"  priority="100"
