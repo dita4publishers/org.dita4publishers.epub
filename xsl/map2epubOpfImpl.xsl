@@ -822,8 +822,15 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
-      <!-- @properties attribute (EPUB3): -->
-      <xsl:sequence select="@properties"/>
+      <xsl:choose>
+        <xsl:when test="$epubtrans:isEpub3">
+          <!-- epub3 takes @properties: -->
+          <xsl:sequence select="@properties"/>    
+        </xsl:when>
+        <xsl:otherwise>
+          <!-- epub2 does not allow @properties -->
+        </xsl:otherwise>
+      </xsl:choose>
     </item>
   </xsl:template>
   
