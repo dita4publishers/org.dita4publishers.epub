@@ -45,6 +45,10 @@
     </html>
   </xsl:template>
   
+  <xsl:template mode="html2xhtml" match="meta/@scheme">
+    <!-- Suppress @scheme on <meta> because @scheme is not allowed there per epubcheck -->
+  </xsl:template>
+  
   <xsl:template mode="html2xhtml" match="meta[@http-equiv = 'Content-Type'] | xhtml:meta[@http-equiv = 'Content-Type']">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:if test="$doDebug">
