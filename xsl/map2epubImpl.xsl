@@ -523,7 +523,7 @@
 
   <xsl:template name="make-meta-inf">
     <xsl:result-document href="{relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'container.xml')}"
-      format="indented-xml"
+      format="indented-xml" exclude-result-prefixes="enum index-terms glossdata mapdriven"
       >
       <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
         <rootfiles>
