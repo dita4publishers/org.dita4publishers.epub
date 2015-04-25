@@ -68,6 +68,8 @@
   <xsl:include href="plugin:org.dita4publishers.common.html:xsl/commonHtmlOverrides.xsl"/>
   <xsl:include href="plugin:org.dita4publishers.common.html:xsl/commonHtmlEnumeration.xsl"/>
   <xsl:include href="plugin:org.dita4publishers.common.html:xsl/commonHtmlBookmapEnumeration.xsl"/>
+  <xsl:include href="plugin:org.dita4publishers.common.html:/xsl/map2htmlIndex.xsl"/>
+
 
   <xsl:include href="map2epubCommon.xsl"/>
   <xsl:include href="map2epubOpfImpl.xsl"/>
@@ -83,13 +85,11 @@
   <xsl:include href="html2xhtmlImpl.xsl"/>
   <xsl:include href="epubHtmlOverrides.xsl"/>
 
-  <xsl:include href="../../org.dita4publishers.html2/xsl/map2html2Index.xsl"/>
-
 
   <xsl:include href="map2epubD4PImpl.xsl"/>
   <xsl:include href="map2epubBookmapImpl.xsl"/>
 
-  <!-- Initial part of ePUB ID URI. Should reflect the book's
+  <!-- Initial part of EPUB ID URI. Should reflect the book's
        owner.
     -->
   <xsl:param name="idURIStub" select="'http://example.org/dummy/URIstub/'" as="xs:string"/>
