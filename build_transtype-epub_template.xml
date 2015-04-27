@@ -53,7 +53,8 @@ for inclusion in the epub file -->
     	compress="true"
       includes="META-INF${file.separator}container.xml,toc.ncx,
       content.opf,container.opf,**/*.html,**/*.xhtml,**/*.css,**/*.HTML,**/*.CSS,
-      **/*.jpg,**/*.jpeg,**/*.gif,**/*.png,**/*.svg,**/*.JPG,**/*.JPEG,**/*.GIF,**/*.PNG,**/*.SVG"/>
+      **/*.jpg,**/*.jpeg,**/*.gif,**/*.png,**/*.svg,**/*.mp4,**/*.mp3,**/*.m4a,
+      **/*.JPG,**/*.JPEG,**/*.GIF,**/*.PNG,**/*.SVG,**/*.MP4,**/*.MP3,**/*.M4A"/>
     <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
       basedir="${epub.temp.dir}"
       includes="mimetype"
