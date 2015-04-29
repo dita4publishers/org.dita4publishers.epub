@@ -3,13 +3,15 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:related-links="http://dita-ot.sourceforge.net/ns/200709/related-links"
-  exclude-result-prefixes="xs related-links"
+  xmlns:epubtrans="urn:d4p:epubtranstype"
+  exclude-result-prefixes="xs related-links epubtrans"
   version="2.0">
   
   <!-- Overrides of built-in HTML generation templates -->
   
   <!-- this template is copied from dita2htmlImpl.xsl in the DITA-OT's xhtml plugin -->
   <xsl:template name="generateCssLinks">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:variable name="childlang">
       <xsl:choose>
         <!-- Update with DITA 1.2: /dita can have xml:lang -->
@@ -67,7 +69,14 @@
       </xsl:choose><xsl:value-of select="$newline"/>
     </xsl:if>
     
+    <xsl:apply-templates select="." mode="epubtrans:add-additional-css">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    
   </xsl:template>
+  
+  <xsl:template match="text()" mode="epubtrans:add-additional-css"/>
+    
   
   
 </xsl:stylesheet>
