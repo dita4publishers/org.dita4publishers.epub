@@ -139,7 +139,11 @@ for inclusion in the epub file -->
     <condition property="css.output.dir" value="${user.csspath}">
       <isset property="user.csspath" />
     </condition>
-
+    
+    <condition property="css.include.kindle" value="true">
+      <equals arg1="${d4p.include.kindle.css}" arg2="true"/>
+    </condition>
+    
   	<condition property="epub.hide.parent.link" value="yes">
   		<not>
       	<isset property="args.hide.parent.link" />
@@ -285,6 +289,9 @@ for inclusion in the epub file -->
     <antcall target="epub-copy-css-system"/>
     <!-- Copy user specified css file when required -->
     <antcall target="epub-copy-css-user"/>
+    
+    <!-- Copy kindle css if being triggered by the kindle plugin -->
+    <antcall target="epub-copy-css-kindle" />
   </target>
 
   <target name="epub-copy-css-system" unless="${system.copycss.no}">
@@ -297,5 +304,9 @@ for inclusion in the epub file -->
   <target name="epub-copy-css-user" if="user.copycss.yes">
     <copy file="${args.css.real}" todir="${user.csspath.real}"/>
   </target>
-
+  
+  <target name="epub-copy-css-kindle" if="css.include.kindle">
+    <copy file="${dita.plugin.org.dita4publishers.kindle.dir}/css/kindleExtensions.css" todir="${user.csspath.real}"/>
+  </target>
+  
 </project>
