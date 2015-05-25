@@ -132,7 +132,7 @@
     <xsl:copy/>
   </xsl:template>
   
-  <xsl:template match="*[df:isTopicRef(.)]" mode="generate-html-toc">
+  <xsl:template match="*[df:isTopicRef(.)][not(@toc = 'no')]" mode="generate-html-toc">
     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
 
@@ -281,7 +281,7 @@
   </xsl:template>
   <!-- ========================================================================== -->
   
-  <xsl:template match="*[df:isTopicHead(.)]" mode="generate-html-toc">
+  <xsl:template match="*[df:isTopicHead(.)][not(@toc = 'no')]" mode="generate-html-toc">
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <xsl:variable name="titleOnlyTopicFilename" as="xs:string"
