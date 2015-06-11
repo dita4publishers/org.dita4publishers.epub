@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pubmap PUBLIC "urn:pubid:dita4publishers.org:doctypes:dita:dtd:pubmap" "urn:pubid:dita4publishers.org:doctypes:dita:dtd:pubmap">
+<pubmap>
+ <mapref href="keys.ditamap"/>
+ <chapter keyref="dita2epub-generating">
+  <subsection keyref="dita2epub-generating-from-oxygen" />
+  <subsection keyref="dita2epub-generation-kindle-books-from-oxygen" />
+  <topicref keyref="dita2epub-using-custom-css" />
+  <subsection keyref="dita2epub-cover-graphics" />
+  <abbrevlist keyref="dita2epub-opf-metadata"/>
+  <subsection keyref="dita2epub-overriding-base-processing"/>
+  <subsection keyref="dita2epub-epub-transtype-parameters">
+   <topicref keyref="dita2epub-ant-param-argsCssOutputDir" collection-type="sequence"/>
+   <topicref keyref="dita2epub-ant-param-coverGraphicFile" />
+   <topicref keyref="dita2epub-ant-paramd4pMaxNavDepth" />
+   <topicref keyref="dita2epub-ant-paramd4pMaxTocDepth" />
+   <topicref keyref="dita2epub-ant-param-epubIncludeAutoRellinks" />
+   <topicref keyref="dita2epub-ant-parm-epubPubidUriStub"/>
+   <topicref keyref="dita2epub-ant-parm-epubTempDir" />
+   <topicref keyref="dita2epub-ant-parm-imagesOutputDir"/>
+   <topicref keyref="dita2epub-ant-parm-kindleGenExecutable" />
+   <topicref keyref="dita2epub-ant-parm-titleOnlyTopicClassSpec" />
+   <topicref keyref="dita2epub-ant-parm-titleOnlyTopicTitleClassSpec" />
+   <topicref keyref="dita2epub-ant-parm-topicsOutputDir"/>
+  </subsection>
+ </chapter>
+</pubmap>

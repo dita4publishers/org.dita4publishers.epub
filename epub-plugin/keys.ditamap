@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map>
+ <keydef keys="dita2epub-generating" href="generating-epubs.xml"/>
+ <keydef keys="dita2epub-generating-from-oxygen" href="generating-epubs-from-oxygen.xml"/>
+ <keydef keys="dita2epub-generation-kindle-books-from-oxygen" href="generating-kindle-books-from-oxygen.xml"/>
+ <keydef keys="dita2epub-using-custom-css" href="using-custom-css.xml"/>
+ <keydef keys="dita2epub-cover-graphics" href="creating-cover-graphics.xml"/>
+ <keydef keys="dita2epub-opf-metadata" href="creating-opf-metadata.xml"/>
+ <keydef keys="dita2epub-overriding-base-processing" href="overriding-base-processing.xml"/>
+ <keydef keys="dita2epub-epub-transtype-parameters" href="epub-transtype-parameters-ref.xml"/>
+ <keydef keys="dita2epub-ant-param-argsCssOutputDir args.css.output.dir.refentry" href="reference/ant-parm-argsCssOutputDir.xml"/>
+ <keydef keys="dita2epub-ant-param-coverGraphicFile" href="reference/ant-parm-coverGraphicFile.xml"/>
+ <keydef keys="dita2epub-ant-paramd4pMaxNavDepth" href="reference/ant-parm-d4pMaxNavDepth.xml"/>
+ <keydef keys="dita2epub-ant-paramd4pMaxTocDepth ant-param_d4p.max.toc-depth" href="reference/ant-parm-d4pMaxTocDepth.xml"/>
+ <keydef keys="dita2epub-ant-param-epubIncludeAutoRellinks" href="reference/ant-parm-epubIncludeAutoRellinks.xml"/>
+ <keydef keys="dita2epub-ant-parm-epubPubidUriStub" href="reference/ant-parm-epubPubidUriStub.xml"/>
+ <keydef keys="dita2epub-ant-parm-epubTempDir" href="reference/ant-parm-epubTempDir.xml"/>
+ <keydef keys="dita2epub-ant-parm-imagesOutputDir" href="reference/ant-parm-imagesOutputDir.xml"/>
+ <keydef keys="dita2epub-ant-parm-kindleGenExecutable" href="reference/ant-parm-kindleGenExecutable.xml"/>
+ <keydef keys="dita2epub-ant-parm-titleOnlyTopicClassSpec" href="reference/ant-parm-titleOnlyTopicClassSpec.xml"/>
+ <keydef keys="dita2epub-ant-parm-titleOnlyTopicTitleClassSpec" href="reference/ant-parm-titleOnlyTopicTitleClassSpec.xml"/>
+ <keydef keys="dita2epub-ant-parm-topicsOutputDir" href="reference/ant-parm-topicsOutputDir.xml"/>
+</map>
