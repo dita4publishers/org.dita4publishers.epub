@@ -171,7 +171,7 @@
         </xsl:when>
         <xsl:otherwise>
           <xsl:variable name="targetUri" 
-            select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl)" 
+            select="htmlutil:getTopicResultUrl2($outdir, root($topic), .,  $rootMapDocUrl)" 
             as="xs:string"/>
           <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
           <xsl:if test="false()"> 
@@ -255,6 +255,7 @@
         <navLabel>
           <text><xsl:sequence select="$navPointTitle"/></text>
         </navLabel>
+        <!-- FIXME: Need the topicref to we can take @copy-to into account -->
         <xsl:variable name="targetUri" 
           select="htmlutil:getTopicResultUrl($outdir, root(.), $rootMapDocUrl)" 
           as="xs:string"/>

@@ -112,7 +112,7 @@
     <xsl:variable name="topic" select="df:resolveTopicRef(.)" as="element()*"/>
     <xsl:if test="$topic">
       <xsl:variable name="targetUri"         as="xs:string"
-        select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl)" 
+        select="htmlutil:getTopicResultUrl2($outdir, root($topic), ., $rootMapDocUrl)" 
       />
       <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
       <reference type="cover"  href="{$relativeUri}"/>    

@@ -154,7 +154,7 @@
               <xsl:apply-templates select="." mode="enumeration"/>
             </xsl:variable>
             <xsl:variable name="targetUri"
-              select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl)" 
+              select="htmlutil:getTopicResultUrl2($outdir, root($topic), ., $rootMapDocUrl)" 
               as="xs:string"
             />
             <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
@@ -254,6 +254,7 @@
       </xsl:variable>
       <xsl:variable name="navPointTitle"
         select="normalize-space(string-join($rawNavPointTitle, ' '))" as="xs:string"/>
+      <!-- FIXME: Need the topicref so we can take copy-to into account -->
         <xsl:variable name="targetUri"
           select="htmlutil:getTopicResultUrl($outdir, root(.), $rootMapDocUrl)" 
           as="xs:string"/>

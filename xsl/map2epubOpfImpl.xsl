@@ -562,7 +562,7 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:variable name="targetUri" 
-          select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl, $doDebug)"
+          select="htmlutil:getTopicResultUrl2($outdir, root($topic), ., $rootMapDocUrl, $doDebug)"
           as="xs:string"
         />
         <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>

@@ -67,6 +67,7 @@
 
     <xsl:variable name="sourceUri" as="xs:string" select="@docUri"/>
     <xsl:variable name="rootTopic" select="document($sourceUri)" as="document-node()?"/>
+    <!-- FIXME: Need the topicref so we can take @copy-to into account -->
     <xsl:variable name="targetUri"
       select="htmlutil:getTopicResultUrl($outdir, $rootTopic, $rootMapDocUrl)" 
       as="xs:string"/>
