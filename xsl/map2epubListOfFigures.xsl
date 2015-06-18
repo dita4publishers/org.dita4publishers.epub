@@ -23,12 +23,12 @@
   <xsl:template mode="generate-list-of-figures-html-toc" 
                 match="*[df:class(., 'topic/fig')]">
     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+    <xsl:param name="topicref" as="element()?" tunnel="yes"/>
 
     <xsl:variable name="sourceUri" as="xs:string" select="@docUri"/>
     <xsl:variable name="rootTopic" select="document($sourceUri)" as="document-node()?"/>
-    <!-- FIXME: Need the topicref so we can take @copy-to into account -->
     <xsl:variable name="targetUri"
-      select="htmlutil:getTopicResultUrl($outdir, $rootTopic, $rootMapDocUrl)"
+      select="htmlutil:getTopicResultUrl2($outdir, $rootTopic, $topicref, $rootMapDocUrl)"
       as="xs:string"/>
     <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
       as="xs:string"/>

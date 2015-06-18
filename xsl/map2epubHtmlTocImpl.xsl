@@ -175,6 +175,7 @@
                   select="$topic/*[df:class(., 'topic/topic')]">
                   <xsl:with-param name="tocDepth" as="xs:integer" tunnel="yes" select="$tocDepth + 1"
                   />
+                  <xsl:with-param name="topicref" as="element()" tunnel="yes" select="."/>
                 </xsl:apply-templates>        
                 <xsl:if test="not(contains(@chunk, 'to-content'))">
                   <xsl:apply-templates mode="#current"
@@ -247,16 +248,16 @@
     <!-- Non-root topics generate ToC entries if they are within the ToC depth -->
     <xsl:param name="tocDepth" as="xs:integer" tunnel="yes" select="0"/>
     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
-
+    <xsl:param name="topicref" as="element()?" tunnel="yes"/>
+    
     <xsl:if test="$tocDepth le $maxTocDepthInt">
       <xsl:variable name="rawNavPointTitle" as="xs:string*">
         <xsl:apply-templates select="*[df:class(., 'topic/title')]" mode="nav-point-title"/>
       </xsl:variable>
       <xsl:variable name="navPointTitle"
         select="normalize-space(string-join($rawNavPointTitle, ' '))" as="xs:string"/>
-      <!-- FIXME: Need the topicref so we can take copy-to into account -->
         <xsl:variable name="targetUri"
-          select="htmlutil:getTopicResultUrl($outdir, root(.), $rootMapDocUrl)" 
+          select="htmlutil:getTopicResultUrl2($outdir, root(.), $topicref, $rootMapDocUrl)" 
           as="xs:string"/>
         <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)"
           as="xs:string"/>

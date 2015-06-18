@@ -126,7 +126,7 @@ for epub2, cannot have @doctype-system="about:legacy:compat" (per epubcheck) -->
       </xsl:when>
       <xsl:otherwise>
         <xsl:variable name="topicResultUri" 
-          select="htmlutil:getTopicResultUrl($outdir, root($topic), $rootMapDocUrl, $doDebug)"
+          select="htmlutil:getTopicResultUrl2($outdir, root($topic), .,$rootMapDocUrl, $doDebug)"
           as="xs:string"
         />
         <!-- Do href fixup before doing full default-mode processing: -->
