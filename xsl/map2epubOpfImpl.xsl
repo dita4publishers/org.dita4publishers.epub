@@ -823,6 +823,7 @@
           <xsl:when test="$imageExtension = 'jpeg'"><xsl:sequence select="'image/jpeg'"/></xsl:when>
           <xsl:when test="$imageExtension = 'gif'"><xsl:sequence select="'image/gif'"/></xsl:when>
           <xsl:when test="$imageExtension = 'png'"><xsl:sequence select="'image/png'"/></xsl:when>
+          <xsl:when test="$imageExtension = 'svg'"><xsl:sequence select="'image/svg+xml'"/></xsl:when>
           <xsl:otherwise>
             <xsl:message> - [WARN] Image extension "<xsl:sequence select="$imageExtension"/>" not recognized, may not work with ePub viewers.</xsl:message>
             <xsl:sequence select="concat('application/', lower-case($imageExtension))"/>
