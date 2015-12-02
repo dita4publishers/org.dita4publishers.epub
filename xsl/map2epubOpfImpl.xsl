@@ -816,19 +816,14 @@
         imageHref   =<xsl:sequence select="$imageHref"/>
       </xsl:message>
     </xsl:if>
+    <xsl:variable name="filenameHolder" as="element()">
+      <gmap:filename extension="{$imageExtension}"
+          name="{$imageFilename}"
+      />
+    </xsl:variable>
     <item id="{@id}" href="{$imageHref}">
       <xsl:attribute name="media-type">
-        <xsl:choose>
-          <xsl:when test="$imageExtension = 'jpg'"><xsl:sequence select="'image/jpeg'"/></xsl:when>
-          <xsl:when test="$imageExtension = 'jpeg'"><xsl:sequence select="'image/jpeg'"/></xsl:when>
-          <xsl:when test="$imageExtension = 'gif'"><xsl:sequence select="'image/gif'"/></xsl:when>
-          <xsl:when test="$imageExtension = 'png'"><xsl:sequence select="'image/png'"/></xsl:when>
-          <xsl:when test="$imageExtension = 'svg'"><xsl:sequence select="'image/svg+xml'"/></xsl:when>
-          <xsl:otherwise>
-            <xsl:message> - [WARN] Image extension "<xsl:sequence select="$imageExtension"/>" not recognized, may not work with ePub viewers.</xsl:message>
-            <xsl:sequence select="concat('application/', lower-case($imageExtension))"/>
-          </xsl:otherwise>
-        </xsl:choose>
+        <xsl:apply-templates select="$filenameHolder" mode="getMimeType"/>
       </xsl:attribute>
       <xsl:choose>
         <xsl:when test="$epubtrans:isEpub3">
@@ -840,6 +835,37 @@
         </xsl:otherwise>
       </xsl:choose>
     </item>
+  </xsl:template>
+  
+  <xsl:template mode="getMimeType" match="gmap:filename" priority="10">
+    <xsl:variable name="imageExtension" as="xs:string" select="@extension"/>
+    <xsl:choose>
+      <xsl:when test="$imageExtension = 'jpg'"><xsl:sequence select="'image/jpeg'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'jpeg'"><xsl:sequence select="'image/jpeg'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'gif'"><xsl:sequence select="'image/gif'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'png'"><xsl:sequence select="'image/png'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'svg'"><xsl:sequence select="'image/svg+xml'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'aac'"><xsl:sequence select="'audio/aac'"/></xsl:when>
+      <xsl:when test="$imageExtension = ('mp1', 'mp2', 'mp3', 'mpg', 'mpeg')"><xsl:sequence select="'audio/mpeg'"/></xsl:when>
+      <xsl:when test="$imageExtension = ('oga', 'ogg')"><xsl:sequence select="'audio/ogg'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'wav'"><xsl:sequence select="'audio/wav'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'm4a'"><xsl:sequence select="'audio/mp4'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'mp4'"><xsl:sequence select="'video/mp4'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'mov'"><xsl:sequence select="'video/mov'"/></xsl:when>
+      <xsl:when test="$imageExtension = 'webm'"><xsl:sequence select="'video/webm'"/></xsl:when>
+      <xsl:otherwise>
+        <!-- Enable custom extensions to this logic -->
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+    
+  </xsl:template>
+  
+  <xsl:template mode="getMimeType" match="gmap:filename" priority="0">
+    <!-- Fallback handling. -->
+    <xsl:variable name="imageExtension" as="xs:string" select="@extension"/>
+    <xsl:message> - [WARN] Image extension "<xsl:sequence select="$imageExtension"/>" not recognized, may not work with ePub viewers.</xsl:message>
+    <xsl:sequence select="concat('application/', lower-case($imageExtension))"/>    
   </xsl:template>
   
   <xsl:function name="local:includeTopicrefInSpine" as="xs:boolean">
