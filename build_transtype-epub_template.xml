@@ -26,7 +26,7 @@ for inclusion in the epub file -->
 		dita:depends="
 		d4p.map-driven-build-init,
 		build-init,
-		dc-preprocess,
+		preprocess,
 		epub"
     dita:extension="depends org.dita.dost.platform.InsertDependsAction">
   </target>
@@ -215,6 +215,7 @@ for inclusion in the epub file -->
       includesfile="${dita.temp.dir}${file.separator}${user.input.file.listfile}"
       classpathref="dost.class.path"
       style="${args.xsl}">
+      <sysproperty key="OT_VERSION" value="${otversion}"/>
      	<param name="cssOutputDir" expression="${css.output.dir}"/>
       <param name="copySystemCssNo" expression="${system.copycss.no}" if="system.copycss.no"/>
       <param name="debug" expression="${debug}"/>
