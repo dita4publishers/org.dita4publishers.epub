@@ -562,7 +562,9 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates mode="epubtrans:manifest" select="$topic">
-          
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          <xsl:with-param name="rootMapDocUrl" as="xs:string" tunnel="yes" select="$rootMapDocUrl"/>
+          <xsl:with-param name="topicref" as="element()" tunnel="yes" select="."/>
         </xsl:apply-templates>
       </xsl:otherwise>
     </xsl:choose>    
@@ -584,7 +586,7 @@
       <xsl:message> + [DEBUG] map2epubOpfImpl: relativeUri="<xsl:sequence select="$relativeUri"/>"</xsl:message>
     </xsl:if>
     <xsl:variable name="itemID" as="xs:string">
-      <xsl:apply-templates select="." mode="epubtrans:getManifestItemID">
+      <xsl:apply-templates select="$topicref" mode="epubtrans:getManifestItemID">
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
       </xsl:apply-templates>
     </xsl:variable>
