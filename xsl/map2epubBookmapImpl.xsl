@@ -5,8 +5,9 @@
   xmlns:df="http://dita2indesign.org/dita/functions"
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:opf="http://www.idpf.org/2007/opf"
+  xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns="http://www.idpf.org/2007/opf"
-  exclude-result-prefixes="xs df relpath"
+  exclude-result-prefixes="xs df relpath epubtrans"
   version="2.0">
     
   <!-- Extensions for DITA Bookmap map type modules in

@@ -9,7 +9,7 @@
   xmlns:gmap="http://dita4publishers/namespaces/graphic-input-to-output-map"  
   xmlns="http://www.idpf.org/2007/opf"
   xmlns:local="urn:functions:local"
-                xmlns:epubtrans="urn:d4p:epubtranstype"
+  xmlns:epubtrans="urn:d4p:epubtranstype"
   exclude-result-prefixes="df xs relpath htmlutil gmap local epubtrans"
   >
 

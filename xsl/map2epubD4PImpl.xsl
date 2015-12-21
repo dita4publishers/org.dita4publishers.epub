@@ -6,8 +6,9 @@
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:opf="http://www.idpf.org/2007/opf"
   xmlns:htmlutil="http://dita4publishers.org/functions/htmlutil"
+  xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns="http://www.idpf.org/2007/opf"
-  exclude-result-prefixes="xs df relpath htmlutil"
+  exclude-result-prefixes="xs df relpath htmlutil epubtrans"
   version="2.0">
     
   <!-- Extensions for DITA for Publishers vocabulary modules in
