@@ -172,13 +172,13 @@
     </xsl:if>
     <!-- List the XHTML files -->
     <!-- FIXME: Have to account for all navigation topicrefs. -->
-    <xsl:apply-templates mode="manifest" select="$uniqueTopicRefs">
+    <xsl:apply-templates mode="epubtrans:manifest " select="$uniqueTopicRefs">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
-    <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="manifest">
+    <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="epubtrans:manifest ">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
-    <xsl:apply-templates select=".//*[local:includeTopicrefInManifest(.)]" mode="manifest">
+    <xsl:apply-templates select=".//*[local:includeTopicrefInManifest(.)]" mode="epubtrans:manifest ">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
     <!-- Hook for extension points: -->
@@ -186,7 +186,7 @@
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
     <!-- List the images -->
-    <xsl:apply-templates mode="manifest" select="$graphicMap">
+    <xsl:apply-templates mode="epubtrans:manifest " select="$graphicMap">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
     
@@ -551,7 +551,7 @@
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="*[df:isTopicRef(.)]" mode="manifest">
+  <xsl:template match="*[df:isTopicRef(.)]" mode="epubtrans:manifest manifest">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
     
@@ -561,25 +561,35 @@
         <xsl:message> + [WARNING] manifest: Failed to resolve topic reference to href "<xsl:sequence select="string(@href)"/>"</xsl:message>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:variable name="targetUri" 
-          select="htmlutil:getTopicResultUrl2($outdir, root($topic), ., $rootMapDocUrl, $doDebug)"
-          as="xs:string"
-        />
-        <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
-        <xsl:if test="$doDebug">          
-          <xsl:message> + [DEBUG] map2epubOpfImpl: outdir="<xsl:sequence select="$outdir"/>"</xsl:message>
-          <xsl:message> + [DEBUG] map2epubOpfImpl: targetUri="<xsl:sequence select="$targetUri"/>"</xsl:message>
-          <xsl:message> + [DEBUG] map2epubOpfImpl: relativeUri="<xsl:sequence select="$relativeUri"/>"</xsl:message>
-        </xsl:if>
-        <xsl:variable name="itemID" as="xs:string">
-          <xsl:apply-templates select="." mode="epubtrans:getManifestItemID">
-            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-          </xsl:apply-templates>
-        </xsl:variable>
-        <item id="{$itemID}" href="{$relativeUri}"
-              media-type="application/xhtml+xml"/>
+        <xsl:apply-templates mode="epubtrans:manifest" select="$topic">
+          
+        </xsl:apply-templates>
       </xsl:otherwise>
     </xsl:choose>    
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:manifest" match="*[df:class(., 'topic/topic')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
+    <xsl:param name="topicref" as="element()" tunnel="yes"/>
+    
+    <xsl:variable name="targetUri" 
+      select="htmlutil:getTopicResultUrl2($outdir, root(.), ., $rootMapDocUrl, $doDebug)"
+      as="xs:string"
+    />
+    <xsl:variable name="relativeUri" select="relpath:getRelativePath($outdir, $targetUri)" as="xs:string"/>
+    <xsl:if test="$doDebug">          
+      <xsl:message> + [DEBUG] map2epubOpfImpl: outdir="<xsl:sequence select="$outdir"/>"</xsl:message>
+      <xsl:message> + [DEBUG] map2epubOpfImpl: targetUri="<xsl:sequence select="$targetUri"/>"</xsl:message>
+      <xsl:message> + [DEBUG] map2epubOpfImpl: relativeUri="<xsl:sequence select="$relativeUri"/>"</xsl:message>
+    </xsl:if>
+    <xsl:variable name="itemID" as="xs:string">
+      <xsl:apply-templates select="." mode="epubtrans:getManifestItemID">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <item id="{$itemID}" href="{$relativeUri}"
+      media-type="application/xhtml+xml"/>
   </xsl:template>
   
   <xsl:template mode="epubtrans:getManifestItemID" match="*[df:class(., 'map/topicref')]">
@@ -605,7 +615,7 @@
     <xsl:sequence select="normalize-space($itemKey)"/>
   </xsl:template>
 
-  <xsl:template match="*[df:isTopicHead(.)]" mode="manifest">
+  <xsl:template match="*[df:isTopicHead(.)]" mode="epubtrans:manifest manifest">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:if test="false()">
       <xsl:message> + [DEBUG] in mode manifest, handling topichead <xsl:sequence select="df:getNavtitleForTopicref(.)"/></xsl:message>
@@ -795,12 +805,12 @@
     <meta name="{@name}" content="{$value}"/>
   </xsl:template>
 
-  <xsl:template match="gmap:graphic-map" mode="manifest">
+  <xsl:template match="gmap:graphic-map" mode="epubtrans:manifest manifest">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
-  <xsl:template match="gmap:graphic-map-item" mode="manifest">
+  <xsl:template match="gmap:graphic-map-item" mode="epubtrans:manifest manifest">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:variable name="imageFilename" select="relpath:getName(@output-url)" as="xs:string"/>
     <xsl:variable name="imageExtension" select="lower-case(relpath:getExtension($imageFilename))" as="xs:string"/>

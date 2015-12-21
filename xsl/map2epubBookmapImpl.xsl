@@ -46,7 +46,7 @@
     <xsl:sequence select="true()"/>    
   </xsl:template>
   
-  <xsl:template mode="manifest" match="*[df:class(., 'bookmap/toc')]">
+  <xsl:template mode="epubtrans:manifest manifest" match="*[df:class(., 'bookmap/toc')]">
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('toc_', generate-id(.), $outext)"
     />
@@ -54,7 +54,7 @@
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
-  <xsl:template mode="manifest" match="*[df:class(., 'bookmap/figurelist')]">
+  <xsl:template mode="epubtrans:manifest manifest" match="*[df:class(., 'bookmap/figurelist')]">
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('list-of-figures_', generate-id(.), $outext)"
     />
@@ -62,7 +62,7 @@
       media-type="application/xhtml+xml"/>    
   </xsl:template>
   
-  <xsl:template mode="manifest" match="*[df:class(., 'bookmap/tablelist')]">
+  <xsl:template mode="epubtrans:manifest manifest" match="*[df:class(., 'bookmap/tablelist')]">
     <xsl:variable name="targetUri" as="xs:string"
       select="concat('list-of-tables_', generate-id(.), $outext)"
     />
