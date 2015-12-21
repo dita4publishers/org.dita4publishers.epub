@@ -17,7 +17,7 @@
 
        DITA Map to ePub Transformation
 
-       Copyright (c) 2010, 2014 DITA For Publishers
+       Copyright (c) 2010, 2015 DITA For Publishers
 
        Licensed under Common Public License v1.0 or the Apache Software Foundation License v2.0.
        The intent of this license is for this material to be licensed in a way that is
@@ -300,6 +300,7 @@
   <xsl:key name="elementsByXtrc" match="*[@xtrc]" use="@xtrc"/>
 
   <xsl:template name="report-parameters" match="*" mode="report-parameters">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
     <xsl:message>
       ==========================================
@@ -437,11 +438,13 @@
     -->
 
     <xsl:apply-templates select="." mode="report-parameters">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
     </xsl:apply-templates>
 
     <xsl:variable name="graphicMap" as="element()">
       <xsl:apply-templates select="." mode="generate-graphic-map">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
         <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
         <xsl:with-param name="uplevels" select="$uplevels" as="xs:string" tunnel="yes" />
       </xsl:apply-templates>
@@ -450,7 +453,9 @@
     <xsl:message> + [INFO] Collecting data for index generation, enumeration, etc....</xsl:message>
 
     <xsl:variable name="collected-data" as="element()">
-      <xsl:call-template name="mapdriven:collect-data"/>
+      <xsl:call-template name="mapdriven:collect-data">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+      </xsl:call-template>
     </xsl:variable>
 
     <xsl:if test="$doDebug">
@@ -466,12 +471,17 @@
       >
       <xsl:sequence select="$graphicMap"/>
     </xsl:result-document>
-    <xsl:call-template name="make-meta-inf"/>
-    <xsl:call-template name="make-mimetype"/>
+    <xsl:call-template name="make-meta-inf">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+    </xsl:call-template>
+    <xsl:call-template name="make-mimetype">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+    </xsl:call-template>
 
-    <xsl:message> + [INFO] Gathering index terms...</xsl:message>
+    <xsl:message> + [INFO] Generating EPUB content components...</xsl:message>
 
     <xsl:apply-templates select="." mode="generate-content">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
     </xsl:apply-templates>
     <xsl:if test="$epubtrans:isEpub3">
@@ -479,6 +489,7 @@
         <xsl:message> + [DEBUG] generating EPUB3 nav</xsl:message>
       </xsl:if>
       <xsl:apply-templates select="." mode="epubtrans:generate-nav">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
         <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
       </xsl:apply-templates>
       <xsl:if test="$doDebug">
@@ -491,25 +502,32 @@
         <xsl:message> + [DEBUG] generating EPUB2 toc.ncx...</xsl:message>
       </xsl:if>
       <xsl:apply-templates select="." mode="generate-toc">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
         <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
       </xsl:apply-templates>
       <xsl:if test="$doDebug">
         <xsl:message> + [DEBUG] after generate-toc</xsl:message>
       </xsl:if>
     </xsl:if>
+    <xsl:message> + [INFO] Generating back-of-book index (if requested)...</xsl:message>
     <xsl:apply-templates select="." mode="generate-index">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
     </xsl:apply-templates>
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] after generate-index</xsl:message>
     </xsl:if>
+    <xsl:message> + [INFO] Generating book lists (toc, figlist, etc.)...</xsl:message>
     <xsl:apply-templates select="." mode="generate-book-lists">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
     </xsl:apply-templates>
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] after generate-book-lists</xsl:message>
     </xsl:if>
+    <xsl:message> + [INFO] Generating OPF file...</xsl:message>
     <xsl:apply-templates select="." mode="generate-opf">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
       <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
@@ -517,10 +535,9 @@
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] after generate-opf</xsl:message>
     </xsl:if>
-    <xsl:if test="$doDebug">
-      <xsl:message> + [DEBUG] Generating graphic copy Ant script...</xsl:message>
-    </xsl:if>
+    <xsl:message> + [INFO] Generating graphic copy Ant script...</xsl:message>
     <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
     </xsl:apply-templates>
     <xsl:if test="$doDebug">
@@ -529,6 +546,7 @@
   </xsl:template>
 
   <xsl:template name="make-meta-inf">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:result-document href="{relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'container.xml')}"
       format="indented-xml" exclude-result-prefixes="enum index-terms glossdata mapdriven"
       >
@@ -541,6 +559,7 @@
   </xsl:template>
 
   <xsl:template name="make-mimetype">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:result-document href="{relpath:newFile($outdir, 'mimetype')}" method="text">
       <xsl:text>application/epub+zip</xsl:text>
     </xsl:result-document>

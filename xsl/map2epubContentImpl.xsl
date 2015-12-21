@@ -14,9 +14,9 @@
   version="2.0">
   <!-- =============================================================
     
-    DITA Map to ePub Transformation: Content Generation Module
+    DITA Map to EPUB Transformation: Content Generation Module
     
-    Copyright (c) 2010, 2013 DITA For Publishers
+    Copyright (c) 2010, 2015 DITA For Publishers
     
     This module generates output HTML files for each topic referenced
     from the incoming map.
@@ -215,7 +215,7 @@ for epub2, cannot have @doctype-system="about:legacy:compat" (per epubcheck) -->
     <!-- This template is a general dispatch template that applies
       templates to the topicref in a distinct mode so processors
       can do topic output processing based on the topicref context
-      if the want. -->
+      if they want. -->
     <xsl:param name="topicref" as="element()?" tunnel="yes"/>
     
     <xsl:choose>
