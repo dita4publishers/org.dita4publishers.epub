@@ -307,7 +307,22 @@
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
       
-  </xsl:template>  
+    <xsl:apply-templates mode="epubtrans:additional-opf-metadata" select=".">      
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>  
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:additional-opf-metadata" match="text()">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <!-- Make sure we don't get unwanted text in the output if there are
+         no extensions that implement this mode.
+      -->
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:additional-opf-metadata" match="*">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:apply-templates mode="#current" select="*"/><!-- We only care about elements -->
+  </xsl:template>
   
   <xsl:template name="epubtrans:generate-opf-spine">
     <!-- Context is a map -->
