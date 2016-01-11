@@ -48,16 +48,27 @@ for inclusion in the epub file -->
     <!-- Two steps because mimetype must go in first,
       uncompressed. Looks like ant puts later zipped files in
       first, so mimetype is in second zip task. -->
-    <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
-      basedir="${epub.temp.dir}"
-    	compress="true"
-      includes="META-INF${file.separator}container.xml,toc.ncx,
-      content.opf,container.opf,**/*.html,**/*.xhtml,**/*.css,**/*.HTML,**/*.CSS,
-      **/*.jpg,**/*.jpeg,**/*.gif,**/*.png,**/*.svg,**/*.mp4,**/*.mp3,**/*.m4a,
-      **/*.JPG,**/*.JPEG,**/*.GIF,**/*.PNG,**/*.SVG,**/*.MP4,**/*.MP3,**/*.M4A, 
-      **/*.ttf, **/*.ttc, **/*.otf, **/*.otc, *.woff,
-      **/*.TTF, **/*.TTC, **/*.OTF, **/*.OTC, *.WOFF
-      "/>
+    <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"      
+      compress="true"
+      >
+      <!-- Default includes: stuff that we know should legitimately be 
+           in any EPUB and is unlikely to get in the epub-temp directory
+           by accident.
+        -->
+      <fileset dir="${epub.temp.dir}"
+        includes="META-INF${file.separator}container.xml,toc.ncx,
+        content.opf,container.opf,**/*.html,**/*.xhtml,**/*.css,**/*.HTML,**/*.CSS,
+        **/*.jpg,**/*.jpeg,**/*.gif,**/*.png,**/*.svg,**/*.mp4,**/*.mp3,**/*.m4a,
+        **/*.JPG,**/*.JPEG,**/*.GIF,**/*.PNG,**/*.SVG,**/*.MP4,**/*.MP3,**/*.M4A, 
+        **/*.ttf, **/*.ttc, **/*.otf, **/*.otc, *.woff,
+        **/*.TTF, **/*.TTC, **/*.OTF, **/*.OTC, *.WOFF,
+        **/*.js,**/*.JS
+        "/>
+      <!-- Extension point to add additional includes or excludes as 
+           needed.
+        -->
+      <dita:extension id="d4p.epub.zip.fileset" behavior="org.dita.dost.platform.InsertAction"/>
+    </zip>
     <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
       basedir="${epub.temp.dir}"
       includes="mimetype"
