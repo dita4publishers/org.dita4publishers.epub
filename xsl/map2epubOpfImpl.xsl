@@ -10,6 +10,7 @@
   xmlns="http://www.idpf.org/2007/opf"
   xmlns:local="urn:functions:local"
   xmlns:epubtrans="urn:d4p:epubtranstype"
+  xmlns:enc="http://www.w3.org/2001/04/xmlenc#"
   exclude-result-prefixes="df xs relpath htmlutil gmap local epubtrans"
   >
 
@@ -144,6 +145,24 @@
               select="$uniqueTopicRefs" tunnel="yes"/>
           </xsl:apply-templates>
         </xsl:if>
+        <xsl:message> + [INFO] Generating encryption.xml file (if required)</xsl:message>
+        <!-- First see if encryption is required then, if it is, generate the encryption.xml file. -->
+        <xsl:variable name="isEncryptionRequired" as="xs:boolean*">
+          <xsl:apply-templates select="." mode="epubtrans:isEncryptionRequired">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+            <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
+            <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
+          </xsl:apply-templates>
+        </xsl:variable>
+        <xsl:if test="true() = $isEncryptionRequired">
+          <xsl:call-template name="epubtrans:makeEncryptionXml">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+            <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
+            <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
+          </xsl:call-template>
+        </xsl:if>
+        <xsl:message> + [INFO] Encryption.xml generation done.</xsl:message>
+        
       </package>
     </xsl:result-document>  
     <xsl:message> + [INFO] OPF file generation done.</xsl:message>
@@ -324,6 +343,10 @@
     <xsl:apply-templates mode="#current" select="*"/><!-- We only care about elements -->
   </xsl:template>
   
+  <!-- =============================
+       Mode epubtrans:collections
+       ============================= -->
+  
   <xsl:template name="epubtrans:generate-opf-spine">
     <!-- Context is a map -->
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
@@ -362,12 +385,20 @@
     </xsl:if>
   </xsl:template>
   
+  <!-- =============================
+       Mode epubtrans:bindings
+       ============================= -->
+  
   <xsl:template mode="epubtrans:bindings" match="*" priority="-1">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Do nothing. There are no default bindings.
       -->
   </xsl:template>
   
+  <!-- =============================
+       Mode epubtrans:collections
+       ============================= -->
+
   <xsl:template mode="epubtrans:collections" match="*[df:class(., 'map/map')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <collection>
@@ -388,6 +419,110 @@
          @prefix attribute on the <package> element.
       -->
   </xsl:template>
+
+  <!-- =============================
+       Mode epubtrans:isEncryptionRequired
+            epubtrans:makeEncryptionXml
+       ============================= -->
+  
+  <!-- Default check for encryption. If obfuscation is turned on and
+       any embedded fonts are obfuscated then encryption is required.
+       
+    -->
+  <xsl:template mode="epubtrans:isEncryptionRequired" match="*[df:class(., 'map/map')]">   
+    <xsl:choose>
+      <xsl:when test="$epubtrans:doObfuscateFonts">
+        <xsl:variable name="fontManifest" as="document-node()?" 
+          select="epubtrans:getFontManifestDoc($epubFontManifestUri)"/>
+        <xsl:sequence select="boolean($fontManifest//*[@obfuscate = ('obfuscate')])"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="false()"/>
+      </xsl:otherwise>      
+    </xsl:choose>
+  </xsl:template>
+  
+  <!-- Generate the encryption.xml file.
+    
+       The encryption.xml file must reflect any
+       resource that is encrypted or obfuscated,
+       such as obfuscated fonts.
+       
+       Context is the root map.
+    -->
+  <xsl:template name="epubtrans:makeEncryptionXml">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:variable name="fontManifest" as="document-node()?" 
+      select="epubtrans:getFontManifestDoc($epubFontManifestURI)"
+    />
+    <xsl:variable name="resultURI" as="xs:string"
+      select="relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'encryption.xml')"
+    />
+    <xsl:result-document indent="yes" method="xml"
+      href="{$resultURI}"
+      >      
+      <encryption 
+        xmlns="urn:oasis:names:tc:opendocument:xmlns:container" 
+        xmlns:enc="http://www.w3.org/2001/04/xmlenc#">
+        <!-- Handle any embedded fonts. -->
+        <xsl:apply-templates mode="epubtrans:makeEncryptionXml"
+          select="$fontManifest/*"
+          >
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+        </xsl:apply-templates>
+        <xsl:apply-templates select="." mode="epubtrans:makeEncryptionXml">
+          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+        </xsl:apply-templates>
+      </encryption>
+    </xsl:result-document>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:makeEncryptionXml" match="*[df:class(., 'map/map')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <!-- No default encryption processing for maps. Override this template in
+         an extension plugin to add additional encryption entries.
+      -->
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:makeEncryptionXml" match="text()">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <!-- Suppress all text by default -->
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:makeEncryptionXml" match="font-manifest">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:apply-templates select=".//font[@obfuscate = ('obfuscate')]"
+      mode="#current"
+    >
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:makeEncryptionXml" match="font-manifest[@obfuscate = ('obfuscate')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:variable name="fontFilename" as="xs:string"
+      select="relpath:getName(string(@uri))"
+    />
+    
+    <xsl:variable name="fontUri" as="xs:string"
+      select="relpath:newFile($fontsOutputDir, $fontFilename)"
+    />
+    
+    <enc:EncryptedData> 
+      <enc:EncryptionMethod Algorithm="http://www.idpf.org/2008/embedding"/>
+      <enc:CipherData> 
+        <enc:CipherReference URI="{$fontUri}"/> 
+      </enc:CipherData>
+    </enc:EncryptedData> 
+  </xsl:template>
+
+  <!-- =====================
+       Mode guide
+       ===================== -->
   
   <xsl:template mode="guide" match="*[df:class(., 'map/map')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
@@ -413,11 +548,18 @@
     </xsl:apply-templates>
   </xsl:template>
   
+  <!-- ======================================
+       Mode generate-opf-manifest-extensions
+       ====================================== -->
+  
   <xsl:template mode="generate-opf-manifest-extensions" match="*[df:class(., 'map/map')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Default implementation. Override to add files to the OPF manifest. -->
   </xsl:template>
 
+  <!-- ======================================
+       Mode generate-opf-spine-extensions
+       ====================================== -->
   <xsl:template mode="spine-extensions" match="*[df:class(., 'map/map')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <!-- Default implementation. Override to add files to the OPF spine. -->
@@ -451,6 +593,10 @@
     </xsl:choose>
   </xsl:template>
   
+  <!-- ======================================
+       Mode data-to-refines
+       ====================================== -->
+  
   <xsl:template match="*[df:class(., 'topic/data')]" mode="data-to-refines">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="refinesId" as="xs:string"/>
@@ -459,6 +605,10 @@
     </meta>
   </xsl:template>
   
+  <!-- ======================================
+       Mode data-to-atts
+       ====================================== -->
+
   <xsl:template mode="data-to-atts" match="text()">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
   </xsl:template><!-- Suppress all text by default -->
@@ -585,6 +735,10 @@
     </xsl:choose>    
   </xsl:template>
   
+  <!-- ======================================
+       Mode epubtrans:manifest
+       ====================================== -->
+
   <xsl:template mode="epubtrans:manifest" match="*[df:class(., 'topic/topic')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
@@ -706,6 +860,10 @@
       </xsl:apply-templates>
     
   </xsl:template>
+  
+  <!-- ======================================
+       Mode list-bookids, bookid
+       ====================================== -->
   
   <xsl:template match="*[df:class(., 'bookmap/bookid')] | *[df:class(., 'pubmeta-d/pubid ')]" 
     mode="list-bookids">
@@ -864,6 +1022,10 @@
     </item>
   </xsl:template>
   
+  <!-- ======================================
+       Mode getMimeType
+       ====================================== -->
+  
   <xsl:template mode="getMimeType" match="gmap:filename" priority="10">
     <xsl:variable name="imageExtension" as="xs:string" select="@extension"/>
     <xsl:choose>
@@ -918,6 +1080,10 @@
     </xsl:if>
     <xsl:sequence select="$result"/>
   </xsl:function>  
+  
+  <!-- ======================================
+       Mode include-topicref-in-spine
+       ====================================== -->
   
   <xsl:template mode="include-topicref-in-spine" match="*">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>

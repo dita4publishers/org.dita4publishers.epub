@@ -15,9 +15,9 @@
 
   <!-- =============================================================
 
-       DITA Map to ePub Transformation
+       DITA Map to EPUB Transformation
 
-       Copyright (c) 2010, 2015 DITA For Publishers
+       Copyright (c) 2010, 2016 DITA For Publishers
 
        Licensed under Common Public License v1.0 or the Apache Software Foundation License v2.0.
        The intent of this license is for this material to be licensed in a way that is
@@ -82,7 +82,8 @@
   <xsl:include href="map2epubListOfTables.xsl"/>
   <xsl:include href="map2epubNavImpl.xsl"/>
   <xsl:include href="map2epubTocImpl.xsl"/>
-<!--  <xsl:include href="map2epubIndexImpl.xsl"/>-->
+  <xsl:include href="map2epubEmbedFonts.xsl"/>
+  <!--  <xsl:include href="map2epubIndexImpl.xsl"/>-->
   <xsl:include href="html2xhtmlImpl.xsl"/>
   <xsl:include href="epubHtmlOverrides.xsl"/>
 
@@ -132,6 +133,11 @@
   -->
   <xsl:param name="topicsOutputDir" select="'topics'" as="xs:string"/>
 
+  <!-- The path of the directory, relative to the $outdir parameter,
+       to hold any fonts embedded in the EPUB.
+    -->
+  <xsl:param name="fontsOutputDir" select="'fonts'" as="xs:string"/>
+  
   <!-- The path of the directory, relative the $outdir parameter,
     to hold the CSS files in the EPub package. Should not have
     a leading "/".
@@ -207,6 +213,13 @@
        of the cover graphic.
     -->
   <xsl:param name="coverGraphicUri" as="xs:string" select="''" />
+  
+  <!-- The URI of the epub font manifest file used to manage embedding 
+       of fonts in the EPUB file. The file must be an XML document
+       valid to the urn:dita4publishers:doctypes:font-manifest:rng:font-manifest.rng
+       grammar included in the DITA for Publisher doctypes plugin.
+    -->
+  <xsl:param name="epubFontManifestUri" as="xs:string?"/>
 
   <!-- NOTE: These parameters are used by the math-d2html XSLT code -->
 
@@ -240,6 +253,21 @@
     select="matches($generateCollections, 'yes|true|on|1', 'i')"
   />
 
+  <!-- The URI of the epub font manifest file used to manage embedding 
+       of fonts in the EPUB file. The file must be an XML document
+       valid to the urn:dita4publishers:doctypes:font-manifest:rng:font-manifest.rng
+       grammar included in the DITA for Publisher doctypes plugin.
+    -->
+  <xsl:param name="epubFontManifestURI" as="xs:string?"/>  
+  
+  <!-- Apply font obfuscation to any font in the font manifest that
+       turns obfuscation on.
+    -->
+  <xsl:param name="obfuscateFonts" as="xs:string" select="'no'"/>
+  <xsl:variable name="epubtrans:doObfuscateFonts" as="xs:boolean"
+    select="matches($obfuscateFonts, 'yes|true|on|1', 'i')"
+  />
+  
   <!-- The type of EPUB to be generated: EPUB3 only ('epub3'),
        EPUB2 only ('epub2'), or dual EPUB3/EPUB2 ('dual').
        Dual is the default.
@@ -326,6 +354,8 @@
       + titleOnlyTopicClassSpec = "<xsl:sequence select="$titleOnlyTopicClassSpec"/>"
       + titleOnlyTopicTitleClassSpec = "<xsl:sequence select="$titleOnlyTopicTitleClassSpec"/>"
       + topicsOutputDir = "<xsl:sequence select="$topicsOutputDir"/>"
+      + fontsOutputDir  = "<xsl:sequence select="$fontsOutputDir"/>"
+      + epubFontManifestUri = "<xsl:sequence select="$epubFontManifestUri"/>"
       + copySystemCssNo = "<xsl:sequence select="$copySystemCssNo"/>"
       
       + WORKDIR         = "<xsl:sequence select="$WORKDIR"/>"
@@ -413,6 +443,19 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:variable>
+  
+  <xsl:variable name="fontsOutputPath">
+    <xsl:choose>
+      <xsl:when test="$fontsOutputDir != ''">
+        <xsl:sequence select="relpath:newFile($outdir, $fontsOutputDir)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$outdir"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
+  
+  
 
   <xsl:template match="/">
     <xsl:if test="$debugBoolean">

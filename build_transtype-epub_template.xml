@@ -260,7 +260,8 @@ for inclusion in the epub file -->
       <param name="maxTocDepth" expression="${d4p.max.toc.depth}" if="d4p.max.toc.depth"/>
       <param name="maxNavDepth" expression="${d4p.max.nav.depth}" if="d4p.max.nav.depth"/>
       <param name="epubType" expression="${d4p.epubtype}" if="d4p.epubtype"/>
-
+      <param name="epubFontManifestUri" expression="${epub.font.manifest}" if="epub.font.manifest" />    
+      
     	<!-- Parameters from dita2xhtml and similar transtypes: -->
       <param name="WORKDIR" expression="${workdir}" if="workdir"/>
       <param name="BASEDIR" expression="${basedir}"></param>
