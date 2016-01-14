@@ -23,11 +23,23 @@
        ========================================= -->
   
  
-  <xsl:template match="*" mode="additional-graphic-refs" priority="10">
+  <xsl:template match="*" mode="additional-graphic-refs" priority="20">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+<!--    <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>-->
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] additional-graphic-refs: embed fonts override: <xsl:value-of select="concat(name(..), '/', name(.))"/></xsl:message>
+    </xsl:if>
+
     <!-- If there is a font manifest specified, process it to add 
          references to each font to the set of graphic references.
       -->
     <xsl:if test="$epubFontManifestUri != ''">
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] additional-graphic-refs: $epubFontManifestUri="<xsl:value-of select="$epubFontManifestUri"/>"</xsl:message>
+      </xsl:if>
+
       <xsl:message> + [INFO] Font manifest specified as "<xsl:value-of select="$epubFontManifestUri"/>"</xsl:message>
       <xsl:message> + [INFO] Processing font manifest...</xsl:message>
       <xsl:variable name="fontManifest" as="document-node()?" 
@@ -37,7 +49,16 @@
           <xsl:message> - [WARN] Font manifest file "<xsl:value-of select="$epubFontManifestUri"/>" not parsed. Fonts will not be embedded.</xsl:message>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:apply-templates select="$fontManifest/*" mode="epubtrans:font-graphic-refs"/>
+          <xsl:if test="$doDebug">
+            <xsl:message> + [DEBUG] additional-graphic-refs: Applying templates to font manifest in mode epubtrans:font-graphic-refs...</xsl:message>
+          </xsl:if>
+          
+          <xsl:apply-templates select="$fontManifest/*" mode="epubtrans:font-graphic-refs">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>              
+          </xsl:apply-templates>
+          <xsl:if test="$doDebug">
+            <xsl:message> + [DEBUG] additional-graphic-refs: Font manifest processing done.</xsl:message>
+          </xsl:if>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:message> + [INFO] Font manifest processing complete.</xsl:message>
@@ -46,15 +67,38 @@
   </xsl:template>
   
   <xsl:template mode="epubtrans:font-graphic-refs" match="font-manifest">
-    <xsl:apply-templates mode="#current" select="font-set"/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:font-graphic-refs: Element <xsl:value-of select="concat(name(..), '/', name(.))"/></xsl:message>
+    </xsl:if>
+    
+    <xsl:apply-templates mode="#current" select="font-set">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
   </xsl:template>
 
   <xsl:template mode="epubtrans:font-graphic-refs" match="font-set">
-    <xsl:apply-templates mode="#current" select="font"/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:font-graphic-refs: Element <xsl:value-of select="concat(name(..), '/', name(.))"/></xsl:message>
+    </xsl:if>
+    
+
+    <xsl:apply-templates mode="#current" select="font">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
   </xsl:template>
   
   
   <xsl:template mode="epubtrans:font-graphic-refs" match="font">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:font-graphic-refs: Element <xsl:value-of select="concat(name(..), '/', name(.))"/></xsl:message>
+    </xsl:if>
+
     <xsl:variable name="baseURI" as="xs:string" select="relpath:getParent(string(base-uri(.)))"/>
     <xsl:variable name="uri" as="xs:string" select="@uri"/>
     <xsl:variable name="fontURI" as="xs:string"
@@ -65,11 +109,17 @@
     />
     <xsl:message> + [INFO] Font embedding: Including font "<xsl:value-of select="$fontURI"/>"</xsl:message>
     <gmap:graphic-ref href="{$fontURI}" filename="{relpath:getName($fontURI)}">
-      <xsl:sequence select="@obfuscate"/>
+      <xsl:sequence select="(@obfuscate, ../@obfuscate)[1]"/>
     </gmap:graphic-ref>
   </xsl:template>
   
   <xsl:template mode="epubtrans:font-graphic-refs" match="* | text()" priority="-1">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:font-graphic-refs: Element <xsl:value-of select="concat(name(..), '/', name(.))"/></xsl:message>
+    </xsl:if>
+    
     <!-- Ignore by default -->
   </xsl:template>
   
@@ -78,6 +128,7 @@
        ============================================ -->
   
   <xsl:template mode="getMimeType" match="gmap:filename[@extension = ('ttf', 'otf', 'ttc')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
     <xsl:variable name="font-type" as="xs:string"
       select="if (@extension = ('ttf', 'otf', 'ttc', 'cff')) then 'sfnt'
@@ -88,11 +139,13 @@
   </xsl:template>
   
   <xsl:template mode="getMimeType" match="gmap:filename[@extension = ('css')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
     <xsl:sequence select="'text/css'"/>
   </xsl:template>
   
   <xsl:template mode="getMimeType" match="gmap:filename[@extension = ('js')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
     <xsl:sequence select="'text/javascript'"/>
   </xsl:template>

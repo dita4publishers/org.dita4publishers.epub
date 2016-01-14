@@ -13,9 +13,16 @@
   exclude-result-prefixes="local xs df xsl relpath kindleutil index-terms gmap">
 
   <xsl:template match="*[df:class(., 'map/map')]" mode="additional-graphic-refs" priority="10">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
-    <xsl:message> + [DEBUG] **** generating cover-image graphic-ref</xsl:message>
+
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] additional-graphic-refs: generating cover-image graphic-ref</xsl:message>
+    </xsl:if>
     <xsl:if test="$effectiveCoverGraphicUri != ''">
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] additional-graphic-refs: $effectiveCoverGraphicUri="<xsl:value-of select="$effectiveCoverGraphicUri"/>"</xsl:message>
+      </xsl:if>
       <gmap:graphic-ref 
         id="{$coverImageId}"
         href="{$effectiveCoverGraphicUri}" 
@@ -23,6 +30,7 @@
         properties="cover-image"
       />
     </xsl:if>
+    <xsl:next-match/>
   </xsl:template>
      
   <xsl:template match="/*[df:class(., 'map/map')]" mode="get-cover-graphic-uri">
