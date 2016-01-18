@@ -130,12 +130,18 @@
   <xsl:template mode="getMimeType" match="gmap:filename[@extension = ('ttf', 'otf', 'ttc')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
+    <!-- NOTE: Per the EPUB 3.1 spec, the core MIME type for
+         Open Type fonts is "application/vnd.ms-opentype", which is
+         what epubcheck 4.0 expects. However, there is now an official
+         MIME type for Open Type fonts, "application/font-sfnt",
+         which the EPUB spec will probably be updated to allow.
+      -->
     <xsl:variable name="font-type" as="xs:string"
-      select="if (@extension = ('ttf', 'otf', 'ttc', 'cff')) then 'sfnt'
-              else @extension
+      select="if (@extension = ('ttf', 'otf', 'ttc', 'cff')) then 'vnd.ms-opentype'
+      else concat('font-', @extension)
       "
     />
-    <xsl:sequence select="concat('application/font-', $font-type)"/>
+    <xsl:sequence select="concat('application/', $font-type)"/>
   </xsl:template>
   
   <xsl:template mode="getMimeType" match="gmap:filename[@extension = ('css')]">
