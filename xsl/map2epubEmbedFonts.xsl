@@ -135,6 +135,8 @@
          what epubcheck 4.0 expects. However, there is now an official
          MIME type for Open Type fonts, "application/font-sfnt",
          which the EPUB spec will probably be updated to allow.
+         
+         See https://github.com/IDPF/epubcheck/issues/339
       -->
     <xsl:variable name="font-type" as="xs:string"
       select="if (@extension = ('ttf', 'otf', 'ttc', 'cff')) then 'vnd.ms-opentype'
