@@ -801,6 +801,9 @@
           " />
     <item id="{generate-id()}" href="{$targetUri}"
       media-type="application/xhtml+xml"/>
+    <!-- FIXME: Need to apply templates in a mode to enable adding additional attributes, e.g.,
+         @scripted.
+      -->
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'map/topicref')]" mode="spine">
