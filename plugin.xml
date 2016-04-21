@@ -113,5 +113,10 @@
       <val default="yes">false</val>
       <val>true</val>
     </param>
+    <param name="html2.generate.index"
+      desc="Specifies whether or not to generate a back-of-the-book index" type="enum">
+      <val>true</val>
+      <val default="true">false</val>
+    </param>
   </transtype>
 </plugin>
