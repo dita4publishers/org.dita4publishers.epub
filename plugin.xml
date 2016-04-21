@@ -77,7 +77,41 @@
       desc="Specifies the name of the directory within the EPUB to hold all images. 
       Any valid directory name. The EPUB process automatically renames graphics to ensure that there are no name conflicts when the graphics are copied to into this directory from their source locations."
       type="string">
-      <val default="true">images</val>
+      <val default="true">images</val>      
+    </param>
+    <param name="d4p.epubtype" type="enum"
+      desc="Specifies the type of EPUB to produce: EPUB 2 only, EPUB3 only, or Dual EPUB 2/3. Default is dual 2/3."
+      >
+      <val default="true">dual</val>
+      <val>epub2</val>      
+      <val>epub3</val>      
+    </param>
+    <param name="epub.font.manifest" type="file"
+      desc="The URI of the EPUB font manifest file. The font manifest specifies the fonts to embed in the EPUB."
+      >
+    </param>
+    <param name="epub.obfuscate.fonts" type="enum"
+      desc="Indicates whether or not to apply font obfuscation to fonts flagged as obfuscated in the font manifest."
+      >
+      <val default="yes">false</val>
+      <val>true</val>
+    </param>
+    <param name="epub.fonts.output.dir" type="dir"
+      desc="The path, within the generated EPUB, to store embedded fonts. Default is to put fonts in the root of the EPUB."
+      >
+    </param>
+    <param name="title.only.topic.class.spec"
+      desc="The @class value to use for generated title-only topics, e.g., '- topic/topic concept/concept '"
+       type="string"/>
+    <param name="title.only.topic.title.class.spec"
+      desc="The @class value to use for generated title-only topic titles, e.g., '- topic/title '"
+      type="string"/>
+    <param name="epub.generate.html.toc" type="enum"
+      desc="Indicates whether or not to generate an HTML table of contents in addition to the 
+      required navigation ToC (EPUB 2 .ncx file or EPUB 3 nav element)"
+      >
+      <val default="yes">false</val>
+      <val>true</val>
     </param>
   </transtype>
 </plugin>
