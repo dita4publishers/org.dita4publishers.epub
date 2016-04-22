@@ -183,6 +183,48 @@
     </xsl:choose>
   </xsl:template>
   
+  <!-- Apply font obfuscation if the obfuscate attribute is set to true -->
+  <xsl:template mode="gmap:generate-copy-target" match="gmap:graphic-map-item[@obfuscate = ('obfuscate')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="targetId" as="xs:string" tunnel="yes"/>
+    <xsl:param name="sourceDir" as="xs:string" tunnel="yes"/>
+    <xsl:param name="toFile" as="xs:string" tunnel="yes"/>
+    
+    <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] gmap:generate-copy-target: Override for font processing. </xsl:message>
+    </xsl:if>
+
+    
+    <xsl:variable name="doObfuscation" as="xs:boolean" select="@obfuscate = ('obfuscate')"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] gmap:generate-copy-target: obfuscate="<xsl:value-of select="$doObfuscation"/>. </xsl:message>
+    </xsl:if>
+    
+    <xsl:variable name="sourceFile" 
+      as="xs:string" 
+      select="@input-url"
+    />
+    
+    <xsl:choose>
+      <xsl:when test="$doObfuscation">
+        <target name="copy-{$targetId}" depends="check-{$targetId}, report-{$targetId}" if="is-{$targetId}">
+          <ant target="epub-obfuscate-font" antfile="${{dita.dir}}/build.xml">
+            <property name="font.obfuscate.obfuscationkey" value="{@obfuscationkey}"/>
+            <property name="font.obfuscate.inputfont" value="{$sourceFile}"/>
+            <property name="font.obfuscate.resultfont" value="{$toFile}"/>
+          </ant>
+        </target>
+        
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+    
+    
   <!-- Gets the font manifest file, if a URI has been specified, otherwise
        returns an empty sequence.
     -->
