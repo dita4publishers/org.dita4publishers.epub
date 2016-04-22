@@ -23,7 +23,7 @@
   <feature extension="dita.conductor.transtype.check" value="epub" type="txt"/>
   <feature extension="dita.conductor.target.relative" file="build.xml"/>
   <feature extension="dita.xsl.strings" value="strings/strings.xml" type="file"/>
-
+  
    <!-- New way of specifying metadata with parameters contributed by the EPUB transtype:
         https://github.com/dita-ot/dita-ot/issues/1757
    -->

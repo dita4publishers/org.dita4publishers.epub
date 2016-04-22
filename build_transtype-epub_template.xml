@@ -333,4 +333,14 @@ for inclusion in the epub file -->
     <copy file="${dita.plugin.org.dita4publishers.kindle.dir}/css/kindleExtensions.css" todir="${user.csspath.real}"/>
   </target>
   
+  <target name="epub-obfuscate-font">
+    <java jar="${dita.plugin.org.dita4publishers.epub.dir}/lib/epub-font-obfuscator.jar"
+      fork="true"
+      >
+      <arg value="${font.obfuscate.obfuscationkey}"/>
+      <arg value="${font.obfuscate.inputfont}"/>
+      <arg value="${font.obfuscate.resultfont}"/>
+    </java>
+  </target>
+  
 </project>
