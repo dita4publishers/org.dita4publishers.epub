@@ -145,7 +145,6 @@
               select="$uniqueTopicRefs" tunnel="yes"/>
           </xsl:apply-templates>
         </xsl:if>
-        <xsl:message> + [INFO] Generating encryption.xml file (if required)</xsl:message>
         <!-- First see if encryption is required then, if it is, generate the encryption.xml file. -->
         <xsl:variable name="isEncryptionRequired" as="xs:boolean*">
           <xsl:apply-templates select="." mode="epubtrans:isEncryptionRequired">
@@ -154,9 +153,11 @@
             <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
           </xsl:apply-templates>
         </xsl:variable>
-        <xsl:if test="true() = $isEncryptionRequired">
+        <xsl:message> + [DEBUG] $isEncryptionRequired="<xsl:value-of select="$isEncryptionRequired"/>"</xsl:message>
+        <xsl:if test="$isEncryptionRequired">
+          <xsl:message> + [INFO] Generating encryption.xml file...</xsl:message>
           <xsl:call-template name="epubtrans:makeEncryptionXml">
-            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="true()"/>
             <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
             <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
           </xsl:call-template>
@@ -453,12 +454,21 @@
   <xsl:template name="epubtrans:makeEncryptionXml">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:makeEncryptionXml: Generating encryption.xml...</xsl:message>
+    </xsl:if>
+    
     <xsl:variable name="fontManifest" as="document-node()?" 
       select="epubtrans:getFontManifestDoc($epubFontManifestURI)"
     />
     <xsl:variable name="resultURI" as="xs:string"
       select="relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'encryption.xml')"
     />
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:makeEncryptionXml: resultURI="<xsl:value-of select="$resultURI"/>"</xsl:message>
+    </xsl:if>
+    
     <xsl:result-document indent="yes" method="xml"
       href="{$resultURI}"
       >      

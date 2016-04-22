@@ -191,7 +191,7 @@
     <xsl:param name="toFile" as="xs:string" tunnel="yes"/>
     <xsl:param name="epubBookID" as="xs:string" tunnel="yes" select="'epub-bookid-not-specified'"/>
     
-    <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>
+<!--    <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>-->
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] gmap:generate-copy-target: Override for font processing. </xsl:message>
     </xsl:if>
