@@ -189,6 +189,7 @@
     <xsl:param name="targetId" as="xs:string" tunnel="yes"/>
     <xsl:param name="sourceDir" as="xs:string" tunnel="yes"/>
     <xsl:param name="toFile" as="xs:string" tunnel="yes"/>
+    <xsl:param name="epubBookID" as="xs:string" tunnel="yes" select="'epub-bookid-not-specified'"/>
     
     <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>
     <xsl:if test="$doDebug">
@@ -208,10 +209,11 @@
     />
     
     <xsl:choose>
-      <xsl:when test="$doObfuscation">
+      <xsl:when test="$epubtrans:doObfuscateFonts and $doObfuscation">
+        <xsl:message> + [INFO] Obfuscating embedded font "<xsl:value-of select="$sourceFile"/>"</xsl:message>
         <target name="copy-{$targetId}" depends="check-{$targetId}, report-{$targetId}" if="is-{$targetId}">
           <ant target="epub-obfuscate-font" antfile="${{dita.dir}}/build.xml">
-            <property name="font.obfuscate.obfuscationkey" value="{@obfuscationkey}"/>
+            <property name="font.obfuscate.obfuscationkey" value="{$epubBookID}"/>
             <property name="font.obfuscate.inputfont" value="{$sourceFile}"/>
             <property name="font.obfuscate.resultfont" value="{$toFile}"/>
           </ant>

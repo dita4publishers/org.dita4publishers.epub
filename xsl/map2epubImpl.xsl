@@ -330,6 +330,8 @@
   <xsl:template name="report-parameters" match="*" mode="report-parameters">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="effectiveCoverGraphicUri" select="''" as="xs:string" tunnel="yes"/>
+    <xsl:param name="epubBookID" as="xs:string"/>
+    
     <xsl:message>
       ==========================================
       Plugin version: ^version^ - build ^buildnumber^ at ^timestamp^
@@ -356,7 +358,9 @@
       + topicsOutputDir = "<xsl:sequence select="$topicsOutputDir"/>"
       + fontsOutputDir  = "<xsl:sequence select="$fontsOutputDir"/>"
       + epubFontManifestUri = "<xsl:sequence select="$epubFontManifestUri"/>"
+      + obfuscateFonts  = "<xsl:sequence select="$obfuscateFonts"/>"
       + copySystemCssNo = "<xsl:sequence select="$copySystemCssNo"/>"
+      
       
       + WORKDIR         = "<xsl:sequence select="$WORKDIR"/>"
       + PATH2PROJ       = "<xsl:sequence select="$PATH2PROJ"/>"
@@ -376,6 +380,8 @@
       + epubtrans:isEpub3     = "<xsl:sequence select="$epubtrans:isEpub3"/>"
       + epubtrans:isEpub2     = "<xsl:sequence select="$epubtrans:isEpub2"/>"
       + epubtrans:isDualEpub  = "<xsl:sequence select="$epubtrans:isDualEpub"/>"
+      + epubtrans:doObfuscateFonts = "<xsl:sequence select="$epubtrans:doObfuscateFonts"/>"
+      + epubBookID       = "<xsl:sequence select="$epubBookID"/>"
 
       ==========================================
     </xsl:message>
@@ -473,6 +479,30 @@
     <xsl:variable name="effectiveCoverGraphicUri" as="xs:string">
       <xsl:apply-templates select="." mode="get-cover-graphic-uri"/>
     </xsl:variable>
+    
+    <!-- Get the EPUB book ID as used for font obfuscation, among
+         other things.
+         
+      -->
+    <xsl:variable name="epubBookID" as="xs:string">
+      <xsl:choose>
+        <xsl:when test="*[df:class(., 'map/topicmeta')]">
+          <xsl:variable name="dcIdentifier" as="node()*">
+            <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]" mode="bookid">
+              <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            </xsl:apply-templates>
+          </xsl:variable>
+          <xsl:variable name="candBookID" select="normalize-space($dcIdentifier)"/>
+          <xsl:sequence select="if (matches($candBookID, '^\s*$')) 
+                                   then 'no-bookid-value' 
+                                   else $candBookID"
+          />
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="'no-bookid-value'"/>
+        </xsl:otherwise>
+      </xsl:choose>      
+    </xsl:variable>
 
     <!-- FIXME: Add mode to get effective front cover topic URI so we
          can generate <guide> entry for the cover page. Also provides
@@ -483,6 +513,7 @@
     <xsl:apply-templates select="." mode="report-parameters">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
+      <xsl:with-param name="epubBookID" as="xs:string" select="$epubBookID"/>
     </xsl:apply-templates>
 
     <xsl:variable name="graphicMap" as="element()">
@@ -490,6 +521,7 @@
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
         <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
         <xsl:with-param name="uplevels" select="$uplevels" as="xs:string" tunnel="yes" />
+        <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
       </xsl:apply-templates>
     </xsl:variable>
 
@@ -516,9 +548,11 @@
     </xsl:result-document>
     <xsl:call-template name="make-meta-inf">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+      <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
     </xsl:call-template>
     <xsl:call-template name="make-mimetype">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+      <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
     </xsl:call-template>
 
     <xsl:message> + [INFO] Generating EPUB content components...</xsl:message>
@@ -526,6 +560,7 @@
     <xsl:apply-templates select="." mode="generate-content">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
     </xsl:apply-templates>
     <xsl:if test="$epubtrans:isEpub3">
       <xsl:if test="$doDebug">
@@ -534,6 +569,7 @@
       <xsl:apply-templates select="." mode="epubtrans:generate-nav">
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
         <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+        <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
       </xsl:apply-templates>
       <xsl:if test="$doDebug">
         <xsl:message> + [DEBUG] after generate-nav</xsl:message>
@@ -547,6 +583,7 @@
       <xsl:apply-templates select="." mode="generate-toc">
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
         <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+        <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
       </xsl:apply-templates>
       <xsl:if test="$doDebug">
         <xsl:message> + [DEBUG] after generate-toc</xsl:message>
@@ -556,6 +593,7 @@
     <xsl:apply-templates select="." mode="generate-index">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
     </xsl:apply-templates>
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] after generate-index</xsl:message>
@@ -564,6 +602,7 @@
     <xsl:apply-templates select="." mode="generate-book-lists">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
+      <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
     </xsl:apply-templates>
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] after generate-book-lists</xsl:message>
@@ -574,6 +613,7 @@
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
       <xsl:with-param name="collected-data" as="element()" select="$collected-data" tunnel="yes"/>
       <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
+      <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
     </xsl:apply-templates>
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] after generate-opf</xsl:message>
@@ -582,6 +622,7 @@
     <xsl:apply-templates select="." mode="generate-graphic-copy-ant-script">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="graphicMap" as="element()" tunnel="yes" select="$graphicMap"/>
+      <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
     </xsl:apply-templates>
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
