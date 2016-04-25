@@ -183,6 +183,49 @@
     </xsl:choose>
   </xsl:template>
   
+  <!-- Make encryption.xml entries for obfuscated fonts. 
+    
+       This template should only be called if obfuscation is turned
+       on.
+       
+    -->
+  <xsl:template mode="epubtrans:makeEncryptionXml" match="font-manifest">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:makeEncryptionXml: font-manifest. </xsl:message>
+      <xsl:message> + [DEBUG] epubtrans:makeEncryptionXml: Have <xsl:value-of 
+        select="count(.//font[@obfuscate = ('obfuscate')])"/> obfuscated fonts.</xsl:message>
+    </xsl:if>
+    
+    <xsl:apply-templates select=".//font[@obfuscate = ('obfuscate')]"
+      mode="#current"
+      >
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:makeEncryptionXml" match="font[@obfuscate = ('obfuscate')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:variable name="fontFilename" as="xs:string"
+      select="relpath:getName(string(@uri))"
+    />
+    
+    <xsl:variable name="fontUri" as="xs:string"
+      select="relpath:newFile($fontsOutputDir, $fontFilename)"
+    />
+    
+    <enc:EncryptedData xmlns:enc="http://www.w3.org/2001/04/xmlenc#"> 
+      <enc:EncryptionMethod Algorithm="http://www.idpf.org/2008/embedding"/>
+      <enc:CipherData> 
+        <enc:CipherReference URI="{$fontUri}"/> 
+      </enc:CipherData>
+    </enc:EncryptedData> 
+  </xsl:template>
+  
+  
+  
   <!-- Apply font obfuscation if the obfuscate attribute is set to true -->
   <xsl:template mode="gmap:generate-copy-target" match="gmap:graphic-map-item[@obfuscate = ('obfuscate')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>

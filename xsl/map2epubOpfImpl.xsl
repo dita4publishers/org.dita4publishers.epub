@@ -501,35 +501,6 @@
     <!-- Suppress all text by default -->
   </xsl:template>
   
-  <xsl:template mode="epubtrans:makeEncryptionXml" match="font-manifest">
-    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    
-    <xsl:apply-templates select=".//font[@obfuscate = ('obfuscate')]"
-      mode="#current"
-    >
-      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-    </xsl:apply-templates>
-  </xsl:template>
-  
-  <xsl:template mode="epubtrans:makeEncryptionXml" match="font-manifest[@obfuscate = ('obfuscate')]">
-    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    
-    <xsl:variable name="fontFilename" as="xs:string"
-      select="relpath:getName(string(@uri))"
-    />
-    
-    <xsl:variable name="fontUri" as="xs:string"
-      select="relpath:newFile($fontsOutputDir, $fontFilename)"
-    />
-    
-    <enc:EncryptedData> 
-      <enc:EncryptionMethod Algorithm="http://www.idpf.org/2008/embedding"/>
-      <enc:CipherData> 
-        <enc:CipherReference URI="{$fontUri}"/> 
-      </enc:CipherData>
-    </enc:EncryptedData> 
-  </xsl:template>
-
   <!-- =====================
        Mode guide
        ===================== -->
@@ -1076,7 +1047,7 @@
       <xsl:apply-templates select="$context" mode="include-topicref-in-spine"/>
     </xsl:variable>
     <xsl:variable name="result" as="xs:boolean" select="$test = 'true'"/>
-    <xsl:if test="$result">
+    <xsl:if test="$result and true()">
       <xsl:message> + [DEBUG] local:includeTopicrefInSpine: Including element "<xsl:sequence select="name($context)"/>" in spine.</xsl:message>
     </xsl:if>
     <xsl:sequence select="$result"/>
@@ -1088,7 +1059,7 @@
       <xsl:apply-templates select="$context" mode="include-topicref-in-manifest"/>
     </xsl:variable>
     <xsl:variable name="result" as="xs:boolean" select="$test = 'true'"/>
-    <xsl:if test="$result">
+    <xsl:if test="$result and false()">
       <xsl:message> + [DEBUG] local:includeTopicrefInSpine: Including element "<xsl:sequence select="name($context)"/>" in manifest.</xsl:message>
     </xsl:if>
     <xsl:sequence select="$result"/>
