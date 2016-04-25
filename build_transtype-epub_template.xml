@@ -223,6 +223,7 @@ for inclusion in the epub file -->
 
   	<property name="args.xsl" location="${epub.dir}/xsl/map2epub.xsl"/>
     <makeurl file="${dita.input.valfile}" property="dita.input.valfile.url" validate="no"></makeurl>
+    <makeurl file="${epub.font.manifest}"  property="epub.font.manifest.url" validate="no"/>
 
   	<echo message="[DEBUG] input file='${dita.temp.dir}${file.separator}${user.input.file}'"/>
 
@@ -261,7 +262,7 @@ for inclusion in the epub file -->
       <param name="maxTocDepth" expression="${d4p.max.toc.depth}" if="d4p.max.toc.depth"/>
       <param name="maxNavDepth" expression="${d4p.max.nav.depth}" if="d4p.max.nav.depth"/>
       <param name="epubType" expression="${d4p.epubtype}" if="d4p.epubtype"/>
-      <param name="epubFontManifestUri" expression="${epub.font.manifest}" if="epub.font.manifest" />    
+      <param name="epubFontManifestUri" expression="${epub.font.manifest.url}" if="epub.font.manifest" />    
       <param name="obfuscateFonts" expression="${epub.obfuscate.fonts}" if="epub.obfuscate.fonts"/>
       
     	<!-- Parameters from dita2xhtml and similar transtypes: -->

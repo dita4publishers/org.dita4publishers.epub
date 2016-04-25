@@ -43,7 +43,7 @@
       <xsl:message> + [INFO] Font manifest specified as "<xsl:value-of select="$epubFontManifestUri"/>"</xsl:message>
       <xsl:message> + [INFO] Processing font manifest...</xsl:message>
       <xsl:variable name="fontManifest" as="document-node()?" 
-        select="epubtrans:getFontManifestDoc($epubFontManifestUri)"/>
+        select="epubtrans:getFontManifestDoc($epubFontManifestUri, root(.))"/>
       <xsl:choose>
         <xsl:when test="not($fontManifest)">
           <xsl:message> - [WARN] Font manifest file "<xsl:value-of select="$epubFontManifestUri"/>" not parsed. Fonts will not be embedded.</xsl:message>
@@ -275,10 +275,11 @@
     -->
   <xsl:function name="epubtrans:getFontManifestDoc" as="document-node()?">
     <xsl:param name="epubFontManifestURI" as="xs:string"/>
+    <xsl:param name="baseNode" as="node()"/>
     
     <xsl:variable name="result" as="document-node()?" 
       select="if ($epubFontManifestUri != '') 
-                 then document($epubFontManifestUri)
+                 then document($epubFontManifestUri, $baseNode)
                  else ()"
     />
     <xsl:if test="$epubFontManifestUri != '' and not($result)">

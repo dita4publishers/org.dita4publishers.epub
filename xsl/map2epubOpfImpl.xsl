@@ -434,7 +434,7 @@
     <xsl:choose>
       <xsl:when test="$epubtrans:doObfuscateFonts">
         <xsl:variable name="fontManifest" as="document-node()?" 
-          select="epubtrans:getFontManifestDoc($epubFontManifestUri)"/>
+          select="epubtrans:getFontManifestDoc($epubFontManifestUri, root(.))"/>
         <xsl:sequence select="boolean($fontManifest//*[@obfuscate = ('obfuscate')])"/>
       </xsl:when>
       <xsl:otherwise>
@@ -459,7 +459,7 @@
     </xsl:if>
     
     <xsl:variable name="fontManifest" as="document-node()?" 
-      select="epubtrans:getFontManifestDoc($epubFontManifestURI)"
+      select="epubtrans:getFontManifestDoc($epubFontManifestURI, root(.))"
     />
     <xsl:variable name="resultURI" as="xs:string"
       select="relpath:newFile(relpath:newFile($outdir, 'META-INF'), 'encryption.xml')"
