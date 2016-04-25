@@ -97,8 +97,9 @@
       <val>true</val>
     </param>
     <param name="epub.fonts.output.dir" type="dir"
-      desc="The path, within the generated EPUB, to store embedded fonts. Default is to put fonts in the root of the EPUB."
+      desc="The path, within the generated EPUB, to store embedded fonts. Default is 'fonts'."
       >
+      <val default="yes">fonts</val>
     </param>
     <param name="title.only.topic.class.spec"
       desc="The @class value to use for generated title-only topics, e.g., '- topic/topic concept/concept '"
