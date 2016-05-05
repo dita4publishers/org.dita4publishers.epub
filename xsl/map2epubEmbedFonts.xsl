@@ -127,7 +127,7 @@
        Set the MIME types for fonts appropriately
        ============================================ -->
   
-  <xsl:template mode="getMimeType" match="gmap:filename[@extension = ('ttf', 'otf', 'ttc')]">
+  <xsl:template mode="getMimeType" match="gmap:filename[lower-case(@extension) = ('ttf', 'otf', 'ttc')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
     <!-- NOTE: Per the EPUB 3.1 spec, the core MIME type for
@@ -139,8 +139,8 @@
          See https://github.com/IDPF/epubcheck/issues/339
       -->
     <xsl:variable name="font-type" as="xs:string"
-      select="if (@extension = ('ttf', 'otf', 'ttc', 'cff')) then 'vnd.ms-opentype'
-      else concat('font-', @extension)
+      select="if (lower-case(@extension) = ('ttf', 'otf', 'ttc', 'cff')) then 'vnd.ms-opentype'
+      else concat('font-', lower-case(@extension))
       "
     />
     <xsl:sequence select="concat('application/', $font-type)"/>
@@ -166,13 +166,14 @@
     <xsl:variable name="absoluteUrl" as="xs:string" select="@href"/>
     <xsl:variable name="filename" as="xs:string" select="@filename"/>
     <xsl:variable name="namePart" as="xs:string" select="relpath:getNamePart($filename)"/>
-    <xsl:variable name="extension" as="xs:string" select="relpath:getExtension($filename)"/>
+    <xsl:variable name="extension" as="xs:string" select="lower-case(relpath:getExtension($filename))"/>
     <xsl:variable name="key"
       select="
       if (count(preceding-sibling::*[@filename = $filename]) > 0)
       then concat($namePart, '-', count(preceding-sibling::*[@filename = $filename]) + 1, '.', $extension)
       else $filename
-      "/>
+      "
+    />
     <xsl:choose>
       <xsl:when test="$extension = ('ttf', 'ttc', 'otf', 'otc', 'cff', 'woff')">
         <xsl:sequence select="relpath:newFile($fontsOutputPath, $key)"/>        
