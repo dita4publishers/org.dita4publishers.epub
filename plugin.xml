@@ -101,6 +101,13 @@
       >
       <val default="yes">fonts</val>
     </param>
+    <param name="epub.generate.css.font.rules" type="enum"
+      desc="Indicates whether or not to generate CSS @font-face rules for embedded fonts as configurated in the font manifest. 
+      Default 'false' (don't generate CSS rules)"
+      >
+      <val default="yes">false</val>
+      <val>true</val>
+    </param>
     <param name="title.only.topic.class.spec"
       desc="The @class value to use for generated title-only topics, e.g., '- topic/topic concept/concept '"
        type="string"/>

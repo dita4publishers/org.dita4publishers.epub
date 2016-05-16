@@ -264,6 +264,7 @@ for inclusion in the epub file -->
       <param name="epubType" expression="${d4p.epubtype}" if="d4p.epubtype"/>
       <param name="epubFontManifestUri" expression="${epub.font.manifest.url}" if="epub.font.manifest" />    
       <param name="obfuscateFonts" expression="${epub.obfuscate.fonts}" if="epub.obfuscate.fonts"/>
+      <param name="epubGenerateCSSFontRules" expression="${epub.generate.css.font.rules}" if="epub.generate.css.font.rules"/>
       
     	<!-- Parameters from dita2xhtml and similar transtypes: -->
       <param name="WORKDIR" expression="${workdir}" if="workdir"/>

@@ -56,6 +56,11 @@
           <xsl:apply-templates select="$fontManifest/*" mode="epubtrans:font-graphic-refs">
             <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>              
           </xsl:apply-templates>
+          <!-- Putting the CSS @font-face generation here as it must contribute to the 
+               OPF manifest and get copied to the output. Also, this is the only place
+               that the font manifest gets processed. This may not be the best place for
+               this action but it's good enough for now.
+            -->
           <xsl:if test="$doDebug">
             <xsl:message> + [DEBUG] additional-graphic-refs: Font manifest processing done.</xsl:message>
           </xsl:if>
@@ -270,7 +275,150 @@
     </xsl:choose>
   </xsl:template>
     
+  <!-- ============================================
+       Generate CSS @font-face rules
+       ============================================ -->
+  
+  <xsl:template name="epubtrans:generateCSSFontRules">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
+    <xsl:if test="$epubFontManifestUri != ''">
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] additional-graphic-refs: $epubFontManifestUri="<xsl:value-of select="$epubFontManifestUri"/>"</xsl:message>
+      </xsl:if>
+      
+      <xsl:message> + [INFO] Font manifest specified as "<xsl:value-of select="$epubFontManifestUri"/>"</xsl:message>
+      <xsl:message> + [INFO] Processing font manifest...</xsl:message>
+      <xsl:variable name="fontManifest" as="document-node()?" 
+        select="epubtrans:getFontManifestDoc($epubFontManifestUri, root(.))"/>
+      <xsl:choose>
+        <xsl:when test="not($fontManifest)">
+          <xsl:message> - [WARN] Font manifest file "<xsl:value-of select="$epubFontManifestUri"/>" not parsed. Fonts will not be embedded.</xsl:message>
+        </xsl:when>
+        <xsl:otherwise>
+                
+          <xsl:message> + [INFO] Generating CSS @font-rules...</xsl:message>
+          
+          <xsl:apply-templates select="$fontManifest/*" mode="epubtrans:generateCSSFontRules">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          </xsl:apply-templates>
+          <xsl:message> + [INFO] CSS @font-rules generated.</xsl:message>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:generateCSSFontRules" match="font-manifest">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:apply-templates mode="#current" select="font-set[1]">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:generateCSSFontRules" match="font-set">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:variable name="cssUrl" as="xs:string" 
+      select="if (@css-url != '') then @css-url else 'fonts.css'"
+    />
+    <xsl:variable name="resultUrl" as="xs:string"
+      select="relpath:newFile($fontsOutputDir, $cssUrl)"
+    />
+    <xsl:message> + [INFO] Generating @font-face CSS file "<xsl:value-of select="$resultUrl"/>"...</xsl:message>
+    <xsl:result-document href="{$resultUrl}" method="text">
+      <xsl:text>/*----------------------------------------------------------- 
+  Font face rules for </xsl:text><xsl:value-of select="../title"
+      /><xsl:text>&#x0a; -----------------------------------------------------------*/&#x0a;</xsl:text>
+      <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] epubtrans:generateCSSFontRules: font-set - Applying templates to font elements...</xsl:message>
+      </xsl:if>
+      <xsl:apply-templates mode="#current" select="font">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+      <xsl:if test="$doDebug">
+        <xsl:message> + [DEBUG] epubtrans:generateCSSFontRules: font-set - Done applying templates to font elements.</xsl:message>
+      </xsl:if>
+    </xsl:result-document>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:generateCSSFontRules" match="font[css-rules]" priority="10">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:generateCSSFontRules: font <xsl:value-of select="@uri"/> with css-rules child.</xsl:message>
+    </xsl:if>
+    
+    <xsl:variable name="fontUrl" as="xs:string" select="@uri"/>
+    
+    <xsl:variable name="fontFamily" as="xs:string" 
+      select="relpath:getNamePart($fontUrl)"/>
+
+    <xsl:apply-templates mode="#current" select="css-rules">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      <xsl:with-param name="fontUrl" as="xs:string" tunnel="yes" select="$fontUrl"/>
+      <xsl:with-param name="fontFamily" as="xs:string" tunnel="yes" select="$fontFamily"/>
+    </xsl:apply-templates>
+        
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:generateCSSFontRules" match="css-rules">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+
+    <xsl:apply-templates mode="#current" select="font-face">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+  </xsl:template> 
+    
+  <xsl:template mode="epubtrans:generateCSSFontRules" match="font-face">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="fontUrl" as="xs:string" tunnel="yes"/>
+    <xsl:param name="fontFamily" as="xs:string" tunnel="yes"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:generateCSSFontRules: font-face: <xsl:sequence select="."/></xsl:message>
+    </xsl:if>
+    
+    <xsl:text>&#x0a;@font-face {&#x0a;</xsl:text>
+    <xsl:value-of select="concat('  font-family: ''',$fontFamily,''';&#x0a;')"/>
+    <xsl:value-of select="concat('  src: url(',$fontUrl,');&#x0a;')"/>
+    <xsl:apply-templates mode="#current" select="@*">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+    <xsl:text>}&#x0a;</xsl:text>    
+    
+  </xsl:template> 
+  
+  <xsl:template mode="epubtrans:generateCSSFontRules" match="@*">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:generateCSSFontRules: <xsl:sequence select="."/></xsl:message>
+    </xsl:if>
+    
+    <!-- FIXME: Not sure if there's any need to quote any values here. -->
+    <xsl:value-of select="concat('  ', name(.), ': ', string(.), ';&#x0a;')"/>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:generateCSSFontRules" match="font">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:generateCSSFontRules: Default font rule for font <xsl:value-of select="@uri"/></xsl:message>
+    </xsl:if>
+    
+    <xsl:variable name="fontUrl" as="xs:string" select="@uri"/>
+    
+    <xsl:variable name="fontFamily" as="xs:string" 
+      select="relpath:getNamePart($fontUrl)"
+    />
+    
+    <xsl:text>&#x0a;@font-face {&#x0a;</xsl:text>
+    <xsl:value-of select="concat('  font-family: ''',$fontFamily,''';&#x0a;')"/>
+    <xsl:value-of select="concat('  src: url(',$fontUrl,');&#x0a;')"/>
+    <xsl:text>}&#x0a;</xsl:text>
+  </xsl:template>
+  
   <!-- Gets the font manifest file, if a URI has been specified, otherwise
        returns an empty sequence.
     -->

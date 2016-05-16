@@ -138,6 +138,12 @@
     -->
   <xsl:param name="fontsOutputDir" select="'fonts'" as="xs:string"/>
   
+  <xsl:param name="epubGenerateCSSFontRules" select="'false'" as="xs:string"/>
+  <xsl:variable name="epubtrans:doGenerateCSSFontRules" 
+    select="matches($epubGenerateCSSFontRules, '1|yes|true|on', 'i')" 
+    as="xs:boolean"
+  />
+  
   <!-- The path of the directory, relative the $outdir parameter,
     to hold the CSS files in the EPub package. Should not have
     a leading "/".
@@ -360,6 +366,7 @@
       + epubFontManifestUri = "<xsl:sequence select="$epubFontManifestUri"/>"
       + obfuscateFonts  = "<xsl:sequence select="$obfuscateFonts"/>"
       + copySystemCssNo = "<xsl:sequence select="$copySystemCssNo"/>"
+      + epubGenerateCSSFontRules = "<xsl:sequence select="$epubGenerateCSSFontRules"/>"
       
       
       + WORKDIR         = "<xsl:sequence select="$WORKDIR"/>"
@@ -381,6 +388,7 @@
       + epubtrans:isEpub2     = "<xsl:sequence select="$epubtrans:isEpub2"/>"
       + epubtrans:isDualEpub  = "<xsl:sequence select="$epubtrans:isDualEpub"/>"
       + epubtrans:doObfuscateFonts = "<xsl:sequence select="$epubtrans:doObfuscateFonts"/>"
+      + epubtrans:doGenerateCSSFontRules = "<xsl:sequence select="$epubtrans:doGenerateCSSFontRules"/>"
       + epubBookID       = "<xsl:sequence select="$epubBookID"/>"
 
       ==========================================
@@ -524,6 +532,13 @@
         <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
       </xsl:apply-templates>
     </xsl:variable>
+    
+    <xsl:if test="$epubtrans:doGenerateCSSFontRules">
+      <xsl:call-template name="epubtrans:generateCSSFontRules">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+      </xsl:call-template>
+    </xsl:if>
+    
 
     <xsl:message> + [INFO] Collecting data for index generation, enumeration, etc....</xsl:message>
 
