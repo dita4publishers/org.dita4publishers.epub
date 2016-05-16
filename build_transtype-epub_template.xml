@@ -17,7 +17,10 @@
   <!-- property that when set will prevent the DITA-OT OOTB CSS from being copied
 for inclusion in the epub file -->
   <condition property="system.copycss.no">
-    <isset property="args.system.copycss.no"/>
+    <and>
+      <isset property="epub.copy.system.css"/>
+      <isfalse  value="${epub.copy.system.css}"/>
+    </and>
   </condition>
   
 	<target name="dita2epub"
@@ -230,6 +233,7 @@ for inclusion in the epub file -->
          to enable proper CSS copying.
          
       -->
+    
     <!-- begin to check and init css relevant properties -->
     <condition property="user.csspath.url">
       <or>

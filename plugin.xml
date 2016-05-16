@@ -121,6 +121,13 @@
       <val default="yes">false</val>
       <val>true</val>
     </param>
+    <param name="epub.copy.system.css" type="enum"
+      desc="Set to 'false' to prevent copying of the built-in CSS files. By default the normal 
+      OT-provided CSS files are copied into the EPUB."
+      >
+      <val default="yes">true</val>
+      <val>false</val>
+    </param>
     <param name="html2.generate.index"
       desc="Specifies whether or not to generate a back-of-the-book index" type="enum">
       <val>true</val>
