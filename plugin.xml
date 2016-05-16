@@ -28,9 +28,9 @@
         https://github.com/dita-ot/dita-ot/issues/1757
    -->
   <transtype name="epub" extends="d4pCommons" desc="EPUB (DITA 4 Publishers)">
-    <param name="args.css.output.dir"
-      desc="Specifies the directory to put CSS files into for EPUB and Kindle transforms.
-      By default it is the configured topic output directory."
+    <param name="args.csspath"
+      desc="Specifies the directory within the EPUB to hold CSS files. Value should be a relative
+      path, e.g. 'css'."
       type="dir"/>
     <param name="cover.graphic.file"
       desc="Specifies the absolute or relative path of the graphic to use as the cover graphic for the EPUB. 

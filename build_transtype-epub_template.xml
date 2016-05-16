@@ -148,17 +148,30 @@ for inclusion in the epub file -->
       </not>
     </condition>
 
+    <echo>user.csspath="${user.csspath}"</echo>
+    <echo>args.css.output.dir="${args.css.output.dir}"</echo>
+    
   	<!-- It appears that user.csspath will always have a value,
   	     even if it's an empty string.
   	  -->
     <condition property="css.output.dir" value="css">
-      <not>
-        <isset property="user.csspath" />
-      </not>
+      <and>
+        <not>
+          <isset property="user.csspath" />
+        </not>
+        <not>
+          <isset property="args.css.output.dir" />          
+        </not>
+      </and>
+    </condition>
+    <condition property="css.output.dir" value="${args.css.output.dir}">
+      <isset property="args.css.output.dir" />
     </condition>
     <condition property="css.output.dir" value="${user.csspath}">
       <isset property="user.csspath" />
     </condition>
+    
+    <echo>css.output.dir="${css.output.dir}"</echo>
     
     <condition property="css.include.kindle" value="true">
       <equals arg1="${d4p.include.kindle.css}" arg2="true"/>
@@ -211,9 +224,65 @@ for inclusion in the epub file -->
   	<echoproperties format="text" regex="^(epub|css|out\.|preprocess)" taskname="echo"/>
   </target>
 
+  <target name="epub.xhtml.init" if="isOT2">
+    <!-- NOTE: These conditions are copied from the OT 2.x
+         build_general's xhtml.init target. They are required
+         to enable proper CSS copying.
+         
+      -->
+    <!-- begin to check and init css relevant properties -->
+    <condition property="user.csspath.url">
+      <or>
+        <contains string="${args.csspath}" substring="http://"/>
+        <contains string="${args.csspath}" substring="https://"/>
+      </or>
+    </condition>
+    <condition property="args.csspath.absolute">
+      <isabsolute path="${args.csspath}"/>
+    </condition>
+    <!-- Set the csspath as default empty directory when there is no user
+      input csspath or user input csspath is a local absolute path. -->
+    <condition property="user.csspath" value="">
+      <or>
+        <not>
+          <isset property="args.csspath"/>
+        </not>
+        <isset property="args.csspath.absolute"/>
+      </or>
+    </condition>
+    <condition property="user.csspath" value="${args.csspath}/">
+      <not>
+        <isset property="user.csspath"/>
+      </not>
+    </condition>
+    <!-- NOTE: This is to support the older (but unnecessary) 
+               args.css.output.dir, removed in 1.0.0 RC18
+      -->
+    <condition property="user.csspath" value="${args.css.output.dir}/">
+      <not>
+        <isset property="args.css.output.dir"/>
+      </not>
+    </condition>
+    <condition property="args.css.real" value="${args.cssroot}${file.separator}${args.css}">
+      <isset property="args.cssroot"/>
+    </condition>
+    <condition property="args.css.real" value="${args.css}">
+      <not>
+        <isset property="args.cssroot"/>
+      </not>
+    </condition>
+    <available file="${args.css.real}" property="args.css.present" type="file"/>
+    <basename property="args.css.file.temp" file="${args.css}"/>
+    <condition property="args.css.file" value="${args.css.file.temp}">
+      <or>
+        <isset property="args.css.present"/>
+        <isset property="user.csspath.url"/>
+      </or>
+    </condition>
+    
+  </target>
 
-
-  <target name="dita.map.epub" depends="dita.map.epub.init, epub-copy-css"
+  <target name="dita.map.epub" depends="epub.xhtml.init, dita.map.epub.init, epub-copy-css"
   	description="Generate all ePub components from input map and topics">
 
   	<mkdir dir="${epub.temp.dir}"/>
@@ -308,6 +377,7 @@ for inclusion in the epub file -->
       <isset property="args.css.present"/>
     </condition>
         
+    <echo>css.output.dir="${css.output.dir}"</echo>    
     <property name="user.csspath.real" value="${epub.temp.dir}/${css.output.dir}"/>
   	<echo message="Copying css files to '${user.csspath.real}"/>
     <mkdir dir="${user.csspath.real}"/>
@@ -321,13 +391,15 @@ for inclusion in the epub file -->
   </target>
 
   <target name="epub-copy-css-system" unless="${system.copycss.no}">
-    <echo message="copying system [${system.copycss.no}]" />
+    <echo message="copying system CSS files [system.copycss.no='${system.copycss.no}']" />
     <copy todir="${user.csspath.real}">
       <fileset dir="${dita.plugin.org.dita.xhtml.dir}/resource" includes="*.css"/>
     </copy>
   </target>
 
   <target name="epub-copy-css-user" if="user.copycss.yes">
+    <echo>Copying user CSS "${args.css.real}" to directory "${user.csspath.real}"...</echo>
+    
     <copy file="${args.css.real}" todir="${user.csspath.real}"/>
   </target>
   

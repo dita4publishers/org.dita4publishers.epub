@@ -883,8 +883,12 @@
         <xsl:attribute name="id" select="$id"/>
       </xsl:if>
       <xsl:sequence select="string(@value)"/>
-      <xsl:apply-templates/>
+      <xsl:apply-templates mode="#current"/>
     </dc:identifier>
+  </xsl:template>
+  
+  <xsl:template mode="bookid" match="text()">
+    <xsl:sequence select="."/>
   </xsl:template>
   
   <xsl:template match="*" mode="bookid" priority="-1">

@@ -6,7 +6,8 @@
   xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns:gmap="http://dita4publishers/namespaces/graphic-input-to-output-map"
   exclude-result-prefixes="xs df relpath epubtrans"
-  version="2.0">
+  version="2.0"
+  xmlns:fn="http://www.example.com/fn">
   
   <!-- =========================================
        Manages embedding of fonts in the 
@@ -56,11 +57,6 @@
           <xsl:apply-templates select="$fontManifest/*" mode="epubtrans:font-graphic-refs">
             <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>              
           </xsl:apply-templates>
-          <!-- Putting the CSS @font-face generation here as it must contribute to the 
-               OPF manifest and get copied to the output. Also, this is the only place
-               that the font manifest gets processed. This may not be the best place for
-               this action but it's good enough for now.
-            -->
           <xsl:if test="$doDebug">
             <xsl:message> + [DEBUG] additional-graphic-refs: Font manifest processing done.</xsl:message>
           </xsl:if>
@@ -81,6 +77,16 @@
     <xsl:apply-templates mode="#current" select="font-set">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
+    <!-- Now generate an entry for the font CSS if font CSS creation has been requested. -->
+    <xsl:if test="$epubtrans:doGenerateCSSFontRules">
+      <!-- NOTE: For now assuming that there's exactly one font-set as we don't have any
+                 features for selecting or combining font sets.
+        -->
+      <xsl:variable name="cssUrl" select="epubtrans:getFontCSSUri((./font-set)[1])"/>
+      <gmap:graphic-ref href="{$cssUrl}" filename="{relpath:getName($cssUrl)}" 
+        targetDir="{$fontsOutputDir}"
+      />
+    </xsl:if>
   </xsl:template>
 
   <xsl:template mode="epubtrans:font-graphic-refs" match="font-set">
@@ -319,18 +325,14 @@
   <xsl:template mode="epubtrans:generateCSSFontRules" match="font-set">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
-    <xsl:variable name="cssUrl" as="xs:string" 
-      select="if (@css-url != '') then @css-url else 'fonts.css'"
-    />
-    <xsl:variable name="resultUrl" as="xs:string"
-      select="relpath:newFile($fontsOutputDir, $cssUrl)"
-    />
+    <xsl:variable name="resultUrl" select="epubtrans:getFontCSSUri(.)"/>
+    
     <xsl:message> + [INFO] Generating @font-face CSS file "<xsl:value-of select="$resultUrl"/>"...</xsl:message>
     <xsl:result-document href="{$resultUrl}" method="text">
       <xsl:text>/*----------------------------------------------------------- 
   Font face rules for </xsl:text><xsl:value-of select="../title"
-      /><xsl:text>&#x0a; -----------------------------------------------------------*/&#x0a;</xsl:text>
-      <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>
+      /><xsl:text>&#x0a;  -----------------------------------------------------------*/&#x0a;</xsl:text>
+<!--      <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>-->
       <xsl:if test="$doDebug">
         <xsl:message> + [DEBUG] epubtrans:generateCSSFontRules: font-set - Applying templates to font elements...</xsl:message>
       </xsl:if>
@@ -352,7 +354,11 @@
     <xsl:variable name="fontUrl" as="xs:string" select="@uri"/>
     
     <xsl:variable name="fontFamily" as="xs:string" 
-      select="relpath:getNamePart($fontUrl)"/>
+      select="
+      if (@css-font-family-name != '') 
+         then @css-font-family-name 
+         else relpath:getNamePart($fontUrl)"
+    />
 
     <xsl:apply-templates mode="#current" select="css-rules">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
@@ -410,7 +416,10 @@
     <xsl:variable name="fontUrl" as="xs:string" select="@uri"/>
     
     <xsl:variable name="fontFamily" as="xs:string" 
-      select="relpath:getNamePart($fontUrl)"
+      select="
+      if (@css-font-family-name != '') 
+      then @css-font-family-name 
+      else relpath:getNamePart($fontUrl)"
     />
     
     <xsl:text>&#x0a;@font-face {&#x0a;</xsl:text>
@@ -438,4 +447,19 @@
     
   </xsl:function>
   
+  <!-- Construct the result URI for the font CSS file. Takes a font-set element
+       as input.
+    -->
+  <xsl:function name="epubtrans:getFontCSSUri">
+    <xsl:param name="context" as="element(font-set)"/>
+
+    <xsl:variable name="cssUrl" as="xs:string" 
+      select="if ($context/@css-url != '') then $context/@css-url else 'fonts.css'"
+    />
+    <xsl:variable name="resultUrl" as="xs:string"
+      select="relpath:newFile(relpath:newFile($outdir, $fontsOutputDir), $cssUrl)"
+    />
+    <xsl:sequence select="$resultUrl"/>
+  </xsl:function>
+    
 </xsl:stylesheet>
