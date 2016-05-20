@@ -299,7 +299,8 @@ for inclusion in the epub file -->
     <makeurl file="${epub.font.manifest}"  property="epub.font.manifest.url" validate="no"/>
 
   	<echo message="[DEBUG] input file='${dita.temp.dir}${file.separator}${user.input.file}'"/>
-
+   <!--This property is no longer defined in DITA OT 2.x-->
+   <dirname property="dita.input.dirname" file="${args.input}" />
   	<!-- NOTE: since we're not using the direct output of the base XSLT transform we just
   	     set the output directory to the temp dir where it will be ignored.
   	  -->
