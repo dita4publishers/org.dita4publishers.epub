@@ -610,18 +610,28 @@
     " 
     mode="generate-opf"> 
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    <dc:publisher><xsl:apply-templates>
+    <dc:publisher><xsl:apply-templates mode="#current">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates></dc:publisher>
   </xsl:template>
   
-  <xsl:template match="*[df:class(., 'topic/publisher')]/*">
+  <xsl:template match="*[df:class(., 'topic/data')]/text()" mode="generate-opf">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    <!-- Make sure that markup within publisher is handled (e.g., for bookmap). -->
-    <xsl:apply-templates>
+    <xsl:apply-templates select="."/><!-- Process text in default mode. -->
+  </xsl:template>
+  
+  <xsl:template match="*[df:class(., 'topic/data')]" mode="generate-opf">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:apply-templates mode="#current">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
     </xsl:apply-templates>
   </xsl:template>
+  
+  <xsl:template match="*[df:class(., 'bookmap/published')]" mode="generate-opf" priority="10">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <!-- Suppress -->
+  </xsl:template>
+
 
   <xsl:template match="*[df:class(., 'map/map')]/*[df:class(., 'map/topicmeta')]/*[df:class(., 'topic/copyright')]" 
     mode="generate-opf"> 
