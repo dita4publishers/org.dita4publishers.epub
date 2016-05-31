@@ -610,9 +610,15 @@
     " 
     mode="generate-opf"> 
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    <dc:publisher><xsl:apply-templates mode="#current">
-      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-    </xsl:apply-templates></dc:publisher>
+    <xsl:variable name="publisherText" as="node()*">
+      <xsl:apply-templates mode="#current">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <xsl:if test="not(matches($publisherText, '^\s*$'))">
+      <dc:publisher><xsl:value-of select="$publisherText"/></dc:publisher>  
+    </xsl:if>
+    
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'topic/data')]/text()" mode="generate-opf">
