@@ -625,7 +625,7 @@
     <xsl:apply-templates select="."/><!-- Process text in default mode. -->
   </xsl:template>
   
-  <xsl:template match="*[df:class(., 'topic/data')]" mode="generate-opf">
+  <xsl:template match="*[df:class(., 'topic/data')]" mode="generate-opf" priority="-1">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:apply-templates mode="#current">
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
@@ -645,7 +645,7 @@
     <dc:rights>Copyright <xsl:value-of select="*[df:class(., 'topic/copyryear')]/@year"/><xsl:text> </xsl:text><xsl:value-of select="*[df:class(., 'topic/copyrholder')]"/></dc:rights>
   </xsl:template>
 
-  <xsl:template match="*[df:class(., 'pubmeta-d/pubrights')]" 
+  <xsl:template match="*[df:class(., 'pubmeta-d/pubrights')]"
     mode="generate-opf"> 
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:variable name="content">
