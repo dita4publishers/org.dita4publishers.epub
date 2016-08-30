@@ -101,7 +101,8 @@ for inclusion in the epub file -->
       **/*.MP4,**/*.MP3,**/*.M4A, 
       **/*.mp4,**/*.mp3,**/*.m4a,
       **/*.ttf, **/*.ttc, **/*.otf, **/*.otc, *.woff,
-      **/*.TTF, **/*.TTC, **/*.OTF, **/*.OTC, *.WOFF
+      **/*.TTF, **/*.TTC, **/*.OTF, **/*.OTC, *.WOFF,
+      **/*.js,**/*.JS
       "/>
     <zip destfile="${output.dir}${file.separator}${dita.map.filename.root}.epub"
       basedir="${epub.temp.dir}"
@@ -339,6 +340,8 @@ for inclusion in the epub file -->
       <param name="epubFontManifestUri" expression="${epub.font.manifest.url}" if="epub.font.manifest" />    
       <param name="obfuscateFonts" expression="${epub.obfuscate.fonts}" if="epub.obfuscate.fonts"/>
       <param name="epubGenerateCSSFontRules" expression="${epub.generate.css.font.rules}" if="epub.generate.css.font.rules"/>
+      <param name="javaScriptSourceFile" expression="${epub.javascript.file}" if="epub.javascript.file"/>
+      <param name="javaScriptOutputDir" expression="${epub.javascript.dir}" if="epub.javascript.dir"/>
       
     	<!-- Parameters from dita2xhtml and similar transtypes: -->
       <param name="WORKDIR" expression="${workdir}" if="workdir"/>

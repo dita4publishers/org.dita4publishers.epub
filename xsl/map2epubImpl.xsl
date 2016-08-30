@@ -83,6 +83,7 @@
   <xsl:include href="map2epubNavImpl.xsl"/>
   <xsl:include href="map2epubTocImpl.xsl"/>
   <xsl:include href="map2epubEmbedFonts.xsl"/>
+  <xsl:include href="map2epubIncludeJavaScript.xsl"/>
   <!--  <xsl:include href="map2epubIndexImpl.xsl"/>-->
   <xsl:include href="html2xhtmlImpl.xsl"/>
   <xsl:include href="epubHtmlOverrides.xsl"/>
@@ -325,6 +326,11 @@
   
   <xsl:variable name="copySystemCssNoBoolean" as="xs:boolean" select="matches($copySystemCssNo,'yes|true|on|1','i')" />
   
+  <!-- JavaScript file to include in all HTML files -->
+  <xsl:param name="javaScriptSourceFile" as="xs:string?"/>
+  <!-- Directory to store the JavaScript file in in the EPUB package. -->
+  <xsl:param name="javaScriptOutputDir" as="xs:string" select="'js'"/>
+  
   <!-- Used by some HTML output stuff. For EPUB, don't want links to
        go to a new window.
     -->
@@ -353,6 +359,7 @@
       + maxTocDepth     = "<xsl:sequence select="$maxTocDepth"/>"
       + maxNavDepth     = "<xsl:sequence select="$maxNavDepth"/>"
       + generateIndex   = "<xsl:sequence select="$generateIndex"/>"
+      + imagesOutputDir = "<xsl:sequence select="$imagesOutputDir"/>"
       + imagesOutputDir = "<xsl:sequence select="$imagesOutputDir"/>"
       + mathJaxInclude  = "<xsl:sequence select="$mathJaxInclude"/>"
       + mathJaxConfigParam = "<xsl:sequence select="$mathJaxConfigParam"/>"
@@ -469,6 +476,16 @@
     </xsl:choose>
   </xsl:variable>
   
+  <xsl:variable name="javascriptOutputPath">
+    <xsl:choose>
+      <xsl:when test="$javaScriptOutputDir != ''">
+        <xsl:sequence select="relpath:newFile($outdir, $javaScriptOutputDir)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$outdir"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
   
 
   <xsl:template match="/">

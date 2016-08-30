@@ -128,6 +128,13 @@
       <val default="yes">true</val>
       <val>false</val>
     </param>
+    <param name="epub.javascript.file"
+      desc="Specifies JavaScript file to include in all generated HTML Files" type="string">
+    </param>
+    <param name="epub.javascript.dir"
+      desc="Specifies directory withih EPUB to put included JavaScript" type="string">
+      <val default="true">js</val>
+    </param>
     <param name="html2.generate.index"
       desc="Specifies whether or not to generate a back-of-the-book index" type="enum">
       <val>true</val>
