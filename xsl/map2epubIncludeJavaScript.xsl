@@ -103,11 +103,11 @@
   <xsl:template mode="gen-user-scripts" match="*">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
-    
-    <xsl:variable name="javaScriptPath" as="xs:string" 
-      select="relpath:newFile($javascriptOutputPath, relpath:getName($javaScriptSourceFile))"/>
-    <script src="{$javaScriptPath}"></script>
-    
+    <xsl:if test="$javaScriptSourceFile != ''">
+      <xsl:variable name="javaScriptPath" as="xs:string" 
+        select="relpath:newFile($javascriptOutputPath, relpath:getName($javaScriptSourceFile))"/>
+      <script src="{$javaScriptPath}"></script>
+    </xsl:if>
     
   </xsl:template>
   
