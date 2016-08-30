@@ -5,7 +5,8 @@
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns:gmap="http://dita4publishers/namespaces/graphic-input-to-output-map"
-  exclude-result-prefixes="xs df relpath epubtrans"
+  xmlns="http://www.w3.org/1999/xhtml"
+  exclude-result-prefixes="#all"
   version="2.0"
   xmlns:fn="http://www.example.com/fn">
   
@@ -23,9 +24,7 @@
  
   <xsl:template match="*" mode="additional-graphic-refs" priority="30">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-    
-<!--    <xsl:variable name="doDebug" as="xs:boolean" select="true()"/>-->
-    
+       
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] additional-graphic-refs: include JavaScript override: <xsl:value-of select="concat(name(..), '/', name(.))"/></xsl:message>
     </xsl:if>
@@ -53,7 +52,7 @@
             id="{concat('javascript-', relpath:getNamePart($javaScriptSourceFile))}"
             href="{$javaScriptUri}" 
             filename="{relpath:getName($javaScriptUri)}"
-            properties="javascript"
+            
           />
           
         </xsl:otherwise>
@@ -79,6 +78,51 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  <xsl:template name="epubtrans:constructJavaScriptReferences">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="resultUri" as="xs:string"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] epubtrans:constructJavaScriptReferences: resultUri="<xsl:value-of select="$resultUri"/>"</xsl:message>
+    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="$javaScriptSourceFile != ''">
+        <xsl:variable name="javaScriptPath" as="xs:string" 
+          select="relpath:newFile($javaScriptOutputDir, relpath:getName($javaScriptSourceFile))"/>
+        <xsl:variable name="relPathToJavascript" as="xs:string"
+          select="relpath:getRelativePath($resultUri, $javaScriptPath)"
+        />
+        <script src="{$relPathToJavascript}"></script>
+      </xsl:when>
+    </xsl:choose>
+    
+  </xsl:template>
+  
+  <!-- This mode is called from dita2htmlImpl.xsl chapterhead template -->
+  <xsl:template mode="gen-user-scripts" match="*">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    
+    <xsl:variable name="javaScriptPath" as="xs:string" 
+      select="relpath:newFile($javascriptOutputPath, relpath:getName($javaScriptSourceFile))"/>
+    <script src="{$javaScriptPath}"></script>
+    
+    
+  </xsl:template>
+  
+  <!-- Return true() if the element's output file will be
+       scripted (have a reference to one or more JavaScript
+       files.
+    -->
+  <xsl:function name="epubtrans:isScripted" as="xs:boolean">
+    <xsl:param name="topic" as="element()"/>
+
+    <xsl:variable name="result" as="xs:boolean"
+      select="if ($javaScriptSourceFile != '') then true() else false()"
+    />
+    <xsl:sequence select="$result"/>
+  </xsl:function>
   
     
 </xsl:stylesheet>

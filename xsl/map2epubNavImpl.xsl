@@ -61,6 +61,10 @@
       	<head>
       		<meta charset="utf-8" />
       		<!-- FIXME: May need to generate appropriate CSS references here -->
+      	  <xsl:call-template name="epubtrans:constructJavaScriptReferences">
+      	    <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      	    <xsl:with-param name="resultUri" as="xs:string" select="$resultUri"/>
+      	  </xsl:call-template>      	  
       	</head>
       	<body>
       	  <xsl:for-each select="$navTypes">

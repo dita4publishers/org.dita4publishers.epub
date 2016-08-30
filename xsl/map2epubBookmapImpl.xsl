@@ -52,7 +52,11 @@
       select="concat('toc_', generate-id(.), $outext)"
     />
     <item id="{generate-id()}" href="{$targetUri}"
-      media-type="application/xhtml+xml"/>    
+      media-type="application/xhtml+xml">
+      <xsl:if test="epubtrans:isScripted(.)">
+        <xsl:attribute name="properties" select="'scripted'"/>          
+      </xsl:if>      
+    </item>
   </xsl:template>
   
   <xsl:template mode="epubtrans:manifest manifest" match="*[df:class(., 'bookmap/figurelist')]">
@@ -60,7 +64,11 @@
       select="concat('list-of-figures_', generate-id(.), $outext)"
     />
     <item id="{generate-id()}" href="{$targetUri}"
-      media-type="application/xhtml+xml"/>    
+      media-type="application/xhtml+xml">
+      <xsl:if test="epubtrans:isScripted(.)">
+        <xsl:attribute name="properties" select="'scripted'"/>          
+      </xsl:if>
+    </item>    
   </xsl:template>
   
   <xsl:template mode="epubtrans:manifest manifest" match="*[df:class(., 'bookmap/tablelist')]">
@@ -68,7 +76,11 @@
       select="concat('list-of-tables_', generate-id(.), $outext)"
     />
     <item id="{generate-id()}" href="{$targetUri}"
-      media-type="application/xhtml+xml"/>    
+      media-type="application/xhtml+xml">
+      <xsl:if test="epubtrans:isScripted(.)">
+        <xsl:attribute name="properties" select="'scripted'"/>          
+      </xsl:if>
+    </item>    
   </xsl:template>
   
   <xsl:template mode="generate-book-lists" match="*[df:class(., 'bookmap/figurelist')]" priority="10">

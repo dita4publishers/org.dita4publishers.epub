@@ -6,7 +6,8 @@
                 xmlns:htmlutil="http://dita4publishers.org/functions/htmlutil"
                 xmlns:index-terms="http://dita4publishers.org/index-terms"
                 xmlns:local="urn:functions:local"
-                exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms"
+                xmlns:epubtrans="urn:d4p:epubtranstype"
+                exclude-result-prefixes="#all"
   >
   <!-- Generate a back-of-the-book index for inclusion in the EPUB. -->
   
@@ -15,6 +16,7 @@
 
 
   <xsl:template match="*[df:class(., 'map/map')]" mode="generate-index">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="index-terms" as="element()"/>
     
 
@@ -35,6 +37,10 @@
         <html xmlns="http://www.w3.org/1999/xhtml">
           <head>
             <title>Index</title>
+            <xsl:call-template name="epubtrans:constructJavaScriptReferences">
+              <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+              <xsl:with-param name="resultUri" as="xs:string" select="$resultUri"/>
+            </xsl:call-template>
           </head>
           <body>
             <h1>Index</h1>

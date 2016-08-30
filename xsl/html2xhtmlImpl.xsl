@@ -91,7 +91,33 @@
       <xsl:apply-templates mode="#current" select="node()"/>
     </xsl:element>
   </xsl:template>
+
+  <xsl:template mode="html2xhtml" match="script/@src | xhtml:script/@src">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:param name="resultUri" as="xs:string" tunnel="yes"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] html2xhtml: handling a script @src attribute: "<xsl:value-of select="."/>"</xsl:message>
+    </xsl:if>
+    
+    <!-- Rewrite the pointer to reflect the actual location of this file. -->
+    
+    <xsl:variable name="oldSrc" as="xs:string" select="."/>
+    <xsl:variable name="relPathToJsDir" as="xs:string"
+      select="relpath:getRelativePath(relpath:getParent($resultUri), $javascriptOutputPath)"
+    />
+    <xsl:variable name="newSrc" as="xs:string"
+      select="if ($relPathToJsDir != '') 
+      then relpath:newFile($relPathToJsDir, relpath:getName($oldSrc))
+      else $oldSrc"
+    />
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] html2xhtml:   newSrc="<xsl:value-of select="$newSrc"/>"</xsl:message>
+    </xsl:if>
+    <xsl:attribute name="{name(.)}" select="$newSrc"/>
+  </xsl:template>
   
+
   <xsl:template mode="html2xhtml" match="img[not(@alt)] | xhtml:img[not(@alt)]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
 
@@ -138,7 +164,7 @@
   <xsl:template mode="html2xhtml" 
     match="*[      not(@id) and a[@name and not(@href)]] | 
                        xhtml:*[not(@id) and xhtml:a[@name and not(@href)]]">
-    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="true()"/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] </xsl:message>
     </xsl:if>

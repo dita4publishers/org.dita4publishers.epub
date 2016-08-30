@@ -183,11 +183,14 @@
     <xsl:if test="$epubtrans:isEpub3">
       <!-- FIXME: Need to do this for each separate nav file to be generated -->
       <xsl:if test="$epubtrans:isEpub3">
+        <xsl:variable name="properties" as="xs:string*" 
+          select="('nav', if (epubtrans:isScripted(.)) then 'scripted' else ())"
+        />
         <item href="{epubtrans:getNavFilename('toc')}" 
           id="{epubtrans:getNavId('toc')}" 
           media-type="application/xhtml+xml" 
-          properties="nav" 
-        />
+          properties="{string-join($properties, ' ')}" 
+        />        
       </xsl:if>
     </xsl:if>
     <!-- List the XHTML files -->
@@ -233,7 +236,11 @@
     <xsl:if test="$generateIndexBoolean">
       <item id="generated-index" 
             href="{concat('generated-index', $outext)}"
-            media-type="application/xhtml+xml"/>
+            media-type="application/xhtml+xml">
+        <xsl:if test="epubtrans:isScripted(.)">
+          <xsl:attribute name="properties" select="'scripted'"/>          
+        </xsl:if>
+      </item>
     </xsl:if>
 
   </xsl:template>
@@ -756,7 +763,12 @@
       </xsl:apply-templates>
     </xsl:variable>
     <item id="{$itemID}" href="{$relativeUri}"
-      media-type="application/xhtml+xml"/>
+      media-type="application/xhtml+xml"
+    >
+      <xsl:if test="epubtrans:isScripted(.)">
+        <xsl:attribute name="properties" select="'scripted'"/>          
+      </xsl:if>
+    </item>
   </xsl:template>
   
   <xsl:template mode="epubtrans:getManifestItemID" match="*[df:class(., 'map/topicref')]">
@@ -796,10 +808,11 @@
           else $titleOnlyTopicFilename
           " />
     <item id="{generate-id()}" href="{$targetUri}"
-      media-type="application/xhtml+xml"/>
-    <!-- FIXME: Need to apply templates in a mode to enable adding additional attributes, e.g.,
-         @scripted.
-      -->
+      media-type="application/xhtml+xml">
+      <xsl:if test="epubtrans:isScripted(.)">
+        <xsl:attribute name="properties" select="'scripted'"/>          
+      </xsl:if>
+    </item>
   </xsl:template>
   
   <xsl:template match="*[df:class(., 'map/topicref')]" mode="spine">

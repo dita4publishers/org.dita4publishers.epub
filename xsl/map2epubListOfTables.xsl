@@ -6,7 +6,8 @@
   xmlns:index-terms="http://dita4publishers.org/index-terms" xmlns:local="urn:functions:local"
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:enum="http://dita4publishers.org/enumerables"
-  exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms enum"
+  xmlns:epubtrans="urn:d4p:epubtranstype"
+  exclude-result-prefixes="#all"
   version="2.0">
   
   <xsl:template match="/" mode="generate-list-of-tables-html-toc">
@@ -21,24 +22,29 @@
   </xsl:template>
   
   <xsl:template name="generate-table-list-html-doc">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="collected-data" as="element()*"/>
 
-    <xsl:variable name="targetUri"
+    <xsl:variable name="resultUri"
       select="relpath:newFile($outdir, concat('list-of-tables_', generate-id(.), $outext))" 
       as="xs:string"
     />
     <xsl:variable name="lot-title" as="node()*">
       <xsl:text>List of Tables</xsl:text><!-- FIXME: Get this string from string config -->
     </xsl:variable>
-    <xsl:message> + [INFO] Generating list of tables as "<xsl:sequence select="$targetUri"/>"</xsl:message>
-    <xsl:result-document href="{$targetUri}"
+    <xsl:message> + [INFO] Generating list of tables as "<xsl:sequence select="$resultUri"/>"</xsl:message>
+    <xsl:result-document href="{$resultUri}"
       format="html5"
       >
       <html>
         <head>                   
           <title><xsl:sequence select="$lot-title"/></title>
           <xsl:call-template name="constructToCStyle">
-            <xsl:with-param name="resultUri" as="xs:string" tunnel="yes" select="$targetUri"/>
+            <xsl:with-param name="resultUri" as="xs:string" tunnel="yes" select="$resultUri"/>
+          </xsl:call-template>
+          <xsl:call-template name="epubtrans:constructJavaScriptReferences">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="resultUri" as="xs:string" select="$resultUri"/>
           </xsl:call-template>
         </head>
         <body class="toc-list-of-tables html-toc">

@@ -2,15 +2,18 @@
   xmlns:df="http://dita2indesign.org/dita/functions" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:htmlutil="http://dita4publishers.org/functions/htmlutil"
-  xmlns:index-terms="http://dita4publishers.org/index-terms" xmlns:local="urn:functions:local"
+  xmlns:index-terms="http://dita4publishers.org/index-terms" 
+  xmlns:local="urn:functions:local"
+  xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns="http://www.w3.org/1999/xhtml"
-  exclude-result-prefixes="local xs df xsl relpath htmlutil index-terms">
+  exclude-result-prefixes="#all">
   
   <xsl:output indent="yes" name="html" method="html"
     doctype-public="-//W3C//DTD XHTML 1.1//EN"
     doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
   />
   <xsl:template match="*[df:class(., 'map/map')]" mode="generate-html-toc">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="resultUri" as="xs:string"/>
     <xsl:param name="collected-data" as="element()" tunnel="yes"/>
     
@@ -63,6 +66,10 @@
           <title>Table of Contents</title>
           <xsl:call-template name="constructToCStyle">
             <xsl:with-param name="resultUri" as="xs:string" tunnel="yes" select="$resultUri"/>
+          </xsl:call-template>
+          <xsl:call-template name="epubtrans:constructJavaScriptReferences">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+            <xsl:with-param name="resultUri" as="xs:string" select="$resultUri"/>
           </xsl:call-template>
         </head>
         <body class="toc-list-of-tables html-toc">
