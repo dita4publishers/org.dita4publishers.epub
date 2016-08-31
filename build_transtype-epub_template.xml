@@ -146,7 +146,7 @@ for inclusion in the epub file -->
   		</not>
     </condition>
 
-    <condition property="out.ext" value=".html">
+    <condition property="out.ext" value=".xhtml">
       <not>
         <isset property="out.ext" />
       </not>
