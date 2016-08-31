@@ -11,14 +11,36 @@
   version="2.0">
   
   <xsl:template match="/" mode="generate-list-of-tables-html-toc">
-    <xsl:apply-templates mode="#current"/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] generate-list-of-tables-html-toc: Starting...</xsl:message>
+    </xsl:if>
+    
+    <xsl:apply-templates mode="#current">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
+
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] generate-list-of-tables-html-toc: Done.</xsl:message>
+    </xsl:if>
   </xsl:template> 
   
   <xsl:template match="*[df:class(., 'map/map')]" 
     mode="generate-list-of-tables-html-toc">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="collected-data" as="element()*" tunnel="yes"/>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] generate-list-of-tables-html-toc: collected-data:
+<xsl:sequence select="$collected-data"/>      
+      </xsl:message>
+    </xsl:if>
+    
     <xsl:apply-templates mode="#current"
-        select="$collected-data/enum:enumerables//*[df:class(., 'topic/table')][enum:title]"/>
+        select="$collected-data/enum:enumerables//*[df:class(., 'topic/table')][enum:title]">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
   </xsl:template>
   
   <xsl:template name="generate-table-list-html-doc">
@@ -51,6 +73,7 @@
           <h2 class="toc-title"><xsl:sequence select="$lot-title"/></h2>
           <ul  class="html-toc html-toc_1 list-of-tables">
             <xsl:apply-templates select="root(.)" mode="generate-list-of-tables-html-toc">
+              <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
               <xsl:with-param 
                 name="collected-data" 
                 select="$collected-data" 
@@ -69,6 +92,7 @@
   
   <xsl:template mode="generate-list-of-tables-html-toc" 
                 match="*[df:class(., 'topic/table')]">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     <xsl:param name="rootMapDocUrl" as="xs:string" tunnel="yes"/>
     <xsl:param name="topicref" as="element()?" tunnel="yes"/>
     
@@ -97,25 +121,44 @@
             <xsl:attribute name="target" select="$contenttarget"/>
           </xsl:if>
           <!-- Generate a number, if any -->
-          <xsl:apply-templates select="." mode="enumeration"/> 
+          <xsl:apply-templates select="." mode="enumeration">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          </xsl:apply-templates> 
           <xsl:apply-templates 
             select="$enumeratedElement/*[df:class(., 'topic/title')]" 
-            mode="#current"/></a></span>
+            mode="#current">
+            <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+          </xsl:apply-templates></a></span>
     </li>    
   </xsl:template>
   
   
   <xsl:template match="*" mode="generate-list-of-tables-html-toc" priority="-1">
-    <xsl:if test="false()">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] Fallback in mode generate-list-of-tables-html-toc: <xsl:sequence select="concat(name(..), '/', @class)"/> in mode generate-list-of-tables-html-toc</xsl:message>
     </xsl:if>
-    <xsl:apply-templates mode="#current"/>
+    <xsl:apply-templates mode="#current">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
   </xsl:template>
   
-  <xsl:template mode="generate-list-of-tables-html-toc" match="text()"/>
+  <xsl:template mode="generate-list-of-tables-html-toc" match="text()">
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>    
+  </xsl:template>
   
   <xsl:template mode="generate-list-of-tables-html-toc" match="*[df:class(., 'topic/title')]">
-    <xsl:apply-templates/>
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    
+    <xsl:variable name="html" as="node()*">
+      <xsl:apply-templates>
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <xsl:apply-templates select="$html" mode="html2xhtml">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
   </xsl:template>
   
 </xsl:stylesheet>

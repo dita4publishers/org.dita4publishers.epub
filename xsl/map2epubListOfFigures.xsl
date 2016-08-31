@@ -66,7 +66,10 @@
   <xsl:template mode="generate-list-of-figures-html-toc" match="text()"/>
   
   <xsl:template mode="generate-list-of-figures-html-toc" match="*[df:class(., 'topic/title')]">
-    <xsl:apply-templates/>
+    <xsl:variable name="html" as="node()*">
+      <xsl:apply-templates/>
+    </xsl:variable>
+    <xsl:apply-templates select="$html" mode="html2xhtml"/>
   </xsl:template>
   
   <xsl:template name="generate-figure-list-html-doc">
