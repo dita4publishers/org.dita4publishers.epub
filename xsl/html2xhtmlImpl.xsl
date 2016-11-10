@@ -306,13 +306,12 @@
         <xsl:message> + [WARN]   Suppressing attribute in HTML output.</xsl:message>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:variable name="effectiveLength" as="xs:string"
-          select="if (matches($length, '[0-9]+'))
-          then concat($length, 'px')
-          else $length
-          "
-        />
-        <xsl:attribute name="{name(.)}" select="$effectiveLength"/>
+        <!-- GitHub issue #75: For EPUB there should be no units on pixel values. 
+            
+             Alternative would be to put the width and height into @style. Not
+             trying to do that for the initial solution.
+        -->
+        <xsl:attribute name="{name(.)}" select="$length"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
