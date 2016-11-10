@@ -14,6 +14,8 @@
   exclude-result-prefixes="df xs relpath htmlutil gmap local epubtrans"
   >
 
+  <xsl:output name="xml-no-doctype" method="xml" indent="yes"/>
+  
   <!-- Convert a DITA map to an EPUB content.opf file. 
     
     Notes:
@@ -475,7 +477,7 @@
       <xsl:message> + [DEBUG] epubtrans:makeEncryptionXml: resultURI="<xsl:value-of select="$resultURI"/>"</xsl:message>
     </xsl:if>
     
-    <xsl:result-document indent="yes" method="xml"
+    <xsl:result-document indent="yes" method="xml" format="xml-no-doctype"
       href="{$resultURI}"
       >      
       <encryption 
