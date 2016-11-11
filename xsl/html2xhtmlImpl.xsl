@@ -132,6 +132,8 @@
       </xsl:apply-templates>
     </xsl:element>
   </xsl:template>
+  
+  <xsl:template mode="html2xhtml" match="@xml:base"/><!-- Don't include in output -->
 
   <xsl:template mode="html2xhtml" match="math | m:math" xmlns="http://www.w3.org/1998/Math/MathML">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
