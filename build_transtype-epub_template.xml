@@ -260,14 +260,6 @@ for inclusion in the epub file -->
         <isset property="user.csspath"/>
       </not>
     </condition>
-    <!-- NOTE: This is to support the older (but unnecessary) 
-               args.css.output.dir, removed in 1.0.0 RC18
-      -->
-    <condition property="user.csspath" value="${args.css.output.dir}/">
-      <not>
-        <isset property="args.css.output.dir"/>
-      </not>
-    </condition>
     <condition property="args.css.real" value="${args.cssroot}${file.separator}${args.css}">
       <isset property="args.cssroot"/>
     </condition>
