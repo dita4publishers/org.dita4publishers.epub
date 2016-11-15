@@ -217,8 +217,8 @@
   <xsl:template mode="nav-point-title" match="*[contains(@class, '/figurelist ')]" priority="20">
     <!-- FIXME: Get title from variables -->
     <xsl:variable name="navPointTitleString">
-      <xsl:call-template name="getString">
-          <xsl:with-param name="stringName" select="'ListOfFigures'"/>
+      <xsl:call-template name="getVariable">
+          <xsl:with-param name="id" select="'ListOfFigures'"/>
       </xsl:call-template>
     </xsl:variable>
     <xsl:sequence select="$navPointTitleString"/>    
@@ -227,8 +227,8 @@
   <xsl:template mode="nav-point-title" match="*[contains(@class, '/tablelist ')]" priority="20">
     <!-- FIXME: Get title from variables -->
     <xsl:variable name="navPointTitleString">
-      <xsl:call-template name="getString">
-          <xsl:with-param name="stringName" select="'ListOfTables'"/>
+      <xsl:call-template name="getVariable">
+          <xsl:with-param name="id" select="'ListOfTables'"/>
       </xsl:call-template>
     </xsl:variable>
     <xsl:sequence select="$navPointTitleString"/>    

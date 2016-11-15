@@ -496,48 +496,48 @@
     </xsl:if>
     <xsl:choose>
       <xsl:when test="$navType = 'toc'">
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="'Contents'"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="'Contents'"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'landmarks'">
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="'Landmarks'"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="'Landmarks'"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'loa'">
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="'ListOfAudio'"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="'ListOfAudio'"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'loi'">
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="'ListOfIllustrations'"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="'ListOfIllustrations'"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'lot'">
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="'ListOfTables'"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="'ListOfTables'"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'lov'">
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="'ListOfVideos'"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="'ListOfVideos'"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'toc-brief'">
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="'BriefToC'"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="'BriefToC'"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$navType = 'lof'"><!-- Note a type defined in EPUB spec. EPUB spec allows other types. -->
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="'ListOfFigures'"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="'ListOfFigures'"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:call-template name="getString">
-            <xsl:with-param name="stringName" select="upper-case($navType)"/>
+        <xsl:call-template name="getVariable">
+            <xsl:with-param name="id" select="upper-case($navType)"/>
         </xsl:call-template>
       </xsl:otherwise>
     </xsl:choose>
