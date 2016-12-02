@@ -363,6 +363,14 @@ for inclusion in the epub file -->
       <param name="FILTERFILE" expression="${dita.input.valfile.url}" if="dita.input.valfile"></param>
       <param name="DBG" expression="${args.debug}" if="args.debug"></param>
       <param name="uplevels" expression="${uplevels}" />
+      <param name="TRANSTYPE" expression="${transtype}" />
+      <param name="HDF" expression="${args.hdf}" if="args.hdf" />
+      <param name="HDR" expression="${args.hdr}" if="args.hdr" />
+      <param name="FTR" expression="${args.ftr}" if="args.ftr" />      
+      <param name="include.rellinks" expression="${include.rellinks}"/>
+      <param name="genDefMeta" expression="${args.gen.default.meta}" if="args.gen.default.meta" />
+      <param name="OUTEXT" expression="${out.ext}" if="out.ext" />
+      <param name="defaultLanguage" expression="${default.language}"/>
 
       <dita:extension id="d4p.epub.xslt.param" behavior="org.dita.dost.platform.InsertAction"/>
       <dita:extension id="dita.conductor.xhtml.param" behavior="org.dita.dost.platform.InsertAction"/>
