@@ -2,31 +2,34 @@
   xmlns:dita="http://dita-ot.sourceforge.net"
   >
 
-  <!-- test to see where the plugin is located, plugins or demo -->
-  <dirname property="epub.dir" file="${ant.file.dita2epub}"/>
-
-	<!-- Global properties that affect the base Toolkit processing: -->
-
-  <condition property="preprocess.maplink.skip" value="true">
-    <isset property="epub.exclude.auto.rellinks" />
-  </condition>
-  <condition property="preprocess.move-links.skip" value="true">
-    <isset property="epub.exclude.auto.rellinks" />
-  </condition>
-
-  <!-- property that when set will prevent the DITA-OT OOTB CSS from being copied
+  <target name="epub.init">
+    <!-- test to see where the plugin is located, plugins or demo -->
+    <dirname property="epub.dir" file="${ant.file.dita2epub}"/>
+    
+    <!-- Global properties that affect the base Toolkit processing: -->
+    
+    <condition property="preprocess.maplink.skip" value="true">
+      <isset property="epub.exclude.auto.rellinks" />
+    </condition>
+    <condition property="preprocess.move-links.skip" value="true">
+      <isset property="epub.exclude.auto.rellinks" />
+    </condition>
+    
+    <!-- property that when set will prevent the DITA-OT OOTB CSS from being copied
 for inclusion in the epub file -->
-  <condition property="system.copycss.no">
-    <and>
-      <isset property="epub.copy.system.css"/>
-      <isfalse  value="${epub.copy.system.css}"/>
-    </and>
-  </condition>
+    <condition property="system.copycss.no">
+      <and>
+        <isset property="epub.copy.system.css"/>
+        <isfalse value="${epub.copy.system.css}"/>
+      </and>
+    </condition>
+  </target>
   
 	<target name="dita2epub"
     unless="noMap"
     xmlns:dita="http://dita-ot.sourceforge.net"
 		dita:depends="
+		epub.init,
 		d4p.map-driven-build-init,
 		build-init,
 		preprocess,
