@@ -49,7 +49,9 @@
                 group-by="local:construct-index-group-key(.)"
                 >
                 <xsl:sort select="local:construct-index-group-sort-key(.)"/>
-                <xsl:message> + [DEBUG] Index group "<xsl:sequence select="current-grouping-key()"/>"</xsl:message>
+                <xsl:if test="$debugBoolean">
+                  <xsl:message> + [DEBUG] Index group "<xsl:sequence select="current-grouping-key()"/>"</xsl:message>
+                </xsl:if>
                 <div class="index-group">
                   <h2><xsl:sequence select="local:construct-index-group-label(current-group()[1])"/></h2>
                   <ul class="index-terms">
