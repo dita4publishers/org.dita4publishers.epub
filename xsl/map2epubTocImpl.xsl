@@ -426,7 +426,9 @@
         <xsl:sequence select="false()"/>
       </xsl:when>
       <xsl:when test="$context/ancestor::*[contains(@chunk, 'to-content')]">
-        <xsl:message> + [DEBUG] isNavPoint(): ancestor has @chunk with to-content.</xsl:message>
+        <xsl:if test="$debugBoolean">
+          <xsl:message> + [DEBUG] isNavPoint(): ancestor has @chunk with to-content.</xsl:message>
+        </xsl:if>
         <xsl:sequence select="false()"/>
       </xsl:when>
       <xsl:when test="string($context/@toc) = 'no'"><!-- Issue 3331319: @toc not respected in EPUB ToC -->
