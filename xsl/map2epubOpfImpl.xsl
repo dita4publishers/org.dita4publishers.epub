@@ -155,7 +155,9 @@
             <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
           </xsl:apply-templates>
         </xsl:variable>
-        <xsl:message> + [DEBUG] $isEncryptionRequired="<xsl:value-of select="$isEncryptionRequired"/>"</xsl:message>
+        <xsl:if test="$debugBoolean">
+          <xsl:message> + [DEBUG] $isEncryptionRequired="<xsl:value-of select="$isEncryptionRequired"/>"</xsl:message>
+        </xsl:if>
         <xsl:if test="$isEncryptionRequired">
           <xsl:message> + [INFO] Generating encryption.xml file...</xsl:message>
           <xsl:call-template name="epubtrans:makeEncryptionXml">
@@ -1081,7 +1083,7 @@
       <xsl:apply-templates select="$context" mode="include-topicref-in-spine"/>
     </xsl:variable>
     <xsl:variable name="result" as="xs:boolean" select="$test = 'true'"/>
-    <xsl:if test="$result and true()">
+    <xsl:if test="$result and $debugBoolean and true()">
       <xsl:message> + [DEBUG] local:includeTopicrefInSpine: Including element "<xsl:sequence select="name($context)"/>" in spine.</xsl:message>
     </xsl:if>
     <xsl:sequence select="$result"/>
@@ -1093,7 +1095,7 @@
       <xsl:apply-templates select="$context" mode="include-topicref-in-manifest"/>
     </xsl:variable>
     <xsl:variable name="result" as="xs:boolean" select="$test = 'true'"/>
-    <xsl:if test="$result and false()">
+    <xsl:if test="$result and $debugBoolean and false()">
       <xsl:message> + [DEBUG] local:includeTopicrefInSpine: Including element "<xsl:sequence select="name($context)"/>" in manifest.</xsl:message>
     </xsl:if>
     <xsl:sequence select="$result"/>

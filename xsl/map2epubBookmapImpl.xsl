@@ -113,7 +113,9 @@
   </xsl:template>
   
   <xsl:template mode="generate-book-lists" match="*[df:class(., 'bookmap/toc')][not(@href)]" priority="10">
-    <xsl:message> + [DEBUG] generate-book-lists: bookmap/toc</xsl:message>
+    <xsl:if test="$debugBoolean">
+      <xsl:message> + [DEBUG] generate-book-lists: bookmap/toc</xsl:message>
+    </xsl:if>
     <xsl:variable name="htmlFilename" as="xs:string"
       select="concat('toc_', generate-id(.), $outext)"
     />
