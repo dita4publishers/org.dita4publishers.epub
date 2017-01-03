@@ -259,7 +259,7 @@
       select="adjust-dateTime-to-timezone(current-dateTime(), xs:dayTimeDuration('-PT0H'))"
     />
     <xsl:variable name="formatted-time" as="xs:string"
-      select="format-dateTime($utcTime, '[Y]-[M,2]-[D,2]T[h,2]:[m,2]:[s,2]Z')"
+      select="format-dateTime($utcTime, '[Y]-[M,2]-[D,2]T[H,2]:[m,2]:[s,2]Z')"
     />
     <!-- NOTE: For EPUB3, the <meta> element has different attributes from
          EPUB2. Instead of @name and @value, it uses @property to specify
