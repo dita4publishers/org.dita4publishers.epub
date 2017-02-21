@@ -408,8 +408,7 @@
   <xsl:output name="html5" method="xhtml"
     indent="yes"
     encoding="utf-8"
-    doctype-system="about:legacy-compat"
-    omit-xml-declaration="yes"
+    omit-xml-declaration="no"
     include-content-type="no"
   />
 
