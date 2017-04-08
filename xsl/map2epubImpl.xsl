@@ -244,7 +244,7 @@
   <!-- FIXME: Parameterize the location of the JavaScript directory -->
   <xsl:param name="mathJaxLocalJavascriptUri" select="'js/mathjax/MathJax.js'"/>
 
-  <xsl:variable name="coverImageId" select="'coverimage'" as="xs:string"/>
+  
 
   <!-- Generate the OPF package bindings section. -->
   <xsl:param name="generateBindings" as="xs:string" select="'no'"/>
