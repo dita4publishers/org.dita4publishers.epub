@@ -291,6 +291,7 @@ for epub2, cannot have @doctype-system="about:legacy:compat" (per epubcheck) -->
       <xsl:call-template name="commonattributes">
         <xsl:with-param name="default-output-class" select="$htmlClass" as="xs:string"/>      
       </xsl:call-template>
+      <xsl:attribute name="id"><xsl:apply-templates select="." mode="return-aria-label-id"/></xsl:attribute>
       <xsl:if test="not(../ancestor::*[df:class(., 'topic/topic')])">
         <!-- Only do this if we're the topic the topicref actually pointed to. -->
         <xsl:apply-templates select="$topicref" mode="enumeration"/>
