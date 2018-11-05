@@ -7,11 +7,10 @@ Generates publication-ready EPUBs from DITA maps. Allows use of
 custom CSS as well as normal HTML customizations as for base
 HTML transformation type.
 
-NOTE: Currently only works with the 1.8.5 Open Toolkit due to dependencies
-on the org.dita-community.adjust-copy-to plugin, which only works with 1.8.5.
-Work is under way to remove this limitation so the transform will work with
-OT 1.7.5, 1.8.5, and 2.1+.
+Development code (on the develop branch) is currently targeting OT 2.5.4, the last version of the 2.x version. This version of the EPUB transform will not work with OT 1.8.5.
 
 == Updates
+
+5 Nov 2018 Updated to OT 2.5.4. Corrected issues with CSS path handling.
 
 18 June 2015: Take @copy-to into account for result files.  
