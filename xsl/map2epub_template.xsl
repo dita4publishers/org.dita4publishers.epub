@@ -21,7 +21,7 @@ they will be added to the epub file as Dublin Core metadata.
                 exclude-result-prefixes="xs epub"
   >
 
-  <xsl:import href="plugin:org.dita.xhtml:xsl/dita2xhtml.xsl"/>
+  <xsl:import href="plugin:org.dita.html5:xsl/dita2html5.xsl"/>
   <xsl:import href="map2epubImpl.xsl"/>
   
 

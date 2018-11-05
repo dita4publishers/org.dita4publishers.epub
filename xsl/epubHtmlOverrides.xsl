@@ -54,7 +54,7 @@
             <link rel="stylesheet" type="text/css" href="{$PATH2PROJ}{$CSSPATH}{$dita-css}" />
           </xsl:otherwise>
         </xsl:choose>
-        <xsl:value-of select="$newline"/>
+        <xsl:value-of select="'&#x0a;'"/>
       </xsl:otherwise>
     </xsl:choose>
     
@@ -67,7 +67,7 @@
         <xsl:otherwise>
           <link rel="stylesheet" type="text/css" href="{$PATH2PROJ}{$CSSPATH}{$CSS}" />
         </xsl:otherwise>
-      </xsl:choose><xsl:value-of select="$newline"/>
+      </xsl:choose><xsl:value-of select="'&#x0a;'"/>
     </xsl:if>
     
     <xsl:apply-templates select="." mode="epubtrans:add-additional-css">

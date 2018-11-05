@@ -8,7 +8,7 @@
   <extension-point id="dita.conductor.xhtml.param" name="XHTML XSLT parameters"/>  
   <extension-point id="d4p.epub.zip.fileset" name="EPUB Zip fileset extensions"/>
 
-  <require plugin="org.dita.xhtml"/>
+  <require plugin="org.dita.html5"/>
 
   <require plugin="org.dita-community.common.mapdriven"/> 
   <require plugin="org.dita-community.common.xslt"/> 
