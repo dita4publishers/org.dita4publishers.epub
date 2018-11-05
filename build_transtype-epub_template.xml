@@ -119,119 +119,10 @@ for inclusion in the epub file -->
   </target>
 
 
-  <target name="dita.map.epub.init"
-    description="Init properties for Epub">
-
-  	<property name="epub.temp.dir" value="${dita.temp.dir}${file.separator}epub_temp"/>
-
-    <property name="d4p.is.map.driven" value="true"/>
-
-    <condition property="topics.output.dir" value="topics">
-  		<not>
-  			<isset property="topics.output.dir"/>
-  	  </not>
-  	</condition>
-
-    <!-- The epubType value d4p.epubtype -->
+  <target name="epub.xhtml.init">
     
-    <condition property="d4p.epubtype" value="dual">
-      <not>
-        <isset property="d4p.epubtype" />
-      </not>
-    </condition>
+    <property name="epub.temp.dir" value="${dita.temp.dir}${file.separator}epub_temp"/>
     
-
-  	<!-- The name of the directory, within the ePub package, to contain all images: -->
-
-    <condition property="images.output.dir" value="images">
-  		<not>
-    	  <isset property="images.output.dir" />
-  		</not>
-    </condition>
-
-    <condition property="out.ext" value=".xhtml">
-      <not>
-        <isset property="out.ext" />
-      </not>
-    </condition>
-
-    <echo>user.csspath="${user.csspath}"</echo>
-    <echo>args.css.output.dir="${args.css.output.dir}"</echo>
-    
-  	<!-- It appears that user.csspath will always have a value,
-  	     even if it's an empty string.
-  	  -->
-    <condition property="css.output.dir" value="css">
-      <and>
-        <not>
-          <isset property="user.csspath" />
-        </not>
-        <not>
-          <isset property="args.css.output.dir" />          
-        </not>
-      </and>
-    </condition>
-    <condition property="css.output.dir" value="${args.css.output.dir}">
-      <isset property="args.css.output.dir" />
-    </condition>
-    <condition property="css.output.dir" value="${user.csspath}">
-      <isset property="user.csspath" />
-    </condition>
-    
-    <echo>css.output.dir="${css.output.dir}"</echo>
-    
-    <condition property="css.include.kindle" value="true">
-      <equals arg1="${d4p.include.kindle.css}" arg2="true"/>
-    </condition>
-    
-  	<condition property="epub.hide.parent.link" value="yes">
-  		<not>
-      	<isset property="args.hide.parent.link" />
-  		</not>
-  	</condition>
-  	<condition property="epub.hide.parent.link" value="${args.hide.parent.link}">
-    	<isset property="args.hide.parent.link" />
-  	</condition>
-
-  	<!-- Defines the @class value to use for topic elements generated for topicheads. -->
-  	<condition property="title.only.topic.class.spec" value="- topic/topic ">
-  		<not>
-    	  <isset property="title.only.topic.class.spec" />
-  		</not>
-  	</condition>
-
-  	<!-- Defines the @class value to use for topic title elements generated for topicheads. -->
-  	<condition property="title.only.topic.title.class.spec" value="- topic/title ">
-  		<not>
-    	  <isset property="title.only.topic.title.class.spec" />
-  		</not>
-  	</condition>
-
-  	<!-- Set this property to set the ePub URI stub to a useful value. -->
-  	<condition property="idURIStub"
-  	  value="http://my-URI-stub/">
-  		<not>
-    	  <isset property="idURIStub" />
-  		</not>
-    </condition>
-
-  	<!-- Leading portion of full EPUB publication ID to be appended to the publication ID -->
-  	<condition property="epub.pubid.uri.stub" value="http://my-URI-stub/">
-  		<not>
-    	  <isset property="epub.pubid.uri.stub" />
-  		</not>
-  	</condition>
-
-    <condition property="noPlugin">
-      <equals arg1="${dita.epub.plugin}" arg2="no" />
-    </condition>
-
-
-  	<echo message="+++ epub-specific properties:"/>
-  	<echoproperties format="text" regex="^(epub|css|out\.|preprocess)" taskname="echo"/>
-  </target>
-
-  <target name="epub.xhtml.init" if="isOT2">
     <!-- NOTE: These conditions are copied from the OT 2.x
          build_general's xhtml.init target. They are required
          to enable proper CSS copying.
@@ -263,14 +154,6 @@ for inclusion in the epub file -->
         <isset property="user.csspath"/>
       </not>
     </condition>
-    <!-- NOTE: This is to support the older (but unnecessary) 
-               args.css.output.dir, removed in 1.0.0 RC18
-      -->
-    <condition property="user.csspath" value="${args.css.output.dir}/">
-      <not>
-        <isset property="args.css.output.dir"/>
-      </not>
-    </condition>
     <condition property="args.css.real" value="${args.cssroot}${file.separator}${args.css}">
       <isset property="args.cssroot"/>
     </condition>
@@ -287,10 +170,10 @@ for inclusion in the epub file -->
         <isset property="user.csspath.url"/>
       </or>
     </condition>
-    
+    <property name="css.output.dir" value="${user.csspath}"/>
   </target>
 
-  <target name="dita.map.epub" depends="epub.xhtml.init, dita.map.epub.init, epub-copy-css"
+  <target name="dita.map.epub" depends="epub.xhtml.init, epub-copy-css"
   	description="Generate all ePub components from input map and topics">
 
   	<mkdir dir="${epub.temp.dir}"/>
@@ -302,7 +185,6 @@ for inclusion in the epub file -->
     <makeurl file="${dita.input.valfile}" property="dita.input.valfile.url" validate="no"></makeurl>
     <makeurl file="${epub.font.manifest}"  property="epub.font.manifest.url" validate="no"/>
 
-  	<echo message="[DEBUG] input file='${dita.temp.dir}${file.separator}${user.input.file}'"/>
    <!--This property is no longer defined in DITA OT 2.x-->
    <dirname property="dita.input.dirname" file="${args.input}" />
   	<!-- NOTE: since we're not using the direct output of the base XSLT transform we just
@@ -396,7 +278,6 @@ for inclusion in the epub file -->
       <isset property="args.css.present"/>
     </condition>
         
-    <echo>css.output.dir="${css.output.dir}"</echo>    
     <property name="user.csspath.real" value="${epub.temp.dir}/${css.output.dir}"/>
   	<echo message="Copying css files to '${user.csspath.real}"/>
     <mkdir dir="${user.csspath.real}"/>
@@ -410,9 +291,9 @@ for inclusion in the epub file -->
   </target>
 
   <target name="epub-copy-css-system" unless="${system.copycss.no}">
-    <echo message="copying system CSS files [system.copycss.no='${system.copycss.no}']" />
+    <echo>copying system CSS files to directory "${user.csspath.real}" [system.copycss.no='${system.copycss.no}']</echo>
     <copy todir="${user.csspath.real}">
-      <fileset dir="${dita.plugin.org.dita.xhtml.dir}/resource" includes="*.css"/>
+      <fileset dir="${dita.plugin.org.dita.html5.dir}/css" includes="*.css"/>
     </copy>
   </target>
 

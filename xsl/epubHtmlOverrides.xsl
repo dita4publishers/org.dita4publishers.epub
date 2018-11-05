@@ -13,14 +13,6 @@
   <xsl:template name="generateCssLinks">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
     
-    <xsl:variable name="CSSPATH" as="xs:string"
-      select="
-      if (ends-with($CSSPATH, '/'))
-      then $CSSPATH
-      else concat($CSSPATH, '/')
-      "
-    />
-    
     <xsl:variable name="childlang">
       <xsl:choose>
         <!-- Update with DITA 1.2: /dita can have xml:lang -->
