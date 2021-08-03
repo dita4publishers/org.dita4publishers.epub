@@ -82,30 +82,28 @@
     <xsl:message> + [INFO] Generating ToC (NCX) file "<xsl:sequence select="$resultUri"/>"...</xsl:message>
     
     <xsl:variable name="dtbUidValue" as="xs:string">
+      <!-- The dtbUidValue must match the value used for dc:identifier in the OPF file. 
+           
+           FIXME: Centralize the code for constructing the ID value so the code is
+                  coordinated.
+        -->
+      <xsl:variable name="bookids" as="element()*">
+        <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]" mode="list-bookids"/>        
+      </xsl:variable>      
       <xsl:choose>
-        <xsl:when test="$idURIStub ne 'http://my-URI-stub/'"><xsl:sequence select="$idURIStub"/></xsl:when>
+        <xsl:when test="empty($bookids)">
+          <xsl:sequence select="'no-bookid-value'"/>
+        </xsl:when>
         <xsl:otherwise>
-          <xsl:variable name="bookids" as="element()*">
-            <xsl:apply-templates select="*[df:class(., 'map/topicmeta')]" mode="list-bookids"/>
-            
+          <xsl:variable name="tempDcIdentifiers">
+            <xsl:call-template name="constructDcIdentifiers">
+              <xsl:with-param name="bookids" select="$bookids" as="element()+"/>
+            </xsl:call-template>
           </xsl:variable>
-          
-          <xsl:choose>
-            <xsl:when test="count($bookids) = 0">
-              <xsl:sequence select="'no-bookid-value'"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:variable name="tempDcIdentifiers">
-                <xsl:call-template name="constructDcIdentifiers">
-                  <xsl:with-param name="bookids" select="$bookids" as="element()+"/>
-                </xsl:call-template>
-              </xsl:variable>
-              <xsl:value-of select="$tempDcIdentifiers"/>
-            </xsl:otherwise>
-          </xsl:choose>
-          
+          <xsl:value-of select="$tempDcIdentifiers"/>
         </xsl:otherwise>
       </xsl:choose>
+          
     </xsl:variable>
     
     <xsl:result-document href="{$resultUri}" format="ncx">

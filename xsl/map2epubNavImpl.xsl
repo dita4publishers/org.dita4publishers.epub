@@ -1,4 +1,4 @@
-<xsl:stylesheet version="2.0"
+<xsl:stylesheet version="3.0" expand-text="yes"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:ncx="http://www.daisy.org/z3986/2005/ncx/"
                 xmlns:df="http://dita2indesign.org/dita/functions"
@@ -59,6 +59,7 @@
         xmlns:epub="http://www.idpf.org/2007/ops" 
         >
       	<head>
+      	  <title>{$navTypes} Navigation</title>
       		<meta charset="utf-8" />
       		<!-- FIXME: May need to generate appropriate CSS references here -->
       	  <xsl:call-template name="epubtrans:constructJavaScriptReferences">
