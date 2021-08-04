@@ -19,7 +19,7 @@
   
   <template file="xsl/map2epub_template.xsl"/>
 
-  <feature extension="dita.conductor.transtype.check" value="epub" type="txt"/>
+  <feature extension="dita.conductor.transtype.check" value="epub" type="text"/>
   <feature extension="dita.conductor.target.relative" file="build.xml"/>
   <feature extension="dita.xsl.strings" value="strings/strings.xml" type="file"/>
   
@@ -92,19 +92,19 @@
     <param name="epub.obfuscate.fonts" type="enum"
       desc="Indicates whether or not to apply font obfuscation to fonts flagged as obfuscated in the font manifest."
       >
-      <val default="yes">false</val>
+      <val default="true">false</val>
       <val>true</val>
     </param>
-    <param name="epub.fonts.output.dir" type="dir"
+    <param name="epub.fonts.output.dir" type="string"
       desc="The path, within the generated EPUB, to store embedded fonts. Default is 'fonts'."
       >
-      <val default="yes">fonts</val>
+      <val default="true">fonts</val>
     </param>
     <param name="epub.generate.css.font.rules" type="enum"
       desc="Indicates whether or not to generate CSS @font-face rules for embedded fonts as configurated in the font manifest. 
       Default 'false' (don't generate CSS rules)"
       >
-      <val default="yes">false</val>
+      <val default="true">false</val>
       <val>true</val>
     </param>
     <param name="title.only.topic.class.spec"
@@ -117,14 +117,14 @@
       desc="Indicates whether or not to generate an HTML table of contents in addition to the 
       required navigation ToC (EPUB 2 .ncx file or EPUB 3 nav element)"
       >
-      <val default="yes">false</val>
+      <val default="true">false</val>
       <val>true</val>
     </param>
     <param name="epub.copy.system.css" type="enum"
       desc="Set to 'false' to prevent copying of the built-in CSS files. By default the normal 
       OT-provided CSS files are copied into the EPUB."
       >
-      <val default="yes">true</val>
+      <val default="true">true</val>
       <val>false</val>
     </param>
     <param name="epub.javascript.file"
