@@ -11,19 +11,20 @@
   xmlns:mapdriven="http://dita4publishers.org/mapdriven"
   xmlns:epubtrans="urn:d4p:epubtranstype"
   exclude-result-prefixes="xs xd df relpath epubtrans"
-  version="2.0">
+  expand-text="true"
+  version="3.0">
 
   <!-- =============================================================
 
        DITA Map to EPUB Transformation
 
-       Copyright (c) 2010, 2016 DITA For Publishers
+       Copyright (c) 2010, 2021 DITA For Publishers
 
        Licensed under Common Public License v1.0 or the Apache Software Foundation License v2.0.
        The intent of this license is for this material to be licensed in a way that is
        consistent with and compatible with the license of the DITA Open Toolkit.
 
-       This transform requires XSLT 2.
+       This transform requires XSLT 3.
 
        This transform is the root transform and manages the generation
        of the following distinct artifacts that make up a complete
@@ -86,9 +87,9 @@
   <xsl:include href="html2xhtmlImpl.xsl"/>
   <xsl:include href="epubHtmlOverrides.xsl"/>
 
-
   <xsl:include href="map2epubD4PImpl.xsl"/>
   <xsl:include href="map2epubBookmapImpl.xsl"/>
+  <xsl:include href="map2epubDataCollection.xsl"/>
 
   <!-- Initial part of EPUB ID URI. Should reflect the book's
        owner.
@@ -97,6 +98,10 @@
 
   <xsl:param name="tempFilesDir" select="'tempFilesDir value not passed'" as="xs:string"/>
 
+  <xsl:param name="work.dir.url"/>
+  
+  <xsl:variable name="job" select="document(resolve-uri('.job.xml', $work.dir.url))" as="document-node()?"/>
+  
   <!-- XSLT document function needs full URI for parameter, so this is
     used for that. -->
   <xsl:variable name="inputURLstub" as="xs:string"
@@ -424,7 +429,7 @@
     "
   />
 
-  <xsl:variable name="debugBinary" select="$debug = 'true'" as="xs:boolean"/>
+  <xsl:variable name="debugBinary" select="$debug = ('true', 'yes', '1', 'on')" as="xs:boolean"/>
 
   <xsl:variable name="topicsOutputPath">
       <xsl:choose>
@@ -537,15 +542,6 @@
       <xsl:with-param name="epubBookID" as="xs:string" select="$epubBookID"/>
     </xsl:apply-templates>
 
-    <xsl:variable name="graphicMap" as="element()">
-      <xsl:apply-templates select="." mode="generate-graphic-map">
-        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
-        <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
-        <xsl:with-param name="uplevels" select="$uplevels" as="xs:string" tunnel="yes" />
-        <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
-      </xsl:apply-templates>
-    </xsl:variable>
-    
     <xsl:if test="$epubtrans:doGenerateCSSFontRules">
       <xsl:call-template name="epubtrans:generateCSSFontRules">
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
@@ -561,7 +557,7 @@
       </xsl:call-template>
     </xsl:variable>
 
-    <xsl:if test="$doDebug">
+    <xsl:if test="$doDebug or true()">
       <xsl:message> + [DEBUG] Writing file <xsl:sequence select="relpath:newFile($outdir, 'collected-data.xml')"/>...</xsl:message>
       <xsl:result-document href="{relpath:newFile($outdir, 'collected-data.xml')}"
         format="indented-xml"
@@ -570,6 +566,18 @@
       </xsl:result-document>
     </xsl:if>
 
+    <xsl:variable name="graphicMap" as="element()">
+      <xsl:apply-templates select="." mode="generate-graphic-map">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
+        <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
+        <xsl:with-param name="uplevels" select="$uplevels" as="xs:string" tunnel="yes" />
+        <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    
+    <xsl:if test="$doDebug">
+      <xsl:message>+ [DEBUG] Writing graphic map to "{relpath:newFile($outdir, 'graphicMap.xml')}"</xsl:message>      
+    </xsl:if>
     <xsl:result-document href="{relpath:newFile($outdir, 'graphicMap.xml')}" format="graphic-map"
       >
       <xsl:sequence select="$graphicMap"/>
