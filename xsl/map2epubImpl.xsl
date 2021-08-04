@@ -10,7 +10,8 @@
   xmlns:relpath="http://dita2indesign/functions/relpath"
   xmlns:mapdriven="http://dita4publishers.org/mapdriven"
   xmlns:epubtrans="urn:d4p:epubtranstype"
-  exclude-result-prefixes="xs xd df relpath epubtrans"
+  xmlns:map2graphicmap="urn:d4p:map2graphicmap" 
+  exclude-result-prefixes="xs xd df relpath epubtrans map2graphicmap"
   expand-text="true"
   version="3.0">
 
@@ -557,7 +558,7 @@
       </xsl:call-template>
     </xsl:variable>
 
-    <xsl:if test="$doDebug or true()">
+    <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] Writing file <xsl:sequence select="relpath:newFile($outdir, 'collected-data.xml')"/>...</xsl:message>
       <xsl:result-document href="{relpath:newFile($outdir, 'collected-data.xml')}"
         format="indented-xml"
@@ -566,13 +567,17 @@
       </xsl:result-document>
     </xsl:if>
 
-    <xsl:variable name="graphicMap" as="element()">
-      <xsl:apply-templates select="." mode="generate-graphic-map">
+    <xsl:if test="$doDebug">
+      <xsl:message> + [DEBUG] Constructing graphicMap structure...</xsl:message>
+    </xsl:if>
+    <xsl:variable name="graphicMap" as="element()?">
+      <xsl:call-template name="map2graphicmap:generate-graphic-map">
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
-        <xsl:with-param name="effectiveCoverGraphicUri" select="$effectiveCoverGraphicUri" as="xs:string" tunnel="yes"/>
-        <xsl:with-param name="uplevels" select="$uplevels" as="xs:string" tunnel="yes" />
+        <xsl:with-param name="effectiveCoverGraphicUri" as="xs:string" tunnel="yes" select="$effectiveCoverGraphicUri"/>
+        <xsl:with-param name="uplevels" as="xs:string" tunnel="yes"  select="$uplevels"/>
         <xsl:with-param name="epubBookID" as="xs:string" tunnel="yes" select="$epubBookID"/>
-      </xsl:apply-templates>
+        <xsl:with-param name="collected-data" as="element()" tunnel="yes" select="$collected-data"/>
+      </xsl:call-template>
     </xsl:variable>
     
     <xsl:if test="$doDebug">
