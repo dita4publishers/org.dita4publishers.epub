@@ -210,72 +210,72 @@ for inclusion in the epub file -->
       includesfile="${dita.temp.dir}${file.separator}${user.input.file.listfile}"
       classpathref="dost.class.path"
       style="${args.xsl}">      
-        <sysproperty key="OT_VERSION" value="${otversion}"/>
-        <ditafileset format="dita" processingRole="normal"/>        
-        <param name="work.dir.url" expression="${work.dir.url}"/>
-        <param name="cssOutputDir" expression="${css.output.dir}"/>
-        <param name="copySystemCssNo" expression="${system.copycss.no}" if:set="system.copycss.no"/>
-        <param name="debug" expression="${debug}"/>
-      	<param name="coverGraphicUri" expression="${cover.graphic.uri}" if:set="cover.graphic.file"/>
-      	<param name="idURIStub" expression="${epub.pubid.uri.stub}" if:set="epub.pubid.uri.stub"/>
-       	<param name="imagesOutputDir" expression="${images.output.dir}"/>
-       	<param name="outdir" expression="${epub.xslt.outdir}"/>
-       	<param name="inputdir" expression="${dita.input.dirname}"/>
-        <param name="outext" expression=".xhtml"/><!-- EPUB3 uses xhtml for result files. -->
-       	<param name="tempdir" expression="${epub.xslt.tempdir}"/>
-        <param name="fileOrganizationStrategy" expression="${html2.file.organization.strategy}"
-                                                  if:set="html2.file.organization.strategy"/>
-  
-      	<param name="rawPlatformString" expression="${os.name}"/>
-      	<param name="titleOnlyTopicClassSpec" expression="${title.only.topic.class.spec}"/>
-      	<param name="titleOnlyTopicTitleClassSpec" expression="${title.only.topic.title.class.spec}"/>
-       	<param name="topicsOutputDir" expression="${topics.output.dir}"/>
-        <param name="fontsOutputDir" expression="${epub.fonts.output.dir}" if:set="epub.fonts.output.dir"/>
-        <param name="generateGlossary" expression="${html2.generate.glossary}" if:set="html2.generate.glossary"/>
-      	<param name="generateHtmlToc" expression="${epub.generate.html.toc}" if:set="epub.generate.html.toc"/>
-      	<param name="generateIndex" expression="${html2.generate.index}" if:set="html2.generate.index"/>
-        <param name="html.toc.OUTPUTCLASS" expression="${args.xhtml.toc.class}" if:set="args.xhtml.toc.class" />
-        <param name="maxTocDepth" expression="${d4p.max.toc.depth}" if:set="d4p.max.toc.depth"/>
-        <param name="maxNavDepth" expression="${d4p.max.nav.depth}" if:set="d4p.max.nav.depth"/>
-        <param name="epubType" expression="${d4p.epubtype}" if:set="d4p.epubtype"/>
-        <param name="epubFontManifestUri" expression="${epub.font.manifest.url}" if:set="epub.font.manifest" />    
-        <param name="obfuscateFonts" expression="${epub.obfuscate.fonts}" if:set="epub.obfuscate.fonts"/>
-        <param name="epubGenerateCSSFontRules" expression="${epub.generate.css.font.rules}" if:set="epub.generate.css.font.rules"/>
-        <param name="javaScriptSourceFile" expression="${epub.javascript.file}" if:set="epub.javascript.file"/>
-        <param name="javaScriptOutputDir" expression="${epub.javascript.dir}" if:set="epub.javascript.dir"/>
-        
-      	<!-- Parameters from dita2xhtml and similar transtypes: -->
-        <param name="WORKDIR" expression="${workdir}" if:set="workdir"/>
-        <param name="BASEDIR" expression="${basedir}"></param>
-        <param name="CSS" expression="${args.css.file}" if:set="args.css.file" />
-        <param name="CSSPATH" expression="${user.csspath}" if:set="user.csspath" />
-        <param name="DRAFT" expression="${args.draft}" if:set="args.draft"></param>
-        <param name="ARTLBL" expression="${args.artlbl}" if:set="args.artlbl"></param>
-        <param name="GENERATE-TASK-LABELS" expression="${args.gen.task.lbl}" if:set="args.gen.task.lbl"></param>
-        <param name="PRESERVE-DITA-CLASS" expression="${args.xhtml.classattr}" if:set="args.xhtml.classattr"></param>
-        <param name="NOPARENTLINK" expression="${epub.hide.parent.link}" />
-        <param name="BREADCRUMBS" expression="${args.breadcrumbs}" if:set="args.breadcrumbs"></param>
-        <param name="INDEXSHOW" expression="${args.indexshow}" if:set="args.indexshow"></param>
-      	<param name="OUTPUTDIR" expression="${epub.temp.dir}"/>
-      	<param name="FILEDIR" expression="."/>
-        <param name="FILTERFILE" expression="${dita.input.valfile.url}" if:set="dita.input.valfile"></param>
-        <param name="DBG" expression="${args.debug}" if:set="args.debug"></param>
-        <param name="uplevels" expression="${uplevels}" />
-        <param name="TRANSTYPE" expression="${transtype}" />
-        <param name="HDF" expression="${args.hdf}" if:set="args.hdf" />
-        <param name="HDR" expression="${args.hdr}" if:set="args.hdr" />
-        <param name="FTR" expression="${args.ftr}" if:set="args.ftr" />      
-        <param name="include.rellinks" expression="${include.rellinks}"/>
-        <param name="genDefMeta" expression="${args.gen.default.meta}" if:set="args.gen.default.meta" />
-        <param name="OUTEXT" expression="${out.ext}" if:set="out.ext" />
-        <param name="defaultLanguage" expression="${default.language}"/>
-  
-        <dita:extension id="d4p.epub.xslt.param" behavior="org.dita.dost.platform.InsertAction"/>
-        <dita:extension id="dita.conductor.xhtml.param" behavior="org.dita.dost.platform.InsertAction"/>
-        <dita:extension id="d4p.common.html.param" behavior="org.dita.dost.platform.InsertAction"/>
-  
-        <xmlcatalog refid="dita.catalog"></xmlcatalog>
-      </xslt>
+      <sysproperty key="OT_VERSION" value="${otversion}"/>
+      <ditafileset format="dita" processingRole="normal"/>        
+      <param name="work.dir.url" expression="${work.dir.url}"/>
+      <param name="cssOutputDir" expression="${css.output.dir}"/>
+      <param name="copySystemCssNo" expression="${system.copycss.no}" if:set="system.copycss.no"/>
+      <param name="debug" expression="${debug}"/>
+      <param name="coverGraphicUri" expression="${cover.graphic.uri}" if:set="cover.graphic.file"/>
+      <param name="idURIStub" expression="${epub.pubid.uri.stub}" if:set="epub.pubid.uri.stub"/>
+      <param name="imagesOutputDir" expression="${images.output.dir}" if:set="images.output.dir"/>
+       <param name="outdir" expression="${epub.xslt.outdir}"/>
+       <param name="inputdir" expression="${dita.input.dirname}"/>
+      <param name="outext" expression=".xhtml"/><!-- EPUB3 uses xhtml for result files. -->
+       <param name="tempdir" expression="${epub.xslt.tempdir}"/>
+      <param name="fileOrganizationStrategy" expression="${html2.file.organization.strategy}"
+                                                if:set="html2.file.organization.strategy"/>
+
+      <param name="rawPlatformString" expression="${os.name}"/>
+      <param name="titleOnlyTopicClassSpec" expression="${title.only.topic.class.spec}"/>
+      <param name="titleOnlyTopicTitleClassSpec" expression="${title.only.topic.title.class.spec}"/>
+      <param name="topicsOutputDir" expression="${topics.output.dir}"/>
+      <param name="fontsOutputDir" expression="${epub.fonts.output.dir}" if:set="epub.fonts.output.dir"/>
+      <param name="generateGlossary" expression="${html2.generate.glossary}" if:set="html2.generate.glossary"/>
+      <param name="generateHtmlToc" expression="${epub.generate.html.toc}" if:set="epub.generate.html.toc"/>
+      <param name="generateIndex" expression="${html2.generate.index}" if:set="html2.generate.index"/>
+      <param name="html.toc.OUTPUTCLASS" expression="${args.xhtml.toc.class}" if:set="args.xhtml.toc.class" />
+      <param name="maxTocDepth" expression="${d4p.max.toc.depth}" if:set="d4p.max.toc.depth"/>
+      <param name="maxNavDepth" expression="${d4p.max.nav.depth}" if:set="d4p.max.nav.depth"/>
+      <param name="epubType" expression="${d4p.epubtype}" if:set="d4p.epubtype"/>
+      <param name="epubFontManifestUri" expression="${epub.font.manifest.url}" if:set="epub.font.manifest" />    
+      <param name="obfuscateFonts" expression="${epub.obfuscate.fonts}" if:set="epub.obfuscate.fonts"/>
+      <param name="epubGenerateCSSFontRules" expression="${epub.generate.css.font.rules}" if:set="epub.generate.css.font.rules"/>
+      <param name="javaScriptSourceFile" expression="${epub.javascript.file}" if:set="epub.javascript.file"/>
+      <param name="javaScriptOutputDir" expression="${epub.javascript.dir}" if:set="epub.javascript.dir"/>
+      
+      <!-- Parameters from dita2xhtml and similar transtypes: -->
+      <param name="WORKDIR" expression="${workdir}" if:set="workdir"/>
+      <param name="BASEDIR" expression="${basedir}"></param>
+      <param name="CSS" expression="${args.css.file}" if:set="args.css.file" />
+      <param name="CSSPATH" expression="${user.csspath}" if:set="user.csspath" />
+      <param name="DRAFT" expression="${args.draft}" if:set="args.draft"></param>
+      <param name="ARTLBL" expression="${args.artlbl}" if:set="args.artlbl"></param>
+      <param name="GENERATE-TASK-LABELS" expression="${args.gen.task.lbl}" if:set="args.gen.task.lbl"></param>
+      <param name="PRESERVE-DITA-CLASS" expression="${args.xhtml.classattr}" if:set="args.xhtml.classattr"></param>
+      <param name="NOPARENTLINK" expression="${epub.hide.parent.link}" />
+      <param name="BREADCRUMBS" expression="${args.breadcrumbs}" if:set="args.breadcrumbs"></param>
+      <param name="INDEXSHOW" expression="${args.indexshow}" if:set="args.indexshow"></param>
+      <param name="OUTPUTDIR" expression="${epub.temp.dir}"/>
+      <param name="FILEDIR" expression="."/>
+      <param name="FILTERFILE" expression="${dita.input.valfile.url}" if:set="dita.input.valfile"></param>
+      <param name="DBG" expression="${args.debug}" if:set="args.debug"></param>
+      <param name="uplevels" expression="${uplevels}" />
+      <param name="TRANSTYPE" expression="${transtype}" />
+      <param name="HDF" expression="${args.hdf}" if:set="args.hdf" />
+      <param name="HDR" expression="${args.hdr}" if:set="args.hdr" />
+      <param name="FTR" expression="${args.ftr}" if:set="args.ftr" />      
+      <param name="include.rellinks" expression="${include.rellinks}"/>
+      <param name="genDefMeta" expression="${args.gen.default.meta}" if:set="args.gen.default.meta" />
+      <param name="OUTEXT" expression="${out.ext}" if:set="out.ext" />
+      <param name="defaultLanguage" expression="${default.language}"/>
+
+      <dita:extension id="d4p.epub.xslt.param" behavior="org.dita.dost.platform.InsertAction"/>
+      <dita:extension id="dita.conductor.xhtml.param" behavior="org.dita.dost.platform.InsertAction"/>
+      <dita:extension id="d4p.common.html.param" behavior="org.dita.dost.platform.InsertAction"/>
+
+      <xmlcatalog refid="dita.catalog"></xmlcatalog>
+    </xslt>
 
   	<antcall target="epub.copy.graphics"/>
 
