@@ -1,4 +1,4 @@
-<xsl:stylesheet version="2.0"
+<xsl:stylesheet version="3.0"
   xmlns:df="http://dita2indesign.org/dita/functions"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:opf="http://www.idpf.org/2007/opf"

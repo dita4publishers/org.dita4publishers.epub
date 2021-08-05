@@ -5,7 +5,7 @@
   xmlns:related-links="http://dita-ot.sourceforge.net/ns/200709/related-links"
   xmlns:epubtrans="urn:d4p:epubtranstype"
   exclude-result-prefixes="xs related-links epubtrans"
-  version="2.0">
+  version="3.0">
   
   <!-- Overrides of built-in HTML generation templates -->
   

@@ -9,7 +9,7 @@
   xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns="http://www.idpf.org/2007/opf"
   exclude-result-prefixes="xs df relpath htmlutil epubtrans"
-  version="2.0">
+  version="3.0">
     
   <!-- Extensions for DITA for Publishers vocabulary modules in
   different contexts -->

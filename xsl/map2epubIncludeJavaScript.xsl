@@ -7,7 +7,7 @@
   xmlns:gmap="http://dita4publishers/namespaces/graphic-input-to-output-map"
   xmlns="http://www.w3.org/1999/xhtml"
   exclude-result-prefixes="#all"
-  version="2.0"
+  version="3.0"
   xmlns:fn="http://www.example.com/fn">
   
   <!-- =========================================

@@ -6,7 +6,7 @@
   xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns:gmap="http://dita4publishers/namespaces/graphic-input-to-output-map"
   exclude-result-prefixes="xs df relpath epubtrans"
-  version="2.0"
+  version="3.0"
   xmlns:fn="http://www.example.com/fn">
   
   <!-- =========================================

@@ -8,7 +8,7 @@
   xmlns:enum="http://dita4publishers.org/enumerables"
   xmlns:epubtrans="urn:d4p:epubtranstype"
   exclude-result-prefixes="#all"
-  version="2.0">
+  version="3.0">
     
   <xsl:template match="/" mode="generate-list-of-figures-html-toc">
     <xsl:apply-templates mode="#current"/>

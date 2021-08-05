@@ -5,7 +5,7 @@
   xmlns:df="http://dita2indesign.org/dita/functions"
   
   exclude-result-prefixes="xs df"
-  version="2.0">
+  version="3.0">
 
   <!-- Pub Title mode: -->
 
