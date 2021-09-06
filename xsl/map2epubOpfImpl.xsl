@@ -11,7 +11,8 @@
   xmlns:local="urn:functions:local"
   xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns:enc="http://www.w3.org/2001/04/xmlenc#"
-  exclude-result-prefixes="df xs relpath htmlutil gmap local epubtrans"
+  xmlns:m="http://www.w3.org/1998/Math/MathML"
+  exclude-result-prefixes="df xs relpath htmlutil gmap local epubtrans m"
   >
 
   <xsl:output name="xml-no-doctype" method="xml" indent="yes"/>
@@ -766,13 +767,28 @@
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
       </xsl:apply-templates>
     </xsl:variable>
+    <xsl:variable name="properties" as="xs:string*">
+      <xsl:apply-templates select="." mode="epubtrans:getItemProperties">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:variable>
     <item id="{$itemID}" href="{$relativeUri}"
       media-type="application/xhtml+xml"
     >
-      <xsl:if test="epubtrans:isScripted(.)">
-        <xsl:attribute name="properties" select="'scripted'"/>          
+      <xsl:if test="exists($properties)">
+        <xsl:attribute name="properties" select="string-join($properties, ' ')"/>
       </xsl:if>
     </item>
+  </xsl:template>
+  
+  <xsl:template mode="epubtrans:getItemProperties" match="*" as="xs:string*">
+    <xsl:if test="epubtrans:isScripted(.)">
+      <xsl:sequence select="'scripted'"/>          
+    </xsl:if>
+    <xsl:if test=".//m:math">
+      <xsl:sequence select="'mathml'"/>
+    </xsl:if>
+    
   </xsl:template>
   
   <xsl:template mode="epubtrans:getManifestItemID" match="*[df:class(., 'map/topicref')]">
