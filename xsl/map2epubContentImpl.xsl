@@ -73,7 +73,9 @@ for epub2, cannot have @doctype-system="about:legacy:compat" (per epubcheck) -->
     </xsl:if>    
     <xsl:apply-templates select="$uniqueTopicRefs" mode="generate-content"/>
     <xsl:message> + [INFO] Generating title-only topics for topicheads...</xsl:message>
-    <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="generate-content"/>
+    <xsl:apply-templates select=".//*[df:isTopicHead(.)]" mode="generate-content">
+      <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+    </xsl:apply-templates>
     <xsl:message> + [INFO] Content generated.</xsl:message>
   </xsl:template>
   

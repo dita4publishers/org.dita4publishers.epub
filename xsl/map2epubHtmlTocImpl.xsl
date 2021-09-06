@@ -74,9 +74,9 @@
         </head>
         <body class="toc-list-of-tables html-toc">
           <h2 class="toc-title">
-            <xsl:call-template name="getString">
-                <xsl:with-param name="stringName" select="'Contents'"/>
-            </xsl:call-template>
+            <xsl:call-template name="getVariable">
+              <xsl:with-param name="id" select="'Contents'"/>
+            </xsl:call-template>            
           </h2>
           <div class="html-toc toc-entries">
             <xsl:apply-templates select="$navmap" mode="html-toc"/>

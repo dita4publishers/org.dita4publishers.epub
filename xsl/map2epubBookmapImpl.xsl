@@ -19,8 +19,8 @@
   <!-- TOC (.ncx) generation context -->
   
   <xsl:template mode="nav-point-title" match="*[df:class(., 'bookmap/toc')]" priority="20">
-    <xsl:call-template name="getString">
-        <xsl:with-param name="stringName" select="'Contents'"/>
+    <xsl:call-template name="getVariable">
+      <xsl:with-param name="id" select="'Contents'"/>
     </xsl:call-template>
   </xsl:template>
 

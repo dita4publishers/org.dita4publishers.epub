@@ -131,6 +131,33 @@ for inclusion in the epub file -->
     
     <property name="epub.temp.dir" value="${dita.temp.dir}${file.separator}epub_temp"/>
     
+    <!-- Defines the @class value to use for topic elements generated for topicheads. -->
+    <condition property="title.only.topic.class.spec" value="- topic/topic ">
+      <not>
+        <isset property="title.only.topic.class.spec" />
+      </not>
+    </condition>    
+    
+    <condition property="title.only.topic.title.class.spec" value="- topic/title ">
+      <not>
+        <isset property="title.only.topic.title.class.spec" />
+      </not>
+    </condition>
+    
+    <condition property="topics.output.dir" value="topics">
+      <not>
+        <isset property="topics.output.dir"/>
+      </not>
+    </condition>
+    
+    <!-- The name of the directory, within the output package, to contain all images: -->
+    
+    <condition property="images.output.dir" value="images">
+      <not>
+        <isset property="images.output.dir" />
+      </not>
+    </condition>
+    
     <!-- NOTE: These conditions are copied from the OT 2.x
          build_general's xhtml.init target. They are required
          to enable proper CSS copying.
