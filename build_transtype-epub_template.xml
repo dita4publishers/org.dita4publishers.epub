@@ -9,6 +9,12 @@
     <dirname property="epub.dir" file="${ant.file.dita2epub}"/>
     
     <!-- Global properties that affect the base Toolkit processing: -->
+
+    <condition property="topics.output.dir" value="topics">
+      <not>
+        <isset property="topics.output.dir"/>
+      </not>
+    </condition>
     
     <condition property="preprocess.maplink.skip" value="true">
       <isset property="epub.exclude.auto.rellinks" />
