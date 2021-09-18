@@ -7,8 +7,9 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml"
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:m="http://www.w3.org/1998/Math/MathML"
+  xmlns:svg="http://www.w3.org/2000/svg"
   xmlns:relpath="http://dita2indesign/functions/relpath"
-  exclude-result-prefixes="xs xd local m xhtml relpath"
+  exclude-result-prefixes="xs xd local m xhtml relpath svg"
   version="3.0">
   <!-- Transform unnamespaced HTML docs into namespaced XHTML docs are required by the epub spec. 
   
@@ -142,7 +143,7 @@
       <xsl:message> + [DEBUG] html2xhtml: math or m:math element</xsl:message>
     </xsl:if>
 
-    <xsl:element name="{name(.)}">
+    <xsl:element name="{name(.)}" namespace="http://www.w3.org/1998/Math/MathML">
       <xsl:apply-templates select="@*,node()" mode="#current">
         <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
       </xsl:apply-templates>
@@ -155,13 +156,22 @@
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] html2xhtml: <xsl:value-of select="concat(name(..), '/', name(.))"/></xsl:message>
     </xsl:if>
-     <xsl:element name="{name(.)}" namespace="http://www.w3.org/1998/Math/MathML">
-        <xsl:apply-templates select="@*,node()" mode="#current">
-          <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
-        </xsl:apply-templates>
-     </xsl:element>    
+    <xsl:element name="{name(.)}" namespace="http://www.w3.org/1998/Math/MathML">
+      <xsl:apply-templates select="@*,node()" mode="#current">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:element>    
   </xsl:template>
   
+  <xsl:template match="svg:*" mode="html2xhtml" priority="-0.5" >
+    <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
+    <xsl:element name="{name(.)}" namespace="http://www.w3.org/2000/svg">
+      <xsl:apply-templates select="@*,node()" mode="#current">
+        <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$doDebug"/>
+      </xsl:apply-templates>
+    </xsl:element>    
+  </xsl:template>
+
   <!-- <a> elements used for IDs are not used in XHTML -->
   <xsl:template mode="html2xhtml" 
     match="*[      not(@id) and a[@name and not(@href)]] | 

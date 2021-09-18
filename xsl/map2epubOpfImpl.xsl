@@ -12,7 +12,8 @@
   xmlns:epubtrans="urn:d4p:epubtranstype"
   xmlns:enc="http://www.w3.org/2001/04/xmlenc#"
   xmlns:m="http://www.w3.org/1998/Math/MathML"
-  exclude-result-prefixes="df xs relpath htmlutil gmap local epubtrans m"
+  xmlns:svg="http://www.w3.org/2000/svg"
+  exclude-result-prefixes="df xs relpath htmlutil gmap local epubtrans m svg"
   >
 
   <xsl:output name="xml-no-doctype" method="xml" indent="yes"/>
@@ -787,6 +788,9 @@
     </xsl:if>
     <xsl:if test=".//m:math">
       <xsl:sequence select="'mathml'"/>
+    </xsl:if>
+    <xsl:if test=".//svg:svg">
+      <xsl:sequence select="'svg'"/>
     </xsl:if>
     
   </xsl:template>
