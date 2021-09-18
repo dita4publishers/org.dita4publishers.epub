@@ -239,7 +239,7 @@ for inclusion in the epub file -->
         filedirparameter="FILEDIR"
         parallel="${parallel}">
 -->
-    <pipeline message="Convert DITA map to HTML5" taskname="xslt">
+    <pipeline message="Convert DITA map to EPUB" taskname="xslt">
       <xslt
       destdir="${dita.temp.dir}"
       style="${args.xsl}">      
