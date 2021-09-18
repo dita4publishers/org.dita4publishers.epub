@@ -58,7 +58,7 @@ for inclusion in the epub file -->
 
   <target name="zipepub" depends="checkAnt1.9, zipEpubOldAnt, zipEpubNewAnt"/>
 
-  <target name="zipEpubNewAnt" if="${isAnt1.9}">
+  <target name="zipEpubNewAnt" if:set="${isAnt1.9}">
     <!-- Two steps because mimetype must go in first,
       uncompressed. Looks like ant puts later zipped files in
       first, so mimetype is in second zip task. -->
@@ -210,6 +210,8 @@ for inclusion in the epub file -->
 
   <target name="dita.map.epub" depends="epub.xhtml.init, epub-copy-css"
   	description="Generate all ePub components from input map and topics">
+    
+    <echo>dita.map.epub: Starting...</echo>
 
   	<mkdir dir="${epub.temp.dir}"/>
   	<makeurl file="${epub.temp.dir}" property="epub.xslt.outdir"/>
@@ -237,14 +239,11 @@ for inclusion in the epub file -->
         filedirparameter="FILEDIR"
         parallel="${parallel}">
 -->
-    <xslt processor="trax"
-      basedir="${dita.temp.dir}"
+    <pipeline message="Convert DITA map to HTML5" taskname="xslt">
+      <xslt
       destdir="${dita.temp.dir}"
-      includesfile="${dita.temp.dir}${file.separator}${user.input.file.listfile}"
-      classpathref="dost.class.path"
       style="${args.xsl}">      
-      <sysproperty key="OT_VERSION" value="${otversion}"/>
-      <ditafileset format="dita" processingRole="normal"/>        
+      <ditafileset input="true" format="ditamap"/>        
       <param name="work.dir.url" expression="${work.dir.url}"/>
       <param name="cssOutputDir" expression="${css.output.dir}"/>
       <param name="copySystemCssNo" expression="${system.copycss.no}" if:set="system.copycss.no"/>
@@ -252,10 +251,10 @@ for inclusion in the epub file -->
       <param name="coverGraphicUri" expression="${cover.graphic.uri}" if:set="cover.graphic.file"/>
       <param name="idURIStub" expression="${epub.pubid.uri.stub}" if:set="epub.pubid.uri.stub"/>
       <param name="imagesOutputDir" expression="${images.output.dir}" if:set="images.output.dir"/>
-       <param name="outdir" expression="${epub.xslt.outdir}"/>
-       <param name="inputdir" expression="${dita.input.dirname}"/>
+      <param name="outdir" expression="${epub.xslt.outdir}"/>
+      <param name="inputdir" expression="${dita.input.dirname}"/>
       <param name="outext" expression=".xhtml"/><!-- EPUB3 uses xhtml for result files. -->
-       <param name="tempdir" expression="${epub.xslt.tempdir}"/>
+      <param name="tempdir" expression="${epub.xslt.tempdir}"/>
       <param name="fileOrganizationStrategy" expression="${html2.file.organization.strategy}"
                                                 if:set="html2.file.organization.strategy"/>
 
@@ -309,9 +308,14 @@ for inclusion in the epub file -->
 
       <xmlcatalog refid="dita.catalog"></xmlcatalog>
     </xslt>
-
+    </pipeline>
+    
+    <echo>dita.map.epub: Calling epub.copy.graphics:</echo>
+    
   	<antcall target="epub.copy.graphics"/>
-
+    
+    <echo>dita.map.epub: Done</echo>
+    
   </target>
 
   <target name="epub.copy.graphics"
@@ -346,12 +350,14 @@ for inclusion in the epub file -->
     </copy>
   </target>
 
-  <target name="epub-copy-css-user" if="user.copycss.yes">
+  <!-- FIXME: moving to if:set breaks this check (succeeds when it should fail) -->
+  <target name="epub-copy-css-user" if="${user.copycss.yes}">
     <echo>Copying user CSS "${args.css.real}" to directory "${user.csspath.real}"...</echo>
     
     <copy file="${args.css.real}" todir="${user.csspath.real}"/>
   </target>
   
+  <!-- FIXME: Changing @if to @if:set breaks this check (check succeeds when it should fail) --> 
   <target name="epub-copy-css-kindle" if="css.include.kindle">
     <copy file="${dita.plugin.org.dita4publishers.kindle.dir}/css/kindleExtensions.css" todir="${user.csspath.real}"/>
   </target>

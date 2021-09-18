@@ -18,7 +18,7 @@ they will be added to the epub file as Dublin Core metadata.
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:epub="urn:d4p:epubtranstype"
-                exclude-result-prefixes="xs epub"
+                exclude-result-prefixes="xs epub xsl"
   >
 
   <xsl:import href="plugin:org.dita.html5:xsl/dita2html5.xsl"/>

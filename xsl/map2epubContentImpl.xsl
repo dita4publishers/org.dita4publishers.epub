@@ -10,7 +10,7 @@
   xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
   xmlns:epubtrans="urn:d4p:epubtranstype"
   
-  exclude-result-prefixes="#all"
+  exclude-result-prefixes="df xs opf dc xsl relpath htmlutil xd epubtrans"
   version="3.0">
   <!-- =============================================================
     

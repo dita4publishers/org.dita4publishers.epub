@@ -25,7 +25,7 @@
        The intent of this license is for this material to be licensed in a way that is
        consistent with and compatible with the license of the DITA Open Toolkit.
 
-       This transform requires XSLT 3.
+       This transform requires XSLT 3 (i.e., Saxon 9.9+).
 
        This transform is the root transform and manages the generation
        of the following distinct artifacts that make up a complete
@@ -490,19 +490,21 @@
   </xsl:variable>
   
 
-  <xsl:template match="/">
-    <xsl:if test="$debugBoolean">
+  <xsl:template match="/">    
+    <xsl:if test="$debugBoolean or true()">
         <xsl:message> + [DEBUG] Root template in default mode. Root element is "<xsl:sequence select="name(/*[1])"/>", class="<xsl:sequence select="string(/*[1]/@class)"/>:</xsl:message>
     </xsl:if>
     <xsl:apply-templates>
       <xsl:with-param name="doDebug" as="xs:boolean" tunnel="yes" select="$debugBoolean"/>
       <xsl:with-param name="rootMapDocUrl" select="document-uri(.)" as="xs:string" tunnel="yes"/>
     </xsl:apply-templates>
+    <xsl:message terminate="no"> + [DEBUG] map2epubImpl.xsl: End of Root template in default mode.</xsl:message>   
   </xsl:template>
 
   <xsl:template match="/*[df:class(., 'map/map')]">
     <xsl:param name="doDebug" as="xs:boolean" tunnel="yes" select="false()"/>
-
+    <xsl:message> + [DEBUG] map2epubImpl.xsl: Template for /map...</xsl:message>   
+    
     <xsl:variable name="effectiveCoverGraphicUri" as="xs:string">
       <xsl:apply-templates select="." mode="get-cover-graphic-uri"/>
     </xsl:variable>
@@ -668,6 +670,10 @@
     <xsl:if test="$doDebug">
       <xsl:message> + [DEBUG] after generate-graphic-copy-ant-script</xsl:message>
     </xsl:if>
+    <xsl:message> + [INFO] Graphic copy Ant script generation done.</xsl:message>
+    <xsl:message> + [INFO] Top-level input map processing done.</xsl:message>
+    <xsl:message> + [DEBUG] map2epubImpl.xsl: End Template for /map...</xsl:message>   
+    
   </xsl:template>
 
   <xsl:template name="make-meta-inf">
